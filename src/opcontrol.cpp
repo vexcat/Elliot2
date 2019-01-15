@@ -73,7 +73,7 @@ void opcontrol() {
 
 		//Allow for controller menus to safely take over the robot.
 		//See display.cpp
-		bot.give();
+		bot.giveDirect();
 		pros::delay(5);
 	}
 }

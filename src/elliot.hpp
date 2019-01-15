@@ -40,6 +40,7 @@ class Elliot {
     void takeCoast();
     void takeStopped();
     void give();
+    void giveDirect();
 };
 void createRobot();
 Elliot& getRobot();

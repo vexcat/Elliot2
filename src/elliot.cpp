@@ -96,6 +96,10 @@ void Elliot::takeStopped() {
     stop();
 }
 
+void Elliot::giveDirect() {
+    usageGuard.give();
+}
+
 void Elliot::give() {
     usageGuard.give();
     left .setBrakeMode(AbstractMotor::brakeMode::coast);
