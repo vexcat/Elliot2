@@ -50,8 +50,8 @@ void moveToSetpoint(RoboPosition pt, GPS& gps, int settleTime) {
             initialSign = curSign;
         }
         //Find velocities
-        gps.left.controllerSet(L / max(abs(R), abs(L)));
-        gps.right.controllerSet(R / max(abs(R), abs(L)));
+        gps. left.moveVelocity(((int)gps. left.getGearing()) * (L / max(abs(R), abs(L))));
+        gps.right.moveVelocity(((int)gps.right.getGearing()) * (R / max(abs(R), abs(L))));
         pros::delay(5);
     } while(curSign == initialSign);
     //brake
@@ -84,13 +84,13 @@ void runMotion(json& motionObject, bool isBlue) {
   auto type = motionObject["type"].get<std::string>();
   //now, run the appropriate function for each type.
   if(type == "direct") {
-    bot.left .controllerSet(motionObject["l"].get<double>());
-    bot.right.controllerSet(motionObject["r"].get<double>());
+    bot.left .moveVelocity(motionObject["l"].get<double>() * (int)bot.left.getGearing());
+    bot.right.moveVelocity(motionObject["r"].get<double>() * (int)bot.right.getGearing());
   }
   if(type == "position") {
     moveToSetpoint({
-      bot.gps.inchToCounts(motionObject["x"].get<double>()),
-      bot.gps.inchToCounts(motionObject["y"].get<double>()),
+      bot.gps.inchToCounts(motionObject["x"].get<double>() * (int)bot.left.getGearing()),
+      bot.gps.inchToCounts(motionObject["y"].get<double>() * (int)bot.right.getGearing()),
       0
     }, bot.gps, motionObject["t"].get<double>());
   }
@@ -99,8 +99,8 @@ void runMotion(json& motionObject, bool isBlue) {
     double initialSign = dTheta > 0 ? 1 : -1;
     double initialLeft = bot.left.getPosition();
     double initialRight = bot.right.getPosition();
-    bot.left .controllerSet(-initialSign);
-    bot.right.controllerSet( initialSign);
+    bot.left .moveVelocity(-initialSign * (int)bot.left.getGearing());
+    bot.right.moveVelocity( initialSign * (int)bot.right.getGearing());
     while(true) {
       double lDelta = bot.left.getPosition() - initialLeft;
       double rDelta = bot.right.getPosition() - initialRight;
@@ -109,33 +109,35 @@ void runMotion(json& motionObject, bool isBlue) {
         bot.left.controllerSet(0);
         bot.right.controllerSet(0);
         pros::delay(motionObject["t"].get<double>());
-        return;
+        break;
       }
       pros::delay(2);
     }
   }
   if(type == "sline") {
-    double distance = motionObject["d"].get<double>();
+    double distance = bot.gps.inchToCounts(motionObject["d"].get<double>());
     double initialSign = distance > 0 ? 1 : -1;
     double initialLeft = bot.left.getPosition();
     double initialRight = bot.right.getPosition();
-    bot.left.controllerSet(initialSign);
-    bot.right.controllerSet(initialSign);
+    bot.left.moveVelocity(initialSign * (int)bot.left.getGearing());
+    bot.right.moveVelocity(initialSign * (int)bot.right.getGearing());
     while(true) {
       double measuredDistance = (bot.left.getPosition() - initialLeft + bot.right.getPosition() - initialRight) / 2;
       if(abs(measuredDistance) > abs(distance)) {
         bot.left .controllerSet(0);
         bot.right.controllerSet(0);
-        pros::delay(motionObject["t"].get<double>());
+        pros::delay((int)(motionObject["t"].get<double>() * 1000));
+        break;
       }
       pros::delay(2);
     }
   }
   if(type == "scorer") {
-    bot.score.controllerSet(motionObject["v"].get<double>());
+    double v = motionObject["v"].get<double>() * (int)bot.score.getGearing();
+    bot.intake.controllerSet(v);
     double timing = motionObject["t"].get<double>();
     if(timing != 0) {
-      pros::delay(timing);
+      pros::delay((int)(timing * 1000));
       bot.score.controllerSet(0);
     }
   }
@@ -143,16 +145,17 @@ void runMotion(json& motionObject, bool isBlue) {
     bot.catapult.setVelocity(motionObject["v"].get<double>() * (int)bot.catapultMtr.getGearing());
     double timing = motionObject["t"].get<double>();
     if(timing != 0) {
-      pros::delay(timing);
+      pros::delay((int)(timing * 1000));
       bot.catapult.setVelocity(0);
     }
   }
   if(type == "intake") {
-    bot.intake.controllerSet(motionObject["v"].get<double>());
+    double v = motionObject["v"].get<double>() * (int)bot.intake.getGearing();
+    bot.intake.controllerSet(v);
     double timing = motionObject["t"].get<double>();
     if(timing != 0) {
-      pros::delay(timing);
-      bot.score.controllerSet(0);
+      pros::delay((int)(timing * 1000));
+      bot.intake.controllerSet(0);
     }
   }
   if(type == "shoot") {
@@ -166,7 +169,7 @@ void runMotion(json& motionObject, bool isBlue) {
     }
   }
   if(type == "delay") {
-    pros::delay(motionObject["t"].get<double>());
+    pros::delay((int)(1000 * motionObject["t"].get<double>()));
   }
 }
 
