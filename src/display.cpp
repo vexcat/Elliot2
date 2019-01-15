@@ -156,6 +156,8 @@ void addAuton(std::string byName) {
       lv_obj_set_pos(button, bx * 95 + 90, by * 115 + 10);
       lv_obj_t* label = lv_label_create(button, NULL);
       lv_label_set_text(label, byName.c_str());
+      lv_style_t* stylish = lv_obj_get_style(label);
+      stylish->text.color = LV_COLOR_HEX(0x000000);
       lv_btn_set_action(button, LV_BTN_ACTION_CLICK, [](lv_obj_t* obj) -> lv_res_t {
         int j = 0;
         for(auto &pair: selectors) {
@@ -393,7 +395,7 @@ void renderEditorArrows(pros::Controller& ctrl, int cursor) {
 
 void renderNumberEditor(pros::Controller& ctrl, double number, int fix, int cursor) {
   char textData[16];
-  snprintf(textData + 1, 15, "%+015.*f\n", fix, number);
+  snprintf(textData, 16, "%+015.*f\n", fix, number);
   line_set(ctrl, 1, std::string(textData));
   renderEditorArrows(ctrl, cursor);
 }
@@ -652,7 +654,9 @@ class CRUDMenu: public ControllerTask {
     crudOptions.push_back({"+ " + name, [attemptAdd, this](pros::Controller& ctrl){
       try {
         if(items.size()) {
+          debug("Index is " + std::to_string(idx + 1) + ".\n");
           items.insert(items.begin() + idx + 1, attemptAdd(idx + 1));
+          debug("Item was added\n");
         } else {
           items.push_back(attemptAdd(0));
         }
@@ -804,26 +808,26 @@ class MotionList: public CRUDMenu {
           //This line *shouldn't* have an effect, but here for safety.
           copy["type"] = "origin";
         }}
-      });
+      })(ctrl);
     } else if(type == "position") {
       MotionEditor(motionData, idx, {
         {"x", 2, "Set X"},
         {"y", 2, "Set Y"}
-      });
+      })(ctrl);
     } else if(type == "direct") {
       MotionEditor(motionData, idx, {
         {"l", 2, "Set left vel"},
         {"r", 2, "Set right vel"}
-      });
+      })(ctrl);
     } else if(type == "rotation") {
       MotionEditor(motionData, idx, {
         {"o", 2, "Set Orientation"}
-      });
+      })(ctrl);
     } else if(type == "sline") {
       MotionEditor(motionData, idx, {
         {"d", 2, "Set distance"},
         {"t", 3, "Set timing"}
-      });
+      })(ctrl);
     } else if(type == "scorer" || type == "catapult" || type == "intake") {
       MotionEditor(motionData, idx, {
         {"v", 2, "Set velocity"},

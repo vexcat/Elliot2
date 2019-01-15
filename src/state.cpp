@@ -31,6 +31,7 @@ json& getState();
 void saveState() {
     try {
         write_file_contents(filePath, getState().dump());
+        puts(getState().dump().c_str());
     } catch(...) {
         printf("Failed to write data.json. Please check write protection / SD inserted.\n");
     }
