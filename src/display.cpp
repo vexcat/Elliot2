@@ -385,6 +385,7 @@ double editNumber(pros::Controller& ctrl, double number, int fix) {
         }
       }
       number += dir * std::pow(10, place);
+      renderNumberEditor(ctrl, number, fix, cursor);
     }
     pros::delay(5);
   }
@@ -751,6 +752,7 @@ class MotionList: public CRUDMenu {
           runMotion(copy, getBlue());
           copy["type"] = "rotation";
           runMotion(copy, getBlue());
+          //This line *shouldn't* have an effect, but here for safety.
           copy["type"] = "origin";
         }}
       });
