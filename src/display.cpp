@@ -69,7 +69,7 @@ void updateRobot() {
   lv_line_set_points(arrow, newPoints, 6);
   lv_obj_invalidate(arrow);
   static char orientationBuffer[1024];
-  snprintf(orientationBuffer, sizeof(orientationBuffer), "x: %f\ny: %f\no: %f", yeet.x, yeet.y, yeet.o);
+  snprintf(orientationBuffer, sizeof(orientationBuffer), "x: %f\ny: %f\no: %f", gps.countsToInch(yeet.x), gps.countsToInch(yeet.y), yeet.o);
   lv_label_set_text(orientationLabel, orientationBuffer);
 }
 
@@ -725,57 +725,57 @@ class MotionList: public CRUDMenu {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "position"}, {"x", pos.x}, {"y", pos.y}, {"t", 200.0}
       }));
-      return nameFor(motionData);
+      return nameFor(motionData[index]);
     });
     addInserter("Direct", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "direct"}, {"l", 1.0}, {"r", 1.0}
       }));
-      return nameFor(motionData);
+      return nameFor(motionData[index]);
     });
     addInserter("Rotation", [&](int index) -> std::string {
       RoboPosition pos = bot.gps.getPosition();
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "rotation"}, {"o", pos.o}, {"t", 200.0}
       }));
-      return nameFor(motionData);
+      return nameFor(motionData[index]);
     });
     addInserter("SLine", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "sline"}, {"d", 12.0}, {"t", 200.0}
       }));
-      return nameFor(motionData);
+      return nameFor(motionData[index]);
     });
     addInserter("Scorer", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "scorer"}, {"v", 1.0}, {"t", 200.0}
       }));
-      return nameFor(motionData);
+      return nameFor(motionData[index]);
     });
     addInserter("Catapult", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "catapult"}, {"v", 1.0}, {"t", 200.0}
       }));
-      return nameFor(motionData);
+      return nameFor(motionData[index]);
     });
     addInserter("Intake", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "intake"}, {"v", 1.0}, {"t", 200.0}
       }));
-      return nameFor(motionData);
+      return nameFor(motionData[index]);
     });
     //Fun fact: Shooting doesn't get an editor. It has no parameters.
     addInserter("Shoot", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "shoot"}
       }));
-      return nameFor(motionData);
+      return nameFor(motionData[index]);
     });
     addInserter("Delay", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "delay"}, {"t", 200.0}
       }));
-      return nameFor(motionData);
+      return nameFor(motionData[index]);
     });
     //Add existing items
     for(auto &motion: motionData) {
@@ -850,6 +850,7 @@ class MotionList: public CRUDMenu {
   }
   private:
   std::string nameFor(json& motion) {
+    printf("Made it to nameFor.\n");
     auto loc = motion.find("name");
     if(loc != motion.end()) return loc->get<std::string>();
     auto type = motion["type"];
