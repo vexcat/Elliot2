@@ -15,6 +15,13 @@ using namespace okapi;
 //  - The GPS viewer
 //  - The GPS calibrator
 //  - The auton planner
+//  - And a bunch of random stuff that'll probably get refactored out.
+
+//Debug Logger - This function should not be used in production code.
+void debug(std::string text) {
+  printf(text.c_str());
+  pros::delay(500);
+}
 
 //------------------------------------------------------------------------------------
 //  V5 Brain Display using LittleVGL
@@ -176,7 +183,7 @@ void removeAuton(std::string byName) {
     lv_obj_del(loc2->first);
     selectors.erase(loc2);
     autonNames.erase(loc);
-    for(int i = 0; i < 8; i++) {
+    for(int i = 0; i < selectors.size(); i++) {
       int bx = i%4;
       int by = i/4;
       lv_obj_set_pos(selectors[i].first, bx * 95 + 90, by * 115 + 10);
