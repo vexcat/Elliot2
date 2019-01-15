@@ -50,8 +50,6 @@ void GPS::setPosition(RoboPosition pos) {
 }
 
 void GPS::gpsDaemon() {
-    MotorGroup left{3, 4};
-    MotorGroup right{-2, -1};
     left.setEncoderUnits(AbstractMotor::encoderUnits::counts);
     right.setEncoderUnits(AbstractMotor::encoderUnits::counts);
     uint32_t lastTime = pros::c::millis();
@@ -99,7 +97,7 @@ void GPS::addPosDelta(RoboPosition& robot, double L, double R) {
     double dTheta = countsToRadians(R-L) / 2;
 
     //Straight/reverse (Infinite circle)
-    if(dTheta < 0.0001) {
+    if(abs(dTheta) < 0.0001) {
         robot.x += cos(robot.o) * L;
         robot.y += sin(robot.o) * R;
         return;
