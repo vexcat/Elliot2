@@ -89,8 +89,8 @@ void runMotion(json& motionObject, bool isBlue) {
   }
   if(type == "position") {
     moveToSetpoint({
-      bot.gps.inchToCounts(motionObject["x"].get<double>() * (int)bot.left.getGearing()),
-      bot.gps.inchToCounts(motionObject["y"].get<double>() * (int)bot.right.getGearing()),
+      bot.gps.inchToCounts(motionObject["x"].get<double>()),
+      bot.gps.inchToCounts(motionObject["y"].get<double>()),
       0
     }, bot.gps, motionObject["t"].get<double>());
   }
