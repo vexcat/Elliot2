@@ -654,9 +654,7 @@ class CRUDMenu: public ControllerTask {
     crudOptions.push_back({"+ " + name, [attemptAdd, this](pros::Controller& ctrl){
       try {
         if(items.size()) {
-          debug("Index is " + std::to_string(idx + 1) + ".\n");
           items.insert(items.begin() + idx + 1, attemptAdd(idx + 1));
-          debug("Item was added\n");
         } else {
           items.push_back(attemptAdd(0));
         }
@@ -727,48 +725,57 @@ class MotionList: public CRUDMenu {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "position"}, {"x", pos.x}, {"y", pos.y}, {"t", 200.0}
       }));
+      return nameFor(motionData);
     });
     addInserter("Direct", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "direct"}, {"l", 1.0}, {"r", 1.0}
       }));
+      return nameFor(motionData);
     });
     addInserter("Rotation", [&](int index) -> std::string {
       RoboPosition pos = bot.gps.getPosition();
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "rotation"}, {"o", pos.o}, {"t", 200.0}
       }));
+      return nameFor(motionData);
     });
     addInserter("SLine", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "sline"}, {"d", 12.0}, {"t", 200.0}
       }));
+      return nameFor(motionData);
     });
     addInserter("Scorer", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "scorer"}, {"v", 1.0}, {"t", 200.0}
       }));
+      return nameFor(motionData);
     });
     addInserter("Catapult", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "catapult"}, {"v", 1.0}, {"t", 200.0}
       }));
+      return nameFor(motionData);
     });
     addInserter("Intake", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "intake"}, {"v", 1.0}, {"t", 200.0}
       }));
+      return nameFor(motionData);
     });
     //Fun fact: Shooting doesn't get an editor. It has no parameters.
     addInserter("Shoot", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "shoot"}
       }));
+      return nameFor(motionData);
     });
     addInserter("Delay", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "delay"}, {"t", 200.0}
       }));
+      return nameFor(motionData);
     });
     //Add existing items
     for(auto &motion: motionData) {
