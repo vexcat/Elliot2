@@ -1,6 +1,14 @@
 #include "main.h"
 #include "display.hpp"
 
+//------------------------------------------------------------------------------------
+//  Controller Editors
+//  ------------------
+//  This file contains the functions for editing numbers & text on the V5 Controller's
+//  screen. It is used primarily in MotionEditor of display.cpp.
+//------------------------------------------------------------------------------------
+
+//Render the cursor arrows that show you what place you're editing
 void renderEditorArrows(pros::Controller& ctrl, int cursor) {
   std::string arrowText(15, ' ');
   arrowText[cursor] = '^';
@@ -9,6 +17,7 @@ void renderEditorArrows(pros::Controller& ctrl, int cursor) {
   line_set(ctrl, 2, arrowText);
 }
 
+//Render a number to a certain amount of decimals, and the cursor
 void renderNumberEditor(pros::Controller& ctrl, double number, int fix, int cursor) {
   char textData[16];
   snprintf(textData, 16, "%+015.*f\n", fix, number);
@@ -16,11 +25,13 @@ void renderNumberEditor(pros::Controller& ctrl, double number, int fix, int curs
   renderEditorArrows(ctrl, cursor);
 }
 
+//Render text and the cursor
 void renderStringEditor(pros::Controller& ctrl, std::string& text, int cursor) {
   line_set(ctrl, 1, text);
   renderEditorArrows(ctrl, cursor);
 }
 
+//Edit an existing number and return the result
 double editNumber(pros::Controller& ctrl, double number, int fix) {
   int cursor = 14 - fix - (fix > 0);
   renderNumberEditor(ctrl, number, fix, cursor);
@@ -59,6 +70,7 @@ double editNumber(pros::Controller& ctrl, double number, int fix) {
   return number;
 }
 
+//Remove padding to the right of a string
 void unrightPad(std::string& str) {
   //Count the spaces on the right of the string.
   int count = 0;
@@ -67,6 +79,7 @@ void unrightPad(std::string& str) {
   str.erase(str.end() - count, str.end());
 }
 
+//Edit an existing string and return the result
 std::string editString(pros::Controller& ctrl, std::string text) {
   int cursor = 0;
   text.insert(text.size(), 15 - text.size(), ' ');
