@@ -77,7 +77,6 @@ void updateRobot() {
 //Initializes the on-screen field.
 lv_obj_t* debugField;
 void oyes() {
-  printf("[LOG] begin oyes()\n");
   debugField = lv_obj_create(lv_scr_act(), NULL);
   lv_obj_set_pos(debugField, 20, 20);
   lv_obj_set_size(debugField, 180, 180);
@@ -116,7 +115,6 @@ void oyes() {
   lv_obj_set_style(arrow, &lv_style_plain);
   updateRobot();
   lv_obj_set_hidden(debugField, true);
-  printf("[LOG] end oyes()\n");
 }
 
 //---------------------------------------
@@ -125,10 +123,8 @@ void oyes() {
 extern "C" const lv_img_t cougarImage;
 lv_obj_t* image;
 void putImage() {
-  printf("[LOG] begin putImage()\n");
   image = lv_img_create(lv_scr_act(), NULL);
   lv_img_set_src(image, &cougarImage);
-  printf("[LOG] end putImage()\n");
 }
 
 //---------------------------------------
@@ -165,7 +161,6 @@ void addAuton(std::string byName) {
           if(pair.first == obj) {
             lv_btn_set_state(pair.first, LV_BTN_STATE_TGL_REL);
             currentlySelected = autonNames[j];
-            printf("%s was selected\n", currentlySelected.c_str());
           } else {
             lv_btn_set_state(pair.first, LV_BTN_STATE_REL);
           }
@@ -256,7 +251,6 @@ bool lastMenuWasEntered = false;
 bool menuWasEntered = false;
 //Responsible for running all V5 Brain tasks.
 void uiExecutor(void*) {
-  printf("[LOG] begin uiExecutor()\n");
   uint32_t startTime = pros::millis();
   putImage();
   autoSelector();
@@ -339,7 +333,6 @@ void line_set(pros::Controller& c, int line, std::string str) {
   else
     str.erase(str.begin() + 15, str.end());
   c.set_text(line, 0, str.c_str());
-  printf("Line was set, %d: %s\n", line, str.c_str());
   pros::delay(52);
 }
 
@@ -359,7 +352,6 @@ class ControllerMenu: public ControllerTask {
   }
   public:
   void initialize(pros::Controller& ctrl) override {
-    printf("Did initialize\n");
     render(ctrl);
   }
   int checkController(pros::Controller& ctrl) override {
@@ -443,7 +435,6 @@ class CRUDMenu: public ControllerTask {
   int crudIndex = 0;
 
   void renderCRUD(pros::Controller& ctrl) {
-    printf("Option list size is %d\n", crudOptions.size());
     for(int i = crudIndex; i < crudIndex + 3; i++) {
       if(i < crudOptions.size()) {
         line_set(ctrl, i - crudIndex, (i == crudIndex ? "*": " ") + crudOptions[i].first);
@@ -527,7 +518,6 @@ class CRUDMenu: public ControllerTask {
 
   protected:
   void addInserter(const std::string name, std::function<const std::string(int)> attemptAdd) {
-    printf("addInserter was called\n");
     crudOptions.push_back({"+ " + name, [attemptAdd, this](pros::Controller& ctrl){
       try {
         if(items.size()) {
@@ -727,7 +717,6 @@ class MotionList: public CRUDMenu {
   }
   private:
   std::string nameFor(json& motion) {
-    printf("Made it to nameFor.\n");
     auto loc = motion.find("name");
     if(loc != motion.end()) return loc->get<std::string>();
     auto type = motion["type"];
@@ -958,8 +947,7 @@ class RootList: public ControllerMenu {
 class CatOSScreen: public ControllerTask {
   std::unique_ptr<ControllerMenu> root = std::make_unique<RootList>();
   void initialize(pros::Controller& ctrl) override {
-    printf("[LOG] catOS init\n");
-    line_set(ctrl, 0, "catOS v0.0");
+    line_set(ctrl, 0, "catOS v1.2");
     line_set(ctrl, 1, "press X+Y to");
     line_set(ctrl, 2, "activate menu");
   }
