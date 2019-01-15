@@ -10,17 +10,30 @@
 #include <functional>
 using namespace okapi;
 
-//gt opcontrol
+//Display code! This file contains the code for:
+//  - The auton selector
+//  - The GPS viewer
+//  - The GPS calibrator
+//  - The auton planner
 
-extern "C" {
-    extern const lv_img_t cougarImage;
-}
+//------------------------------------------------------------------------------------
+//  V5 Brain Display using LittleVGL
+//  --------------------------------
+//  The V5 screen shows an auton selector, a gps viewer, or just our logo, depending
+//  on the competition mode. The code for the screen integrates with gps.cpp for the
+//  GPS, autonomous.cpp for changing the color mode, and the auton planner for newly
+//  created autonomi.
+//------------------------------------------------------------------------------------
 
+//---------------------------------------
+//  GPS Debug Viewer
+//---------------------------------------
 lv_point_t origPoints[] = { {0, 0}, {30, 0}, {24, -6}, {30, 0}, {24, 6}, {30, 0} };
 lv_point_t newPoints[6];
 lv_obj_t* arrow;
 lv_obj_t* orientationLabel;
 
+//Rotates the robot position arrow according to the robot's rotation value.
 void rotateIt(lv_point_t* points, lv_point_t* dPoints, int count, double rotation) {
   for(int i = 0; i < count; i++) {
     dPoints->x = points->x * cos(rotation) - points->y * sin(rotation);
@@ -30,6 +43,7 @@ void rotateIt(lv_point_t* points, lv_point_t* dPoints, int count, double rotatio
   }
 }
 
+//Flips points upside down and makes all points positive.
 void fix(lv_point_t* points, int count) {
   for(int i = 0; i < count; i++) {
     points->y = 80-(points->y);
@@ -38,6 +52,7 @@ void fix(lv_point_t* points, int count) {
   }
 }
 
+//Updates robot arrow on screen.
 void updateRobot() {
   auto &gps = getRobot().gps;
   RoboPosition yeet = gps.getPosition();
@@ -51,6 +66,7 @@ void updateRobot() {
   lv_label_set_text(orientationLabel, orientationBuffer);
 }
 
+//Initializes the on-screen field.
 lv_obj_t* debugField;
 void oyes() {
   printf("[LOG] begin oyes()\n");
@@ -95,6 +111,10 @@ void oyes() {
   printf("[LOG] end oyes()\n");
 }
 
+//---------------------------------------
+//  Team Logo
+//---------------------------------------
+extern "C" const lv_img_t cougarImage;
 lv_obj_t* image;
 void putImage() {
   printf("[LOG] begin putImage()\n");
@@ -103,6 +123,9 @@ void putImage() {
   printf("[LOG] end putImage()\n");
 }
 
+//---------------------------------------
+//  Auton Selector
+//---------------------------------------
 lv_obj_t* autoSelectorObj;
 lv_obj_t* buttonTemplate;
 std::string currentlySelected = "#No Auton";
@@ -111,6 +134,7 @@ std::string getSelectedAuton() {
 }
 std::vector<std::string> autonNames;
 std::vector<std::pair<lv_obj_t*, lv_obj_t*>> selectors;
+//Adds new autons to the screen
 void addAuton(std::string byName) {
   if(std::find(autonNames.begin(), autonNames.end(), byName) != autonNames.end()) {
     throw "ur data is bad and u should feel bad";
@@ -142,7 +166,7 @@ void addAuton(std::string byName) {
     }
   }
 }
-
+//Removes autons from the screen
 void removeAuton(std::string byName) {
   auto loc = std::find(autonNames.begin(), autonNames.end(), byName);
   if(loc == autonNames.end()) {
@@ -160,6 +184,7 @@ void removeAuton(std::string byName) {
   }
 }
 
+//Initializes the auton selector
 void autoSelector() {
   setBlue(false);
   autoSelectorObj = lv_obj_create(lv_scr_act(), NULL);
@@ -205,6 +230,7 @@ void autoSelector() {
     }
   });
   addAuton("#No Auton");
+  //Load existing autons
   auto &stateAutons = getState()["autons"];
   for(auto &elem: stateAutons.items()) {
     addAuton(elem.key());
@@ -212,9 +238,13 @@ void autoSelector() {
   lv_btn_set_state(selectors[0].first, LV_BTN_STATE_TGL_REL);
 }
 
+//-------------------------------------
+//  UI Executor
+//-------------------------------------
 int lastCompStatus = -1;
 bool lastMenuWasEntered = false;
 bool menuWasEntered = false;
+//Responsible for running all V5 Brain tasks.
 void uiExecutor(void*) {
   printf("[LOG] begin uiExecutor()\n");
   uint32_t startTime = pros::millis();
@@ -249,6 +279,18 @@ void uiExecutor(void*) {
     }
   }
 }
+
+//-----------------------------------------------------------------------------------
+//  V5 Controller Menus
+//  -------------------
+//  The V5 Controller is responsible for the display of many debug menus. It runs
+//  catOS, a collection of classes that aid in the display of debug information.
+//  The controller has an autonomous planner, a very large feature that allows us to
+//  create and edit autonomouses from within the controller, and save them to the 
+//  microSD card. This system removes a lot of overhead in the process for developing
+//  auton, leaving our team with more time to practice and build. For more details on
+//  what JSON-based autons can do, take a look at autonomous.cpp and gps.cpp.
+//-----------------------------------------------------------------------------------
 
 class ControllerTask {
   public:
