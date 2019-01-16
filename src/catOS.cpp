@@ -6,6 +6,7 @@ void ControllerTask::operator()(pros::Controller& ctrl) {
   do {
     result = checkController(ctrl);
     pros::delay(5);
+    checkTemporaryExit(ctrl);
   } while(result != ControllerTask::CheckResult::GO_UP);
 }
 
@@ -36,7 +37,7 @@ int ControllerMenu::checkController(pros::Controller& ctrl) {
   if(ctrl.get_digital_new_press(DIGITAL_B)) return GO_UP;
   if(ctrl.get_digital_new_press(DIGITAL_A)) {
     list[index].second(ctrl);
-    initialize(ctrl);
+    render(ctrl);
   }
   if(ctrl.get_digital_new_press(DIGITAL_DOWN)) {
     index++;

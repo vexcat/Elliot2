@@ -297,6 +297,22 @@ void uiExecutor(void*) {
 //  what JSON-based autons can do, take a look at autonomous.cpp and gps.cpp.
 //-----------------------------------------------------------------------------------
 
+//Allows you to drive before selecting a menu option.
+void checkTemporaryExit(pros::Controller& ctrl) {
+  if(ctrl.get_digital_new_press(DIGITAL_Y)) {
+    line_set(ctrl, 0, "Now driving,");
+    line_set(ctrl, 1, "Press X");
+    line_set(ctrl, 2, "to exit.");
+    while(true) {
+      getRobot().drive(ctrl);
+      if(ctrl.get_digital_new_press(DIGITAL_X)) {
+        break;
+      }
+      pros::delay(5);
+    }
+  }
+}
+
 //Can edit a motion object, given its keys.
 class MotionEditor: public ControllerMenu {
   std::vector<std::pair<std::string, std::string>> options;
@@ -699,30 +715,26 @@ class RootList: public ControllerMenu {
   }
 };
 
-class CatOSScreen: public ControllerTask {
-  std::unique_ptr<ControllerMenu> root = std::make_unique<RootList>();
-  void initialize(pros::Controller& ctrl) override {
-    line_set(ctrl, 0, "catOS v1.2");
-    line_set(ctrl, 1, "press X+Y to");
-    line_set(ctrl, 2, "activate menu");
-  }
-  int checkController(pros::Controller& ctrl) override {
+void drawCatOSScreen(pros::Controller& ctrl) {
+  line_set(ctrl, 0, "catOS v1.2");
+  line_set(ctrl, 1, "press X+Y to");
+  line_set(ctrl, 2, "activate menu");
+}
+
+void catOS(void*) {
+  pros::Controller ctrl(pros::E_CONTROLLER_MASTER);
+  drawCatOSScreen(ctrl);
+  while(true) {
     if(ctrl.get_digital(DIGITAL_X) && ctrl.get_digital(DIGITAL_Y)) {
       getRobot().takeStopped();
       menuWasEntered = true;
-      (*root)(ctrl);
-      initialize(ctrl);
+      taskOption<RootList>(ctrl);
+      drawCatOSScreen(ctrl);
       getRobot().give();
       menuWasEntered = false;
     }
-    return NO_CHANGE;
+    pros::delay(5);
   }
-};
-
-void catOS(void*) {
-  std::unique_ptr<CatOSScreen> screen = std::make_unique<CatOSScreen>();
-  pros::Controller master(pros::E_CONTROLLER_MASTER);
-  (*screen)(master);
 }
 
 void disabled() { }

@@ -83,3 +83,5 @@ class CRUDMenu: public ControllerTask {
   void initialize(pros::Controller& ctrl) override;
   int checkController(pros::Controller& ctrl) override;
 };
+
+void checkTemporaryExit(pros::Controller& ctrl);

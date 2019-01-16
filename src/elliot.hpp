@@ -19,6 +19,9 @@ class Catapult {
 };
 
 class Elliot {
+	int multiplier = 1;
+	double speedMultiplier = 200;
+	int lastR1 = 0;
     friend void createRobot();
     pros::Mutex usageGuard;
     void resetMtrs();
@@ -41,6 +44,7 @@ class Elliot {
     void takeStopped();
     void give();
     void giveDirect();
+    void drive(pros::Controller&);
 };
 void createRobot();
 Elliot& getRobot();
