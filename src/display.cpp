@@ -297,6 +297,7 @@ void uiExecutor(void*) {
 //  what JSON-based autons can do, take a look at autonomous.cpp and gps.cpp.
 //-----------------------------------------------------------------------------------
 
+//Can edit a motion object, given its keys.
 class MotionEditor: public ControllerMenu {
   std::vector<std::pair<std::string, std::string>> options;
   public:
@@ -334,6 +335,7 @@ class MotionEditor: public ControllerMenu {
   }
 };
 
+//Can edit an autonomous, given its motion list.
 class MotionList: public CRUDMenu {
   json &motionData;
   public:
@@ -483,6 +485,7 @@ class MotionList: public CRUDMenu {
   }
 };
 
+//Can create/remove autons
 class AutonList: public CRUDMenu {
   json &autonData;
   public:
@@ -553,6 +556,7 @@ class AutonList: public CRUDMenu {
   }
 };
 
+//Can test a single motor
 class MotorTest: public ControllerTask {
   pros::Motor m;
   int pn;
@@ -579,11 +583,12 @@ class MotorTest: public ControllerTask {
   };
 };
 
+//Can list all motors you can test
 class MotorList: public ControllerMenu {
   public:
   MotorList() {}
   void initialize(pros::Controller& ctrl) override {
-    for(int i = 1; i <= 8; i++) {
+    for(int i = 1; i <= 21; i++) {
       list.push_back({std::to_string(i), [=](auto& ctrl) {
         taskOption<MotorTest>(ctrl, i);
       }});
