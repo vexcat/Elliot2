@@ -638,8 +638,7 @@ class GPSCalibrator: public ControllerTask {
       if(!y) y = ctrl.get_analog(ANALOG_LEFT_Y) / 127.0;
       robot.left.controllerSet(y);
       robot.right.controllerSet(y);
-    }
-    if(state == 2) {
+    } else if(state == 2) {
       int x = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
       if(!x) x = ctrl.get_analog(ANALOG_LEFT_X) / 127.0;
       robot.left.controllerSet(x);
