@@ -616,15 +616,13 @@ class GPSCalibrator: public ControllerTask {
         line_set(ctrl, 0, "Reset position");
         line_set(ctrl, 1, "of robot, then");
         line_set(ctrl, 2, "press A.");
-      }
-      if(state == 1) {
+      } else if(state == 1) {
         initial_left  = robot.left .getPosition();
         initial_right = robot.right.getPosition();
         line_set(ctrl, 0, "Turn 32x CCW");
         line_set(ctrl, 1, "<- ->/LeftJoyX");
         line_set(ctrl, 2, "then press A.");
-      }
-      if(state == 2) {
+      } else if(state == 2) {
         double deltaL = robot.left .getPosition() - initial_left;
         double deltaR = robot.right.getPosition() - initial_right;
         double measuredCPR = (deltaR - deltaL) / 32 * PI;
@@ -632,8 +630,7 @@ class GPSCalibrator: public ControllerTask {
         line_set(ctrl, 0, "All done!");
         line_set(ctrl, 1, "A to exit.");
         line_set(ctrl, 2, "");
-      }
-      if(state == 3) return GO_UP;
+      } else if(state == 3) return GO_UP;
       state++;
     }
     if(state == 0) {
