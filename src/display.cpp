@@ -308,15 +308,15 @@ class MotionEditor: public ControllerMenu {
   ) {
     auto &object = auton[idx];
     for(auto &[key, fix, option]: options) {
-      list.push_back({option, [&object, key, fix](pros::Controller& ctrl){
+      list.push_back({option, [&object, key, fix](auto& ctrl){
         object[key] = editNumber(ctrl, object[key].get<double>(), fix);
       }});
     }
     list.insert(list.end(), conveniences);
-    list.push_back({"Run this", [&](pros::Controller&) {
+    list.push_back({"Run this", [&](auto&) {
       runMotion(object, getBlue());
     }});
-    list.push_back({"Run to here", [&](pros::Controller&) {
+    list.push_back({"Run to here", [&](auto&) {
       auto loc = auton.begin();
       //Process the first entry, an Origin.
       RoboPosition origin = {
@@ -427,7 +427,7 @@ class MotionList: public CRUDMenu {
         {"y", 2, "Set Y"},
         {"o", 2, "Set Orientation"}
       }, {
-        {"Move Here", [&origin](pros::Controller&){
+        {"Move Here", [&origin](auto&){
           json copy = origin;
           copy["type"] = "position";
           runMotion(copy, getBlue());
@@ -584,7 +584,7 @@ class MotorList: public ControllerMenu {
   MotorList() {}
   void initialize(pros::Controller& ctrl) override {
     for(int i = 1; i <= 8; i++) {
-      list.push_back({std::to_string(i), [=](pros::Controller& ctrl) {
+      list.push_back({std::to_string(i), [=](auto& ctrl) {
         taskOption<MotorTest>(ctrl, i);
       }});
     }
@@ -662,25 +662,25 @@ class GPSList: public ControllerMenu {
   void initialize(pros::Controller& ctrl) override {
     list.push_back({"Calibrate GPS", taskOption<GPSCalibrator>});
     auto &gps = getRobot().gps;
-    list.push_back({"Set X", [&](pros::Controller& ctrl) {
+    list.push_back({"Set X", [&](auto& ctrl) {
       RoboPosition pos = gps.getPosition();
       pos.x = editNumber(ctrl, pos.x, 3);
       gps.setPosition(pos);
     }});
-    list.push_back({"Set Y", [&](pros::Controller& ctrl) {
+    list.push_back({"Set Y", [&](auto& ctrl) {
       RoboPosition pos = gps.getPosition();
       pos.x = editNumber(ctrl, pos.x, 3);
       gps.setPosition(pos);
     }});
-    list.push_back({"Set Z", [&](pros::Controller& ctrl) {
+    list.push_back({"Set Z", [&](auto& ctrl) {
       RoboPosition pos = gps.getPosition();
       pos.x = editNumber(ctrl, pos.x, 3);
       gps.setPosition(pos);
     }});
-    list.push_back({"Set CPR", [&](pros::Controller& ctrl) {
+    list.push_back({"Set CPR", [&](auto& ctrl) {
       gps.setCPR(editNumber(ctrl, gps.radiansToCounts(1), 4));
     }});
-    list.push_back({"Set CPI", [&](pros::Controller& ctrl) {
+    list.push_back({"Set CPI", [&](auto& ctrl) {
       gps.setCPI(editNumber(ctrl, gps.inchToCounts(1), 4));
     }});
     ControllerMenu::initialize(ctrl);
