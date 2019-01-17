@@ -403,7 +403,6 @@ class MotionList: public CRUDMenu {
       }));
       return nameFor(motionData[index]);
     });
-    //Fun fact: Shooting doesn't get an editor. It has no parameters.
     addInserter("Shoot", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "shoot"}
@@ -481,6 +480,8 @@ class MotionList: public CRUDMenu {
       })(ctrl);
     } else if(type == "delay") {
       motionData[idx]["t"] = editNumber(ctrl, motionData[idx]["t"].get<double>(), 3);
+    } else if(type == "shoot") {
+      MotionEditor(motionData, idx, {})(ctrl);
     }
     updateItem(idx, nameFor(motionData[idx]));
   }
