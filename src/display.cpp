@@ -298,16 +298,17 @@ void uiExecutor(void*) {
 //-----------------------------------------------------------------------------------
 
 //Allows you to drive before selecting a menu option.
-void checkTemporaryExit(pros::Controller& ctrl) {
+void checkTemporaryExit() {
+  auto &ctrl = getRobot().controller;
   if(ctrl.get_digital_new_press(DIGITAL_Y)) {
-    line_set(ctrl, 0, "Now driving,");
-    line_set(ctrl, 1, "Press X");
-    line_set(ctrl, 2, "to exit.");
+    line_set(0, "Now driving,");
+    line_set(1, "Press B");
+    line_set(2, "to exit.");
     auto &bot = getRobot();
     while(true) {
       bot.drive(ctrl);
-      if(ctrl.get_digital(DIGITAL_X)) {
-        while(ctrl.get_digital(DIGITAL_X)) pros::delay(25);
+      if(ctrl.get_digital(DIGITAL_B)) {
+        while(ctrl.get_digital(DIGITAL_B)) pros::delay(25);
         break;
       }
       pros::delay(5);
@@ -327,30 +328,30 @@ class MotionEditor: public ControllerMenu {
   ) {
     auto &object = auton[idx];
     for(auto &[key, fix, option]: options) {
-      list.push_back({option, [&object, key, fix](auto& ctrl){
-        object[key] = editNumber(ctrl, object[key].get<double>(), fix);
+      list.push_back({option, [&object, key, fix](){
+        object[key] = editNumber(object[key].get<double>(), fix);
       }});
     }
     list.insert(list.end(), conveniences);
-    list.push_back({"Run this", [&](auto&) {
-      runMotion(object, getBlue());
-    }});
-    list.push_back({"Run to here", [&auton, idx](auto&) {
-      auto loc = auton.begin();
-      //Process the first entry, an Origin.
-      RoboPosition origin = {
-        (*loc)["x"].get<double>(),
-        (*loc)["y"].get<double>(),
-        (*loc)["o"].get<double>()
-      };
-      auto &bot = getRobot();
-      bot.gps.setPosition(origin);
-      loc++;
-      for(; loc != auton.begin() + idx + 1; loc++) {
-        puts(((*loc)["type"].get<std::string>()).c_str());
-        runMotion(*loc, getBlue());
-      }
-    }});
+    list.insert(list.end(), {
+      {"Run this", [&]() { runMotion(object, getBlue()); }},
+      {"Run to here", [&auton, idx]() {
+        auto loc = auton.begin();
+        //Process the first entry, an Origin.
+        RoboPosition origin = {
+          (*loc)["x"].get<double>(),
+          (*loc)["y"].get<double>(),
+          (*loc)["o"].get<double>()
+        };
+        auto &bot = getRobot();
+        bot.gps.setPosition(origin);
+        loc++;
+        for(; loc != auton.begin() + idx + 1; loc++) {
+          puts(((*loc)["type"].get<std::string>()).c_str());
+          runMotion(*loc, getBlue());
+        }
+      }}
+    });
   }
 };
 
@@ -358,8 +359,7 @@ class MotionEditor: public ControllerMenu {
 class MotionList: public CRUDMenu {
   json &motionData;
   public:
-  MotionList(std::string autonName): CRUDMenu(), motionData(getState()["autons"][autonName]) {}
-  void initialize(pros::Controller& ctrl) override {
+  MotionList(std::string autonName): CRUDMenu(), motionData(getState()["autons"][autonName]) {
     //Add inserters here
     auto &bot = getRobot();
     addInserter("Position", [&](int index) -> std::string {
@@ -423,7 +423,7 @@ class MotionList: public CRUDMenu {
       addItem(nameFor(motion));
     }
     //First render
-    CRUDMenu::initialize(ctrl);
+    render();
   }
   virtual void attemptDelete(int idx, const std::string& oldName) {
     motionData.erase(motionData.begin() + idx);
@@ -438,7 +438,7 @@ class MotionList: public CRUDMenu {
     motionData.insert(motionData.begin() + newIdx, motionData[idx]);
     return nameFor(motionData[newIdx]);
   }
-  void handleSelect(pros::Controller& ctrl, int idx, const std::string& name) override {
+  void handleSelect(int idx, const std::string& name) override {
     std::string type = motionData[idx]["type"];
     if(type == "origin") {
       json &origin = motionData[idx];
@@ -447,7 +447,7 @@ class MotionList: public CRUDMenu {
         {"y", 2, "Set Y"},
         {"o", 2, "Set Orientation"}
       }, {
-        {"Move Here", [&origin](auto&){
+        {"Move Here", [&origin](){
           json copy = origin;
           copy["type"] = "position";
           runMotion(copy, getBlue());
@@ -456,35 +456,35 @@ class MotionList: public CRUDMenu {
           //This line *shouldn't* have an effect, but here for safety.
           copy["type"] = "origin";
         }}
-      })(ctrl);
+      })();
     } else if(type == "position") {
       MotionEditor(motionData, idx, {
         {"x", 2, "Set X"},
         {"y", 2, "Set Y"}
-      })(ctrl);
+      })();
     } else if(type == "direct") {
       MotionEditor(motionData, idx, {
         {"l", 2, "Set left vel"},
         {"r", 2, "Set right vel"}
-      })(ctrl);
+      })();
     } else if(type == "rotation") {
       MotionEditor(motionData, idx, {
         {"o", 2, "Set Orientation"}
-      })(ctrl);
+      })();
     } else if(type == "sline") {
       MotionEditor(motionData, idx, {
         {"d", 2, "Set distance"},
         {"t", 3, "Set timing"}
-      })(ctrl);
+      })();
     } else if(type == "scorer" || type == "catapult" || type == "intake") {
       MotionEditor(motionData, idx, {
         {"v", 2, "Set velocity"},
         {"t", 3, "Set timing"}
-      })(ctrl);
+      })();
     } else if(type == "delay") {
-      motionData[idx]["t"] = editNumber(ctrl, motionData[idx]["t"].get<double>(), 3);
+      motionData[idx]["t"] = editNumber(motionData[idx]["t"].get<double>(), 3);
     } else if(type == "shoot") {
-      MotionEditor(motionData, idx, {})(ctrl);
+      MotionEditor(motionData, idx, {})();
     }
     updateItem(idx, nameFor(motionData[idx]));
   }
@@ -509,8 +509,7 @@ class MotionList: public CRUDMenu {
 class AutonList: public CRUDMenu {
   json &autonData;
   public:
-  AutonList(): CRUDMenu(), autonData(getState()["autons"]) {}
-  void initialize(pros::Controller& ctrl) override {
+  AutonList(): CRUDMenu(), autonData(getState()["autons"]) {
     addInserter("auton", [&](int index) -> std::string {
       if(autonData.find("unnamed") != autonData.end()) {
         throw "ur data is bad and u should feel bad";
@@ -532,8 +531,9 @@ class AutonList: public CRUDMenu {
       addItem(k);
     }
     //Render for the first time
-    CRUDMenu::initialize(ctrl);
+    render();
   }
+
   void attemptDelete(int idx, const std::string& oldName) override {
     auto location = autonData.find(oldName);
     if(location == autonData.end()) {
@@ -543,7 +543,9 @@ class AutonList: public CRUDMenu {
       removeAuton(oldName);
     }
   }
+
   //attemptMove is skipped because it's not useful on an object where string keys matter.
+
   void attemptRename(int idx, std::string newName, const std::string& oldName) override {
     auto newLocation = autonData.find(newName);
     auto oldLocation = autonData.find(oldName);
@@ -556,6 +558,7 @@ class AutonList: public CRUDMenu {
       addAuton(newName);
     }
   }
+
   std::string attemptDuplicate(int idx, int newIdx, const std::string& oldName) override {
     auto location = autonData.find("unnamed");
     if(location != autonData.end()) {
@@ -568,9 +571,10 @@ class AutonList: public CRUDMenu {
     return "unnamed";
   }
 
-  void handleSelect(pros::Controller& ctrl, int idx, const std::string& name) override {
-    taskOption<MotionList>(ctrl, name);
+  void handleSelect(int idx, const std::string& name) override {
+    taskOption<MotionList>(name);
   };
+
   void finalizeData() override {
     saveState();
   }
@@ -581,13 +585,14 @@ class MotorTest: public ControllerTask {
   pros::Motor m;
   int pn;
   public:
-  MotorTest(int n): m(n), pn(n) {};
-  void initialize(pros::Controller& ctrl) override {
-    line_set(ctrl, 0, "Test motor# " + std::to_string(pn));
-    line_set(ctrl, 1, "Press <-/->");
-    line_set(ctrl, 2, "Or use left joy");
-  }
-  int checkController(pros::Controller& ctrl) override {
+  MotorTest(int n): m(n), pn(n) {
+    line_set(0, "Test motor# " + std::to_string(pn));
+    line_set(1, "Press <-/->");
+    line_set(2, "Or use left joy");
+  };
+
+  int checkController() override {
+    auto &ctrl = getRobot().controller;
     if(ctrl.get_digital(DIGITAL_LEFT)) {
       m.move_velocity(-200);
     } else if(ctrl.get_digital(DIGITAL_RIGHT)) {
@@ -606,14 +611,13 @@ class MotorTest: public ControllerTask {
 //Can list all motors you can test
 class MotorList: public ControllerMenu {
   public:
-  MotorList() {}
-  void initialize(pros::Controller& ctrl) override {
+  MotorList() {
     for(int i = 1; i <= 21; i++) {
-      list.push_back({std::to_string(i), [=](auto& ctrl) {
-        taskOption<MotorTest>(ctrl, i);
+      list.push_back({std::to_string(i), [=]() {
+        taskOption<MotorTest>(i);
       }});
     }
-    ControllerMenu::initialize(ctrl);
+    render();
   }
 };
 
@@ -623,38 +627,39 @@ class GPSCalibrator: public ControllerTask {
   Elliot& robot;
   int state = 0;
   public:
-  GPSCalibrator(): robot(getRobot()) {}
-  void initialize(pros::Controller& ctrl) override {
+  GPSCalibrator(): robot(getRobot()) {
     initial_left  = robot.left .getPosition();
     initial_right = robot.right.getPosition();
-    line_set(ctrl, 0, "Move robot 96in");
-    line_set(ctrl, 1, "<-  ->/LeftJoyY");
-    line_set(ctrl, 2, "then press A.");
+    line_set(0, "Move robot 96in");
+    line_set(1, "<-  ->/LeftJoyY");
+    line_set(2, "then press A.");
   }
-  int checkController(pros::Controller& ctrl) override {
+
+  int checkController() override {
+    auto &ctrl = getRobot().controller;
     if(ctrl.get_digital_new_press(DIGITAL_A)) {
       if(state == 0) {
         double lastAvg = (initial_left + initial_right) / 2;
         double curAvg = (robot.left .getPosition() + robot.right.getPosition()) / 2;
         double measuredTPI = curAvg - lastAvg;
         robot.gps.setCPI(measuredTPI);
-        line_set(ctrl, 0, "Reset position");
-        line_set(ctrl, 1, "of robot, then");
-        line_set(ctrl, 2, "press A.");
+        line_set(0, "Reset position");
+        line_set(1, "of robot, then");
+        line_set(2, "press A.");
       } else if(state == 1) {
         initial_left  = robot.left .getPosition();
         initial_right = robot.right.getPosition();
-        line_set(ctrl, 0, "Turn 32x CCW");
-        line_set(ctrl, 1, "<- ->/LeftJoyX");
-        line_set(ctrl, 2, "then press A.");
+        line_set(0, "Turn 32x CCW");
+        line_set(1, "<- ->/LeftJoyX");
+        line_set(2, "then press A.");
       } else if(state == 2) {
         double deltaL = robot.left .getPosition() - initial_left;
         double deltaR = robot.right.getPosition() - initial_right;
         double measuredCPR = (deltaR - deltaL) / 32 * PI;
         robot.gps.setCPR(measuredCPR);
-        line_set(ctrl, 0, "All done!");
-        line_set(ctrl, 1, "A to exit.");
-        line_set(ctrl, 2, "");
+        line_set(0, "All done!");
+        line_set(1, "A to exit.");
+        line_set(2, "");
       } else if(state == 3) return GO_UP;
       state++;
     }
@@ -679,61 +684,63 @@ class GPSCalibrator: public ControllerTask {
 
 class GPSList: public ControllerMenu {
   public:
-  GPSList() {}
-  void initialize(pros::Controller& ctrl) override {
-    list.push_back({"Calibrate GPS", taskOption<GPSCalibrator>});
+  GPSList() {
     auto &gps = getRobot().gps;
-    list.push_back({"Set X", [&](auto& ctrl) {
-      RoboPosition pos = gps.getPosition();
-      pos.x = editNumber(ctrl, pos.x, 3);
-      gps.setPosition(pos);
-    }});
-    list.push_back({"Set Y", [&](auto& ctrl) {
-      RoboPosition pos = gps.getPosition();
-      pos.y = editNumber(ctrl, pos.y, 3);
-      gps.setPosition(pos);
-    }});
-    list.push_back({"Set O", [&](auto& ctrl) {
-      RoboPosition pos = gps.getPosition();
-      pos.o = editNumber(ctrl, pos.o, 3);
-      gps.setPosition(pos);
-    }});
-    list.push_back({"Set CPR", [&](auto& ctrl) {
-      gps.setCPR(editNumber(ctrl, gps.radiansToCounts(1), 4));
-    }});
-    list.push_back({"Set CPI", [&](auto& ctrl) {
-      gps.setCPI(editNumber(ctrl, gps.inchToCounts(1), 4));
-    }});
-    ControllerMenu::initialize(ctrl);
+    list.insert(list.end(), {
+      {"Calibrate GPS", taskOption<GPSCalibrator>},
+      {"Set X", [&]() {
+        RoboPosition pos = gps.getPosition();
+        pos.x = editNumber(pos.x, 3);
+        gps.setPosition(pos);
+      }},
+      {"Set Y", [&]() {
+        RoboPosition pos = gps.getPosition();
+        pos.y = editNumber(pos.y, 3);
+        gps.setPosition(pos);
+      }},
+      {"Set O", [&]() {
+        RoboPosition pos = gps.getPosition();
+        pos.o = editNumber(pos.o, 3);
+        gps.setPosition(pos);
+      }},
+      {"Set CPR", [&]() {
+        gps.setCPR(editNumber(gps.radiansToCounts(1), 4));
+      }},
+      {"Set CPI", [&]() {
+        gps.setCPI(editNumber(gps.inchToCounts(1), 4));
+      }}
+    });
+    render();
   }
 };
 
 class RootList: public ControllerMenu {
   public:
-  RootList() {}
-  void initialize(pros::Controller& ctrl) override {
-    list.push_back({"Autonomous"  , taskOption<AutonList>});
-    list.push_back({"Motors"      , taskOption<MotorList>});
-    list.push_back({"GPS Settings", taskOption<  GPSList>});
-    ControllerMenu::initialize(ctrl);
+  RootList() {
+    list.insert(list.end(), {
+      {"Autonomous"  , taskOption<AutonList>},
+      {"Motors"      , taskOption<MotorList>},
+      {"GPS Settings", taskOption<  GPSList>}
+    });
+    render();
   }
 };
 
-void drawCatOSScreen(pros::Controller& ctrl) {
-  line_set(ctrl, 0, "catOS v1.2");
-  line_set(ctrl, 1, "press X+Y to");
-  line_set(ctrl, 2, "activate menu");
+void drawCatOSScreen() {
+  line_set(0, "catOS v1.2");
+  line_set(1, "press X+Y to");
+  line_set(2, "activate menu");
 }
 
 void catOS(void*) {
   pros::Controller ctrl(pros::E_CONTROLLER_MASTER);
-  drawCatOSScreen(ctrl);
+  drawCatOSScreen();
   while(true) {
     if(ctrl.get_digital(DIGITAL_X) && ctrl.get_digital(DIGITAL_Y)) {
       getRobot().takeStopped();
       menuWasEntered = true;
-      RootList()(ctrl);
-      drawCatOSScreen(ctrl);
+      RootList()();
+      drawCatOSScreen();
       getRobot().give();
       menuWasEntered = false;
     }

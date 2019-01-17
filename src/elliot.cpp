@@ -107,6 +107,7 @@ void Elliot::give() {
     right.setBrakeMode(AbstractMotor::brakeMode::coast);
 }
 
+Elliot* elliot;
 void createRobot() {
     if(!elliot) {
         elliot = new Elliot();

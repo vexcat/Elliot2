@@ -1,5 +1,6 @@
 #include "main.h"
 #include "display.hpp"
+#include "elliot.hpp"
 
 //------------------------------------------------------------------------------------
 //  Controller Editors
@@ -9,42 +10,43 @@
 //------------------------------------------------------------------------------------
 
 //Render the cursor arrows that show you what place you're editing
-void renderEditorArrows(pros::Controller& ctrl, int cursor) {
+void renderEditorArrows(int cursor) {
   std::string arrowText(15, ' ');
   arrowText[cursor] = '^';
-  line_set(ctrl, 0, arrowText);
+  line_set(0, arrowText);
   arrowText[cursor] = 'v';
-  line_set(ctrl, 2, arrowText);
+  line_set(2, arrowText);
 }
 
 //Render a number to a certain amount of decimals, and the cursor
-void renderNumberEditor(pros::Controller& ctrl, double number, int fix, int cursor) {
+void renderNumberEditor(double number, int fix, int cursor) {
   char textData[16];
   snprintf(textData, 16, "%+015.*f\n", fix, number);
-  line_set(ctrl, 1, std::string(textData));
-  renderEditorArrows(ctrl, cursor);
+  line_set(1, std::string(textData));
+  renderEditorArrows(cursor);
 }
 
 //Render text and the cursor
-void renderStringEditor(pros::Controller& ctrl, std::string& text, int cursor) {
-  line_set(ctrl, 1, text);
-  renderEditorArrows(ctrl, cursor);
+void renderStringEditor(std::string& text, int cursor) {
+  line_set(1, text);
+  renderEditorArrows(cursor);
 }
 
 //Edit an existing number and return the result
-double editNumber(pros::Controller& ctrl, double number, int fix) {
+double editNumber(double number, int fix) {
+  auto &ctrl = getRobot().controller;
   int cursor = 14 - fix - (fix > 0);
-  renderNumberEditor(ctrl, number, fix, cursor);
+  renderNumberEditor(number, fix, cursor);
   while(!ctrl.get_digital_new_press(DIGITAL_A) && !ctrl.get_digital_new_press(DIGITAL_B)) {
     if(ctrl.get_digital_new_press(DIGITAL_LEFT)) {
       cursor--;
       if(cursor < 0) cursor = 0;
-      renderNumberEditor(ctrl, number, fix, cursor);
+      renderNumberEditor(number, fix, cursor);
     }
     if(ctrl.get_digital_new_press(DIGITAL_RIGHT)) {
       cursor++;
       if(cursor > 14) cursor = 14;
-      renderNumberEditor(ctrl, number, fix, cursor);
+      renderNumberEditor(number, fix, cursor);
     }
     int dir = (!!ctrl.get_digital_new_press(DIGITAL_UP) - !!ctrl.get_digital_new_press(DIGITAL_DOWN));
     if(dir && cursor == 0) {
@@ -63,7 +65,7 @@ double editNumber(pros::Controller& ctrl, double number, int fix) {
         }
       }
       number += dir * std::pow(10, place);
-      renderNumberEditor(ctrl, number, fix, cursor);
+      renderNumberEditor(number, fix, cursor);
     }
     pros::delay(5);
   }
@@ -80,20 +82,21 @@ void unrightPad(std::string& str) {
 }
 
 //Edit an existing string and return the result
-std::string editString(pros::Controller& ctrl, std::string text) {
+std::string editString(std::string text) {
+  auto &ctrl = getRobot().controller;
   int cursor = 0;
   text.insert(text.size(), 15 - text.size(), ' ');
-  renderStringEditor(ctrl, text, cursor);
+  renderStringEditor(text, cursor);
   while(!ctrl.get_digital_new_press(DIGITAL_A) && !ctrl.get_digital_new_press(DIGITAL_B)) {
     if(ctrl.get_digital_new_press(DIGITAL_LEFT)) {
       cursor--;
       if(cursor < 0) cursor = 0;
-      renderStringEditor(ctrl, text, cursor);
+      renderStringEditor(text, cursor);
     }
     if(ctrl.get_digital_new_press(DIGITAL_RIGHT)) {
       cursor++;
       if(cursor > 14) cursor = 14;
-      renderStringEditor(ctrl, text, cursor);
+      renderStringEditor(text, cursor);
     }
 
     int dir = (!!ctrl.get_digital_new_press(DIGITAL_UP) - !!ctrl.get_digital_new_press(DIGITAL_DOWN));
@@ -130,7 +133,7 @@ std::string editString(pros::Controller& ctrl, std::string text) {
     }
 
     if(dir)
-      renderStringEditor(ctrl, text, cursor);
+      renderStringEditor(text, cursor);
 
     pros::delay(5);
   }

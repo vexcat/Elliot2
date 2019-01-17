@@ -1,4 +1,4 @@
 #pragma once
 
-double editNumber(pros::Controller& ctrl, double number, int fix);
-std::string editString(pros::Controller& ctrl, std::string text);
+double editNumber(double number, int fix);
+std::string editString(std::string text);

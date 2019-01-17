@@ -13,9 +13,6 @@ double pos0(double a) {
 }
 
 void Elliot::drive(pros::Controller& m) {
-	//Motor usage guard
-	takeCoast();
-
 	//Base drive
 	int y = m.get_analog(ANALOG_LEFT_Y) * (speedMultiplier / 127.0);
 	int x = m.get_analog(ANALOG_LEFT_X) * (speedMultiplier / 127.0);
@@ -66,14 +63,17 @@ void Elliot::drive(pros::Controller& m) {
 
 	//Allow for controller menus to safely take over the robot.
 	//See display.cpp
-	giveDirect();
 }
 
 void opcontrol() {
 	pros::Controller m(pros::E_CONTROLLER_MASTER);
 	auto &bot = getRobot();
 	while (true) {
+		//takeCoast and giveDirect allow for controller
+		//menus to safely take over the robot.
+		bot.takeCoast();
 		bot.drive(m);
+		bot.giveDirect();
 		pros::delay(5);
 	}
 }

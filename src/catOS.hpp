@@ -8,13 +8,12 @@
 class ControllerTask {
   public:
   enum CheckResult { NO_CHANGE, GO_UP };
-  virtual void initialize(pros::Controller&) = 0;
-  virtual int checkController(pros::Controller&) = 0;
-  void operator()(pros::Controller& ctrl);
+  virtual int checkController() = 0;
+  void operator()();
   virtual ~ControllerTask() {};
 };
 
-using MenuAction = std::function<void(pros::Controller&)>;
+using MenuAction = std::function<void(void)>;
 using MenuEntry = std::pair<std::string, MenuAction>;
 
 //C++ is really, really cool sometimes.
@@ -24,22 +23,19 @@ using MenuEntry = std::pair<std::string, MenuAction>;
 //The strange syntax is to be able to work on any class T,
 //and to perfectly forward the constructor arguments.
 template <typename T, typename ...Args>
-MenuAction taskOption(pros::Controller& ctrl, Args&&... args) {
+MenuAction taskOption(Args&&... args) {
   auto ptr = std::make_unique<T>(std::forward<Args>(args)...);
-  (*ptr)(ctrl);
+  (*ptr)();
 }
-
-void line_set(pros::Controller& c, int line, std::string str);
 
 class ControllerMenu: public ControllerTask {
   protected:
-  ControllerMenu() {};
+  ControllerMenu() {}
   std::vector<MenuEntry> list;
   int index = 0;
-  void render(pros::Controller& ctrl);
+  void render();
   public:
-  void initialize(pros::Controller& ctrl) override;
-  int checkController(pros::Controller& ctrl) override;
+  int checkController() override;
 };
 
 void bound(int& index, int size);
@@ -48,15 +44,14 @@ using MenuPair = std::pair<int, std::vector<MenuEntry>>;
 class CRUDMenu: public ControllerTask {
   std::vector<MenuEntry> crudOptions;
   int crudIndex = 0;
-  void renderCRUD(pros::Controller& ctrl);
+  void renderCRUD();
 
   std::vector<std::string> items;
   int idx = 0;
-  void renderItems(pros::Controller& ctrl);
+  void renderItems();
 
 
   int selectedVector = ITEM_NAME_LIST;
-  void render(pros::Controller& ctrl);
 
   enum {
     CRUD_OPTION_LIST = 0,
@@ -64,6 +59,7 @@ class CRUDMenu: public ControllerTask {
   };
 
   protected:
+  void render();
   CRUDMenu();
 
   void addInserter(const std::string name, std::function<const std::string(int)> attemptAdd);
@@ -76,12 +72,11 @@ class CRUDMenu: public ControllerTask {
   virtual void attemptMove(int idx, int newIdx, const std::string& oldName) {}
   virtual void attemptRename(int idx, std::string newName, const std::string& oldName) {}
   virtual std::string attemptDuplicate(int idx, int newIdx, const std::string& oldName) {}
-  virtual void handleSelect(pros::Controller& ctrl, int idx, const std::string& name) = 0;
+  virtual void handleSelect(int idx, const std::string& name) = 0;
   virtual void finalizeData() = 0;
 
   public:
-  void initialize(pros::Controller& ctrl) override;
-  int checkController(pros::Controller& ctrl) override;
+  int checkController() override;
 };
 
-void checkTemporaryExit(pros::Controller& ctrl);
+void checkTemporaryExit();

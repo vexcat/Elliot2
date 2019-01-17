@@ -1,53 +1,50 @@
 #include "catOS.hpp"
+#include "elliot.hpp"
 
-void ControllerTask::operator()(pros::Controller& ctrl) {
+void ControllerTask::operator()() {
   int result;
-  initialize(ctrl);
   do {
-    result = checkController(ctrl);
+    result = checkController();
     pros::delay(5);
-    checkTemporaryExit(ctrl);
+    checkTemporaryExit();
   } while(result != ControllerTask::CheckResult::GO_UP);
 }
 
-void line_set(pros::Controller& c, int line, std::string str) {
+void line_set(int line, std::string str) {
   if(15 >= str.size())
     str.insert(str.end(), 15 - str.size(), ' ');
   else
     str.erase(str.begin() + 15, str.end());
-  c.set_text(line, 0, str.c_str());
+  getRobot().controller.set_text(line, 0, str.c_str());
   pros::delay(52);
 }
 
-void ControllerMenu::render(pros::Controller& ctrl) {
+void ControllerMenu::render() {
   for(int i = index; i < index + 3; i++) {
     if(i < list.size()) {
-      line_set(ctrl, i - index, (i == index ? "*": " ") + list[i].first);
+      line_set(i - index, (i == index ? "*": " ") + list[i].first);
     } else {
-      line_set(ctrl, i - index, "");
+      line_set(i - index, "");
     }
   }
 }
 
-void ControllerMenu::initialize(pros::Controller& ctrl) {
-  render(ctrl);
-}
-
-int ControllerMenu::checkController(pros::Controller& ctrl) {
+int ControllerMenu::checkController() {
+  auto &ctrl = getRobot().controller;
   if(ctrl.get_digital_new_press(DIGITAL_B)) return GO_UP;
   if(ctrl.get_digital_new_press(DIGITAL_A)) {
-    list[index].second(ctrl);
-    render(ctrl);
+    list[index].second();
+    render();
   }
   if(ctrl.get_digital_new_press(DIGITAL_DOWN)) {
     index++;
     if(index >= list.size()) index = 0;
-    render(ctrl);
+    render();
   }
   if(ctrl.get_digital_new_press(DIGITAL_UP)) {
     index--;
     if(index < 0) index = list.size() - 1;
-    render(ctrl);
+    render();
   }
 }
 
@@ -58,13 +55,13 @@ void bound(int& index, int size) {
 
 CRUDMenu::CRUDMenu() {
   crudOptions.insert(crudOptions.begin(), {
-    {"delet this", [this](pros::Controller& ctrl){
+    {"delet this", [this](){
       try {
         attemptDelete(idx, items[idx]);
         items.erase(items.begin() + idx);
       } catch(...) {}
     }},
-    {"move ^", [this](pros::Controller& ctrl){
+    {"move ^", [this](){
       try {
         if(idx != 0) {
           attemptMove(idx, idx - 1, items[idx]);
@@ -72,7 +69,7 @@ CRUDMenu::CRUDMenu() {
         }
       } catch (...) {}
     }},
-    {"move v", [this](pros::Controller& ctrl){
+    {"move v", [this](){
       try {
         if(idx != items.size() - 1) {
           attemptMove(idx, idx + 1, items[idx]);
@@ -80,82 +77,78 @@ CRUDMenu::CRUDMenu() {
         }
       } catch(...) {}
     }},
-    {"duplicate", [this](pros::Controller& ctrl){
+    {"duplicate", [this](){
       try {
         attemptDuplicate(idx, idx + 1, items[idx]);
         items.insert(items.begin() + idx + 1, items[idx]);
       } catch(...) {}
     }},
-    {"rename", [this](pros::Controller& ctrl){
+    {"rename", [this](){
       try {
-        std::string newName = editString(ctrl, items[idx]);
+        std::string newName = editString(items[idx]);
         selectedVector = ITEM_NAME_LIST;
-        render(ctrl);
+        render();
         attemptRename(idx, newName, items[idx]);
         items[idx] = newName;
-        render(ctrl);
+        render();
       } catch(...) {}
     }}
   });
 }
 
-void CRUDMenu::renderCRUD(pros::Controller& ctrl) {
+void CRUDMenu::renderCRUD() {
   for(int i = crudIndex; i < crudIndex + 3; i++) {
     if(i < crudOptions.size()) {
-      line_set(ctrl, i - crudIndex, (i == crudIndex ? "*": " ") + crudOptions[i].first);
+      line_set(i - crudIndex, (i == crudIndex ? "*": " ") + crudOptions[i].first);
     } else {
-      line_set(ctrl, i - crudIndex, "");
+      line_set(i - crudIndex, "");
     }
   }
 }
 
-void CRUDMenu::renderItems(pros::Controller& ctrl) {
+void CRUDMenu::renderItems() {
   for(int i = idx; i < idx + 3; i++) {
     if(i < items.size()) {
-      line_set(ctrl, i - idx, (i == idx ? "*": " ") + items[i]);
+      line_set(i - idx, (i == idx ? "*": " ") + items[i]);
     } else {
-      line_set(ctrl, i - idx, "");
+      line_set(i - idx, "");
     }
   }
 }
 
-void CRUDMenu::render(pros::Controller& ctrl) {
+void CRUDMenu::render() {
   if(selectedVector == CRUD_OPTION_LIST) {
-    renderCRUD(ctrl);
+    renderCRUD();
   } else {
-    renderItems(ctrl);
+    renderItems();
   }
 }
 
-void CRUDMenu::initialize(pros::Controller& ctrl) {
-  crudIndex = 0;
-  idx = 0;
-  render(ctrl);
-}
 
-int CRUDMenu::checkController(pros::Controller& ctrl) {
+int CRUDMenu::checkController() {
+  auto &ctrl = getRobot().controller;
   if(ctrl.get_digital_new_press(DIGITAL_B)) {
     if(selectedVector == ITEM_NAME_LIST) {
       finalizeData();
       return GO_UP;
     } else {
       selectedVector = ITEM_NAME_LIST;
-      render(ctrl);
+      render();
     }
   };
   if(ctrl.get_digital_new_press(DIGITAL_X)) {
     selectedVector = CRUD_OPTION_LIST;
-    render(ctrl);
+    render();
   }
   if(ctrl.get_digital_new_press(DIGITAL_A)) {
     if(selectedVector == CRUD_OPTION_LIST) {
-      crudOptions[crudIndex].second(ctrl);
+      crudOptions[crudIndex].second();
     } else {
-      handleSelect(ctrl, idx, items[idx]);
+      handleSelect(idx, items[idx]);
     }
     crudIndex = 0;
     idx = 0;
-    render(ctrl);
+    render();
   }
   if(ctrl.get_digital_new_press(DIGITAL_DOWN)) {
     if(selectedVector != ITEM_NAME_LIST) {
@@ -165,7 +158,7 @@ int CRUDMenu::checkController(pros::Controller& ctrl) {
       idx++;
       bound(idx, items.size());
     }
-    render(ctrl);
+    render();
   }
   if(ctrl.get_digital_new_press(DIGITAL_UP)) {
     if(selectedVector != ITEM_NAME_LIST) {
@@ -175,12 +168,12 @@ int CRUDMenu::checkController(pros::Controller& ctrl) {
       idx--;
       bound(idx, items.size());
     }
-    render(ctrl);
+    render();
   }
 }
 
 void CRUDMenu::addInserter(const std::string name, std::function<const std::string(int)> attemptAdd) {
-  crudOptions.push_back({"+ " + name, [attemptAdd, this](pros::Controller& ctrl){
+  crudOptions.push_back({"+ " + name, [attemptAdd, this](){
     try {
       if(items.size()) {
         items.insert(items.begin() + idx + 1, attemptAdd(idx + 1));
