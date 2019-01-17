@@ -90,8 +90,8 @@ void runMotion(json& motionObject, bool isBlue) {
   if(type == "position") {
     RoboPosition pos = bot.gps.getPosition();
     moveToSetpoint({
-      bot.gps.inchToCounts(motionObject["x"].get<double>()),
-      bot.gps.inchToCounts(motionObject["y"].get<double>()),
+      bot.gps.inchToCounts(motionObject["x"].get<double>() - pos.x),
+      bot.gps.inchToCounts(motionObject["y"].get<double>() - pos.y),
       0
     }, bot.gps, motionObject["t"].get<double>());
   }
