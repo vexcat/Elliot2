@@ -666,13 +666,13 @@ class GPSCalibrator: public ControllerTask {
     if(state == 0) {
       int y = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
       if(!y) y = ctrl.get_analog(ANALOG_LEFT_Y) / 127.0;
-      robot.left.controllerSet(y);
-      robot.right.controllerSet(y);
+      robot. left.moveVelocity(y * (int)robot. left.getGearing());
+      robot.right.moveVelocity(y * (int)robot.right.getGearing());
     } else if(state == 2) {
       int x = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
       if(!x) x = ctrl.get_analog(ANALOG_LEFT_X) / 127.0;
-      robot.left.controllerSet(x);
-      robot.right.controllerSet(-x);
+      robot. left.moveVelocity( x * (int)robot. left.getGearing());
+      robot.right.moveVelocity(-x * (int)robot.right.getGearing());
     }
     if(ctrl.get_digital_new_press(DIGITAL_B)) {
       return GO_UP;
