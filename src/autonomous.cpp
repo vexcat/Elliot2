@@ -96,7 +96,7 @@ void runMotion(json& motionObject, bool isBlue) {
     }, bot.gps, motionObject["t"].get<double>());
   }
   if(type == "rotation") {
-    double dTheta = periodicallyEfficient(motionObject["o"].get<double>() - bot.gps.getPosition().o);
+    double dTheta = periodicallyEfficient(motionObject["o"].get<double>());
     double initialSign = dTheta > 0 ? 1 : -1;
     double initialLeft = bot.left.getPosition();
     double initialRight = bot.right.getPosition();
