@@ -26,6 +26,7 @@ class Elliot {
     pros::Mutex usageGuard;
     void resetMtrs();
     public:
+    pros::Controller controller;
 	MotorGroup left;
 	MotorGroup right;
 	MotorGroup catapultMtr;
@@ -47,4 +48,6 @@ class Elliot {
     void drive(pros::Controller&);
 };
 void createRobot();
+extern Elliot* elliot;
+inline Elliot& getRobot() { return *elliot; }
 Elliot& getRobot();

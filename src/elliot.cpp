@@ -57,6 +57,7 @@ score{7},
 intake{8},
 catapultLimit{2},
 gps{left, right, getGPSState()},
+controller{CONTROLLER_MASTER},
 catapult{catapultMtr, catapultLimit} {
     score.setBrakeMode(AbstractMotor::brakeMode::hold);
     left.setGearing(AbstractMotor::gearset::green);
@@ -106,10 +107,6 @@ void Elliot::give() {
     right.setBrakeMode(AbstractMotor::brakeMode::coast);
 }
 
-Elliot* elliot;
-Elliot& getRobot() {
-    return *elliot;
-}
 void createRobot() {
     if(!elliot) {
         elliot = new Elliot();
