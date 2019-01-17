@@ -690,12 +690,12 @@ class GPSList: public ControllerMenu {
     }});
     list.push_back({"Set Y", [&](auto& ctrl) {
       RoboPosition pos = gps.getPosition();
-      pos.x = editNumber(ctrl, pos.x, 3);
+      pos.y = editNumber(ctrl, pos.y, 3);
       gps.setPosition(pos);
     }});
-    list.push_back({"Set Z", [&](auto& ctrl) {
+    list.push_back({"Set O", [&](auto& ctrl) {
       RoboPosition pos = gps.getPosition();
-      pos.x = editNumber(ctrl, pos.x, 3);
+      pos.o = editNumber(ctrl, pos.o, 3);
       gps.setPosition(pos);
     }});
     list.push_back({"Set CPR", [&](auto& ctrl) {
