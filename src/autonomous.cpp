@@ -70,7 +70,7 @@ bool getBlue() {
   return isBlue;
 }
 
-void runMotion(json& motionObject, bool isBlue) {
+void runMotion(json motionObject, bool isBlue) {
   //set the brake mode in case it wasn't set before
   auto &bot = getRobot();
   bot.left .setBrakeMode(AbstractMotor::brakeMode::hold);
