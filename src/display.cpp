@@ -303,9 +303,11 @@ void checkTemporaryExit(pros::Controller& ctrl) {
     line_set(ctrl, 0, "Now driving,");
     line_set(ctrl, 1, "Press X");
     line_set(ctrl, 2, "to exit.");
+    auto &bot = getRobot();
     while(true) {
-      getRobot().drive(ctrl);
-      if(ctrl.get_digital_new_press(DIGITAL_X)) {
+      bot.drive(ctrl);
+      if(ctrl.get_digital(DIGITAL_X)) {
+        while(ctrl.get_digital(DIGITAL_X)) pros::delay(25);
         break;
       }
       pros::delay(5);
@@ -333,7 +335,7 @@ class MotionEditor: public ControllerMenu {
     list.push_back({"Run this", [&](auto&) {
       runMotion(object, getBlue());
     }});
-    list.push_back({"Run to here", [&](auto&) {
+    list.push_back({"Run to here", [&auton, idx](auto&) {
       auto loc = auton.begin();
       //Process the first entry, an Origin.
       RoboPosition origin = {
@@ -345,6 +347,7 @@ class MotionEditor: public ControllerMenu {
       bot.gps.setPosition(origin);
       loc++;
       for(; loc != auton.begin() + idx + 1; loc++) {
+        puts(((*loc)["type"].get<std::string>()).c_str());
         runMotion(*loc, getBlue());
       }
     }});
@@ -362,7 +365,7 @@ class MotionList: public CRUDMenu {
     addInserter("Position", [&](int index) -> std::string {
       RoboPosition pos = bot.gps.getPosition();
       motionData.insert(motionData.begin() + index, json::object({
-        {"type", "position"}, {"x", pos.x}, {"y", pos.y}, {"t", 200.0}
+        {"type", "position"}, {"x", pos.x}, {"y", pos.y}, {"t", 0.2}
       }));
       return nameFor(motionData[index]);
     });
@@ -375,31 +378,31 @@ class MotionList: public CRUDMenu {
     addInserter("Rotation", [&](int index) -> std::string {
       RoboPosition pos = bot.gps.getPosition();
       motionData.insert(motionData.begin() + index, json::object({
-        {"type", "rotation"}, {"o", pos.o}, {"t", 200.0}
+        {"type", "rotation"}, {"o", pos.o}, {"t", 0.2}
       }));
       return nameFor(motionData[index]);
     });
     addInserter("SLine", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
-        {"type", "sline"}, {"d", 12.0}, {"t", 200.0}
+        {"type", "sline"}, {"d", 12.0}, {"t", 0.2}
       }));
       return nameFor(motionData[index]);
     });
     addInserter("Scorer", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
-        {"type", "scorer"}, {"v", 1.0}, {"t", 200.0}
+        {"type", "scorer"}, {"v", 1.0}, {"t", 0.2}
       }));
       return nameFor(motionData[index]);
     });
     addInserter("Catapult", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
-        {"type", "catapult"}, {"v", 1.0}, {"t", 200.0}
+        {"type", "catapult"}, {"v", 1.0}, {"t", 0.2}
       }));
       return nameFor(motionData[index]);
     });
     addInserter("Intake", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
-        {"type", "intake"}, {"v", 1.0}, {"t", 200.0}
+        {"type", "intake"}, {"v", 1.0}, {"t", 0.2}
       }));
       return nameFor(motionData[index]);
     });
@@ -411,7 +414,7 @@ class MotionList: public CRUDMenu {
     });
     addInserter("Delay", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
-        {"type", "delay"}, {"t", 200.0}
+        {"type", "delay"}, {"t", 0.2}
       }));
       return nameFor(motionData[index]);
     });
@@ -590,7 +593,7 @@ class MotorTest: public ControllerTask {
     } else if(ctrl.get_digital(DIGITAL_RIGHT)) {
       m.move_velocity(200);
     } else {
-      m.move_velocity(ctrl.get_analog(ANALOG_LEFT_Y) * 200.0 / 127.0);
+      m.move_velocity(ctrl.get_analog(ANALOG_LEFT_Y) * 200 / 127.0);
     }
     if(ctrl.get_digital(DIGITAL_B)) {
       return GO_UP;
@@ -729,7 +732,7 @@ void catOS(void*) {
     if(ctrl.get_digital(DIGITAL_X) && ctrl.get_digital(DIGITAL_Y)) {
       getRobot().takeStopped();
       menuWasEntered = true;
-      taskOption<RootList>(ctrl);
+      RootList()(ctrl);
       drawCatOSScreen(ctrl);
       getRobot().give();
       menuWasEntered = false;
