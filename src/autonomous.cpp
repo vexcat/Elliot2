@@ -78,7 +78,7 @@ void runMotion(json& motionObject, bool isBlue) {
   bot.left .setEncoderUnits(AbstractMotor::encoderUnits::counts);
   bot.right.setEncoderUnits(AbstractMotor::encoderUnits::counts);
   //pi - angle will flip the angle for the blue autonomous.
-  if(motionObject.find("o") != motionObject.end()) {
+  if(isBlue && motionObject.find("o") != motionObject.end()) {
     motionObject["o"] = PI - motionObject["o"].get<double>();
   }
   auto type = motionObject["type"].get<std::string>();
@@ -88,6 +88,7 @@ void runMotion(json& motionObject, bool isBlue) {
     bot.right.moveVelocity(motionObject["r"].get<double>() * (int)bot.right.getGearing());
   }
   if(type == "position") {
+    RoboPosition pos = bot.gps.getPosition();
     moveToSetpoint({
       bot.gps.inchToCounts(motionObject["x"].get<double>()),
       bot.gps.inchToCounts(motionObject["y"].get<double>()),
@@ -95,7 +96,7 @@ void runMotion(json& motionObject, bool isBlue) {
     }, bot.gps, motionObject["t"].get<double>());
   }
   if(type == "rotation") {
-    double dTheta = motionObject["o"].get<double>() - bot.gps.getPosition().o;
+    double dTheta = periodicallyEfficient(motionObject["o"].get<double>() - bot.gps.getPosition().o);
     double initialSign = dTheta > 0 ? 1 : -1;
     double initialLeft = bot.left.getPosition();
     double initialRight = bot.right.getPosition();
@@ -170,6 +171,10 @@ void runMotion(json& motionObject, bool isBlue) {
   }
   if(type == "delay") {
     pros::delay((int)(1000 * motionObject["t"].get<double>()));
+  }
+  //undo the pi - angle
+  if(isBlue && motionObject.find("o") != motionObject.end()) {
+    motionObject["o"] = PI - motionObject["o"].get<double>();
   }
 }
 
