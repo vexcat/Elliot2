@@ -77,26 +77,32 @@ void runMotion(json motionObject, bool isBlue) {
   bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
   bot.left .setEncoderUnits(AbstractMotor::encoderUnits::counts);
   bot.right.setEncoderUnits(AbstractMotor::encoderUnits::counts);
-  //pi - angle will flip the angle for the blue autonomous.
-  if(isBlue && motionObject.find("o") != motionObject.end()) {
-    motionObject["o"] = PI - motionObject["o"].get<double>();
-  }
+  //get the type of motion
   auto type = motionObject["type"].get<std::string>();
   //now, run the appropriate function for each type.
   if(type == "direct") {
-    bot.left .moveVelocity(motionObject["l"].get<double>() * (int)bot.left.getGearing());
-    bot.right.moveVelocity(motionObject["r"].get<double>() * (int)bot.right.getGearing());
+    double l = motionObject["l"].get<double>() * (int)bot. left.getGearing();
+    double r = motionObject["r"].get<double>() * (int)bot.right.getGearing();
+    //If we're blue, swap left and right.
+    if(isBlue) {
+      bot.left .moveVelocity(r);
+      bot.right.moveVelocity(l);
+    } else {
+      bot.left .moveVelocity(l);
+      bot.right.moveVelocity(r);
+    }
   }
   if(type == "position") {
     RoboPosition pos = bot.gps.getPosition();
     moveToSetpoint({
-      bot.gps.inchToCounts(motionObject["x"].get<double>() - pos.x),
-      bot.gps.inchToCounts(motionObject["y"].get<double>() - pos.y),
+      bot.gps.inchToCounts((isBlue ? -1 : 1) * motionObject["x"].get<double>() + pos.x),
+      bot.gps.inchToCounts(                    motionObject["y"].get<double>() + pos.y),
       0
     }, bot.gps, motionObject["t"].get<double>());
   }
   if(type == "rotation") {
     double dTheta = periodicallyEfficient(motionObject["o"].get<double>());
+    if(isBlue) dTheta *= -1;
     double initialSign = dTheta > 0 ? 1 : -1;
     double initialLeft = bot.left.getPosition();
     double initialRight = bot.right.getPosition();
@@ -171,10 +177,6 @@ void runMotion(json motionObject, bool isBlue) {
   }
   if(type == "delay") {
     pros::delay((int)(1000 * motionObject["t"].get<double>()));
-  }
-  //undo the pi - angle
-  if(isBlue && motionObject.find("o") != motionObject.end()) {
-    motionObject["o"] = PI - motionObject["o"].get<double>();
   }
 }
 
