@@ -24,7 +24,6 @@ class Elliot {
 	int lastR1 = 0;
     friend void createRobot();
     pros::Mutex usageGuard;
-    void resetMtrs();
     public:
     pros::Controller controller;
 	MotorGroup left;

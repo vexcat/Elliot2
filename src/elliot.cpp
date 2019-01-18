@@ -62,18 +62,6 @@ catapult{catapultMtr, catapultLimit} {
     score.setBrakeMode(AbstractMotor::brakeMode::hold);
     left.setGearing(AbstractMotor::gearset::green);
     right.setGearing(AbstractMotor::gearset::green);
-    catapultMtr.setGearing(AbstractMotor::gearset::red);
-    catapultMtr.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
-    score.setGearing(AbstractMotor::gearset::green);
-    intake.setGearing(AbstractMotor::gearset::green);
-}
-
-void Elliot::resetMtrs() {
-    score.setBrakeMode(AbstractMotor::brakeMode::hold);
-    left.setGearing(AbstractMotor::gearset::green);
-    right.setGearing(AbstractMotor::gearset::green);
-    left.setBrakeMode(AbstractMotor::brakeMode::hold);
-    right.setBrakeMode(AbstractMotor::brakeMode::hold);
     left .setEncoderUnits(AbstractMotor::encoderUnits::counts);
     right.setEncoderUnits(AbstractMotor::encoderUnits::counts);
     catapultMtr.setGearing(AbstractMotor::gearset::red);
