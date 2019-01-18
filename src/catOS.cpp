@@ -3,10 +3,13 @@
 
 void ControllerTask::operator()() {
   int result;
+  render();
   do {
     result = checkController();
     pros::delay(5);
-    checkTemporaryExit();
+    if(checkTemporaryExit()) {
+      render();
+    }
   } while(result != ControllerTask::CheckResult::GO_UP);
 }
 

@@ -8,6 +8,7 @@
 class ControllerTask {
   public:
   enum CheckResult { NO_CHANGE, GO_UP };
+  virtual void render() = 0;
   virtual int checkController() = 0;
   void operator()();
   virtual ~ControllerTask() {};
@@ -33,7 +34,7 @@ class ControllerMenu: public ControllerTask {
   ControllerMenu() {}
   std::vector<MenuEntry> list;
   int index = 0;
-  void render();
+  void render() override;
   public:
   int checkController() override;
 };
@@ -59,7 +60,7 @@ class CRUDMenu: public ControllerTask {
   };
 
   protected:
-  void render();
+  void render() override;
   CRUDMenu();
 
   void addInserter(const std::string name, std::function<const std::string(int)> attemptAdd);
@@ -79,4 +80,4 @@ class CRUDMenu: public ControllerTask {
   int checkController() override;
 };
 
-void checkTemporaryExit();
+int checkTemporaryExit();

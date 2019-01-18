@@ -298,7 +298,7 @@ void uiExecutor(void*) {
 //-----------------------------------------------------------------------------------
 
 //Allows you to drive before selecting a menu option.
-void checkTemporaryExit() {
+int checkTemporaryExit() {
   auto &ctrl = getRobot().controller;
   if(ctrl.get_digital_new_press(DIGITAL_Y)) {
     line_set(0, "Now driving,");
@@ -313,7 +313,9 @@ void checkTemporaryExit() {
       }
       pros::delay(5);
     }
+    return true;
   }
+  return false;
 }
 
 //Can edit a motion object, given its keys.
@@ -422,8 +424,6 @@ class MotionList: public CRUDMenu {
     for(auto &motion: motionData) {
       addItem(nameFor(motion));
     }
-    //First render
-    render();
   }
   virtual void attemptDelete(int idx, const std::string& oldName) {
     motionData.erase(motionData.begin() + idx);
@@ -530,8 +530,6 @@ class AutonList: public CRUDMenu {
     for(auto &[k, v]: autonData.items()) {
       addItem(k);
     }
-    //Render for the first time
-    render();
   }
 
   void attemptDelete(int idx, const std::string& oldName) override {
@@ -617,7 +615,6 @@ class MotorList: public ControllerMenu {
         taskOption<MotorTest>(i);
       }});
     }
-    render();
   }
 };
 
@@ -710,7 +707,6 @@ class GPSList: public ControllerMenu {
         gps.setCPI(editNumber(gps.inchToCounts(1), 4));
       }}
     });
-    render();
   }
 };
 
@@ -722,7 +718,6 @@ class RootList: public ControllerMenu {
       {"Motors"      , taskOption<MotorList>},
       {"GPS Settings", taskOption<  GPSList>}
     });
-    render();
   }
 };
 
