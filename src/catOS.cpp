@@ -60,8 +60,11 @@ CRUDMenu::CRUDMenu() {
   crudOptions.insert(crudOptions.begin(), {
     {"delet this", [this](){
       try {
-        attemptDelete(idx, items[idx]);
-        items.erase(items.begin() + idx);
+        if(idx < items.size()) {
+          attemptDelete(idx, items[idx]);
+          items.erase(items.begin() + idx);
+          bound(idx, items.size());
+        }
       } catch(...) {}
     }},
     {"move ^", [this](){
@@ -69,6 +72,7 @@ CRUDMenu::CRUDMenu() {
         if(idx != 0) {
           attemptMove(idx, idx - 1, items[idx]);
           std::swap(items[idx], items[idx - 1]);
+          idx--;
         }
       } catch (...) {}
     }},
@@ -77,13 +81,14 @@ CRUDMenu::CRUDMenu() {
         if(idx != items.size() - 1) {
           attemptMove(idx, idx + 1, items[idx]);
           std::swap(items[idx], items[idx + 1]);
+          idx++;
         }
       } catch(...) {}
     }},
     {"duplicate", [this](){
       try {
-        attemptDuplicate(idx, idx + 1, items[idx]);
-        items.insert(items.begin() + idx + 1, items[idx]);
+        auto dupName = attemptDuplicate(idx, idx + 1, items[idx]);
+        items.insert(items.begin() + idx + 1, dupName);
       } catch(...) {}
     }},
     {"rename", [this](){
@@ -149,8 +154,6 @@ int CRUDMenu::checkController() {
     } else {
       handleSelect(idx, items[idx]);
     }
-    crudIndex = 0;
-    idx = 0;
     render();
   }
   if(ctrl.get_digital_new_press(DIGITAL_DOWN)) {
