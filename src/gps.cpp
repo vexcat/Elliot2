@@ -50,8 +50,6 @@ void GPS::setPosition(RoboPosition pos) {
 }
 
 void GPS::gpsDaemon() {
-    left.setEncoderUnits(AbstractMotor::encoderUnits::counts);
-    right.setEncoderUnits(AbstractMotor::encoderUnits::counts);
     uint32_t lastTime = pros::c::millis();
     //These two change how encoder smoothing happens.
     const int sampleCount = 2;
