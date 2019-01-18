@@ -593,12 +593,12 @@ class MotorTest: public ControllerTask {
   pros::Motor m;
   int pn;
   public:
-  MotorTest(int n): m(n), pn(n) {
+  MotorTest(int n): m(n), pn(n) {};
+  void render() override {
     line_set(0, "Test motor# " + std::to_string(pn));
     line_set(1, "Press <-/->");
     line_set(2, "Or use left joy");
-  };
-
+  }
   int checkController() override {
     auto &ctrl = getRobot().controller;
     if(ctrl.get_digital(DIGITAL_LEFT)) {
@@ -637,9 +637,26 @@ class GPSCalibrator: public ControllerTask {
   GPSCalibrator(): robot(getRobot()) {
     initial_left  = robot.left .getPosition();
     initial_right = robot.right.getPosition();
-    line_set(0, "Move robot 96in");
-    line_set(1, "<-  ->/LeftJoyY");
-    line_set(2, "then press A.");
+  }
+
+  void render() override {
+    if(state == 0) {
+      line_set(0, "Move robot 96in");
+      line_set(1, "<-  ->/LeftJoyY");
+      line_set(2, "then press A.");
+    } else if(state == 1) {
+      line_set(0, "Reset position");
+      line_set(1, "of robot, then");
+      line_set(2, "press A.");
+    } else if(state == 2) {
+      line_set(0, "Turn 32x CCW");
+      line_set(1, "<- ->/LeftJoyX");
+      line_set(2, "then press A.");
+    } else if(state == 3) {
+      line_set(0, "All done!");
+      line_set(1, "A to exit.");
+      line_set(2, "");
+    }
   }
 
   int checkController() override {
@@ -650,25 +667,18 @@ class GPSCalibrator: public ControllerTask {
         double curAvg = (robot.left .getPosition() + robot.right.getPosition()) / 2;
         double measuredTPI = curAvg - lastAvg;
         robot.gps.setCPI(measuredTPI);
-        line_set(0, "Reset position");
-        line_set(1, "of robot, then");
-        line_set(2, "press A.");
       } else if(state == 1) {
         initial_left  = robot.left .getPosition();
         initial_right = robot.right.getPosition();
-        line_set(0, "Turn 32x CCW");
-        line_set(1, "<- ->/LeftJoyX");
-        line_set(2, "then press A.");
       } else if(state == 2) {
         double deltaL = robot.left .getPosition() - initial_left;
         double deltaR = robot.right.getPosition() - initial_right;
         double measuredCPR = (deltaR - deltaL) / 32 * PI;
         robot.gps.setCPR(measuredCPR);
-        line_set(0, "All done!");
-        line_set(1, "A to exit.");
-        line_set(2, "");
-      } else if(state == 3) return GO_UP;
+      }
       state++;
+      if(state == 4) return GO_UP;
+      render();
     }
     if(state == 0) {
       int y = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
