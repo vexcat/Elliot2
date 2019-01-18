@@ -74,6 +74,8 @@ void Elliot::resetMtrs() {
     right.setGearing(AbstractMotor::gearset::green);
     left.setBrakeMode(AbstractMotor::brakeMode::hold);
     right.setBrakeMode(AbstractMotor::brakeMode::hold);
+    left .setEncoderUnits(AbstractMotor::encoderUnits::counts);
+    right.setEncoderUnits(AbstractMotor::encoderUnits::counts);
     catapultMtr.setGearing(AbstractMotor::gearset::red);
     catapultMtr.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
     score.setGearing(AbstractMotor::gearset::green);

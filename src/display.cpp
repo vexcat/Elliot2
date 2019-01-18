@@ -338,6 +338,9 @@ class MotionEditor: public ControllerMenu {
     list.insert(list.end(), {
       {"Run this", [&]() { runMotion(object, getBlue()); }},
       {"Run to here", [&auton, idx]() {
+        auto &bot = getRobot();
+        bot.left .setBrakeMode(AbstractMotor::brakeMode::hold);
+        bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
         auto loc = auton.begin();
         //Process the first entry, an Origin.
         RoboPosition origin = {
@@ -345,7 +348,6 @@ class MotionEditor: public ControllerMenu {
           (*loc)["y"].get<double>(),
           (*loc)["o"].get<double>()
         };
-        auto &bot = getRobot();
         bot.gps.setPosition(origin);
         loc++;
         for(; loc != auton.begin() + idx + 1; loc++) {

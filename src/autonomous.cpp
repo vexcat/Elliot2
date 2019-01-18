@@ -73,10 +73,6 @@ bool getBlue() {
 void runMotion(json motionObject, bool isBlue) {
   //set the brake mode in case it wasn't set before
   auto &bot = getRobot();
-  bot.left .setBrakeMode(AbstractMotor::brakeMode::hold);
-  bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
-  bot.left .setEncoderUnits(AbstractMotor::encoderUnits::counts);
-  bot.right.setEncoderUnits(AbstractMotor::encoderUnits::counts);
   //get the type of motion
   auto type = motionObject["type"].get<std::string>();
   //now, run the appropriate function for each type.
@@ -182,13 +178,15 @@ void runMotion(json motionObject, bool isBlue) {
 
 void runAuton(json& motionArray, bool isBlue) {
   auto loc = motionArray.begin();
+  auto &bot = getRobot();
+  bot.left .setBrakeMode(AbstractMotor::brakeMode::hold);
+  bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
   //Process the first entry, an Origin.
   RoboPosition origin = {
     (*loc)["x"].get<double>(),
     (*loc)["y"].get<double>(),
     (*loc)["o"].get<double>()
   };
-  auto &bot = getRobot();
   bot.gps.setPosition(origin);
   loc++;
   for(; loc != motionArray.end(); loc++) {
