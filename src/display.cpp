@@ -444,8 +444,7 @@ class MotionList: public CRUDMenu {
     if(type == "origin") {
       MotionEditor(motionData, idx, {
         {"x", 2, "Set X"},
-        {"y", 2, "Set Y"},
-        {"o", 2, "Set Orientation"}
+        {"y", 2, "Set Y"}
       }, {
         {"Move Here", [&motionSelected](){
           json copy = motionSelected;
@@ -457,6 +456,10 @@ class MotionList: public CRUDMenu {
           copy["type"] = "rotation";
           copy["o"] = copy["o"].get<double>() - getRobot().gps.getPosition().o;
           runMotion(copy, getBlue());
+        }},
+        //Shows up as "*Set Orientatio" due to character limit
+        {"Set Orientation", [&motionSelected]() {
+          motionSelected["o"] = (PI / 180.0) * editNumber((180.0 / PI) * motionSelected["o"].get<double>(), 2);
         }}
       })();
     } else if(type == "position") {
