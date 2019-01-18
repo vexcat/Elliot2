@@ -440,21 +440,23 @@ class MotionList: public CRUDMenu {
   }
   void handleSelect(int idx, const std::string& name) override {
     std::string type = motionData[idx]["type"];
+    auto &motionSelected = motionData[idx];
     if(type == "origin") {
-      json &origin = motionData[idx];
       MotionEditor(motionData, idx, {
         {"x", 2, "Set X"},
         {"y", 2, "Set Y"},
         {"o", 2, "Set Orientation"}
       }, {
-        {"Move Here", [&origin](){
-          json copy = origin;
-          copy["type"] = "position";
-          runMotion(copy, getBlue());
+        {"Move Here", [&motionSelected](){
+          json copy = motionSelected;
+          moveToSetpoint({
+            copy["x"].get<double>(),
+            copy["y"].get<double>(),
+            0
+          }, getRobot().gps, 500);
           copy["type"] = "rotation";
+          copy["o"] = copy["o"].get<double>() - getRobot().gps.getPosition().o;
           runMotion(copy, getBlue());
-          //This line *shouldn't* have an effect, but here for safety.
-          copy["type"] = "origin";
         }}
       })();
     } else if(type == "position") {
@@ -468,8 +470,11 @@ class MotionList: public CRUDMenu {
         {"r", 2, "Set right vel"}
       })();
     } else if(type == "rotation") {
-      MotionEditor(motionData, idx, {
-        {"o", 2, "Set Orientation"}
+      //Use a manual convenience for the radian/degree conversion
+      MotionEditor(motionData, idx, {}, {
+        {"Set Rotation", [&motionSelected]() {
+          motionSelected["o"] = (PI / 180.0) * editNumber((180.0 / PI) * motionSelected["o"].get<double>(), 2);
+        }}
       })();
     } else if(type == "sline") {
       MotionEditor(motionData, idx, {

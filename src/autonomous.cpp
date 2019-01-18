@@ -98,7 +98,7 @@ void runMotion(json motionObject, bool isBlue) {
       bot.gps.inchToCounts((isBlue ? -1 : 1) * motionObject["x"].get<double>() + pos.x),
       bot.gps.inchToCounts(                    motionObject["y"].get<double>() + pos.y),
       0
-    }, bot.gps, motionObject["t"].get<double>());
+    }, bot.gps, motionObject["t"].get<double>() * 1000);
   }
   if(type == "rotation") {
     double dTheta = periodicallyEfficient(motionObject["o"].get<double>());
