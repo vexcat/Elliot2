@@ -64,6 +64,7 @@ class CRUDMenu: public ControllerTask {
   CRUDMenu();
 
   void addInserter(const std::string name, std::function<const std::string(int)> attemptAdd);
+  void addConvenience(const std::string name, std::function<void(int, std::string)> convenience);
   void addItem(std::string item);
 
   void updateItem(int idx, std::string newName);

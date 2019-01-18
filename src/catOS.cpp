@@ -187,6 +187,14 @@ void CRUDMenu::addInserter(const std::string name, std::function<const std::stri
   }});
 }
 
+void CRUDMenu::addConvenience(const std::string name, std::function<void(int, std::string)> convenience) {
+  crudOptions.push_back({name, [convenience, this]() {
+    try {
+      convenience(idx, items[idx]);
+    } catch(...) {}
+  }});
+}
+
 void CRUDMenu::addItem(std::string item) {
   items.insert(items.end(), item);
 }
