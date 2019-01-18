@@ -64,6 +64,9 @@ CRUDMenu::CRUDMenu() {
           attemptDelete(idx, items[idx]);
           items.erase(items.begin() + idx);
           bound(idx, items.size());
+          if(idx && idx >= items.size()) {
+            idx--;
+          }
         }
       } catch(...) {}
     }},
