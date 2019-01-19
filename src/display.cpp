@@ -681,12 +681,12 @@ class GPSCalibrator: public ControllerTask {
       render();
     }
     if(state == 0) {
-      int y = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
+      double y = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
       if(!y) y = ctrl.get_analog(ANALOG_LEFT_Y) / 127.0;
       robot. left.moveVelocity(y * (int)robot. left.getGearing());
       robot.right.moveVelocity(y * (int)robot.right.getGearing());
     } else if(state == 2) {
-      int x = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
+      double x = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
       if(!x) x = ctrl.get_analog(ANALOG_LEFT_X) / 127.0;
       robot. left.moveVelocity( x * (int)robot. left.getGearing());
       robot.right.moveVelocity(-x * (int)robot.right.getGearing());
