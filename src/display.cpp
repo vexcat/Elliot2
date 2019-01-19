@@ -19,12 +19,6 @@ using namespace okapi;
 //  - The auton planner
 //  - And a bunch of random stuff that'll probably get refactored out.
 
-//Debug Logger - This function should not be used in production code.
-void debug(std::string text) {
-  printf(text.c_str());
-  pros::delay(500);
-}
-
 //------------------------------------------------------------------------------------
 //  V5 Brain Display using LittleVGL
 //  --------------------------------
