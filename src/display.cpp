@@ -502,7 +502,7 @@ class MotionList: public CRUDMenu {
     auto type = motion["type"];
     if(type == "delay") {
       char buf[16];
-      snprintf(buf, 16, "%6.4fs delay");
+      snprintf(buf, 16, "%5.3fs delay", motion["t"].get<double>());
       return buf;
     }
     return motion["type"].get<std::string>();
