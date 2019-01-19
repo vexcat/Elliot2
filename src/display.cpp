@@ -665,7 +665,7 @@ class GPSCalibrator: public ControllerTask {
       if(state == 0) {
         double lastAvg = (initial_left + initial_right) / 2;
         double curAvg = (robot.left .getPosition() + robot.right.getPosition()) / 2;
-        double measuredTPI = curAvg - lastAvg;
+        double measuredTPI = (curAvg - lastAvg) / 96.0;
         robot.gps.setCPI(measuredTPI);
       } else if(state == 1) {
         initial_left  = robot.left .getPosition();
