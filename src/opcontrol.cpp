@@ -68,6 +68,7 @@ void Elliot::drive(pros::Controller& m) {
 void opcontrol() {
 	pros::Controller m(pros::E_CONTROLLER_MASTER);
 	auto &bot = getRobot();
+  	bot.giveDirect();
 	while (true) {
 		//takeCoast and giveDirect allow for controller
 		//menus to safely take over the robot.
