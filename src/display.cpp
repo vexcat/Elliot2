@@ -673,7 +673,7 @@ class GPSCalibrator: public ControllerTask {
       } else if(state == 2) {
         double deltaL = robot.left .getPosition() - initial_left;
         double deltaR = robot.right.getPosition() - initial_right;
-        double measuredCPR = (deltaR - deltaL) / 64 * PI;
+        double measuredCPR = (deltaR - deltaL) / (64 * PI);
         robot.gps.setCPR(measuredCPR);
       }
       state++;
