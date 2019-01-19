@@ -111,7 +111,7 @@ void runMotion(json motionObject, bool isBlue) {
       if(abs(measuredDTheta) > abs(dTheta)) {
         bot.left.controllerSet(0);
         bot.right.controllerSet(0);
-        pros::delay(motionObject["t"].get<double>());
+        pros::delay(motionObject["t"].get<double>() * 1000);
         break;
       }
       pros::delay(2);
@@ -137,7 +137,7 @@ void runMotion(json motionObject, bool isBlue) {
   }
   if(type == "scorer") {
     double v = motionObject["v"].get<double>() * (int)bot.score.getGearing();
-    bot.intake.controllerSet(v);
+    bot.score.controllerSet(v);
     double timing = motionObject["t"].get<double>();
     if(timing != 0) {
       pros::delay((int)(timing * 1000));
