@@ -330,7 +330,15 @@ class MotionEditor: public ControllerMenu {
     }
     list.insert(list.end(), conveniences);
     list.insert(list.end(), {
-      {"Run this", [&]() { runMotion(object, getBlue()); }},
+      {"Run this", [&]() {
+        auto &bot = getRobot();
+        auto old = bot.left.getBrakeMode();
+        bot. left.setBrakeMode(AbstractMotor::brakeMode::hold);
+        bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
+        runMotion(object, getBlue());
+        bot. left.setBrakeMode(old);
+        bot.right.setBrakeMode(old);
+      }},
       {"Run to here", [&auton, idx]() {
         auto &bot = getRobot();
         bot.left .setBrakeMode(AbstractMotor::brakeMode::hold);
@@ -415,6 +423,15 @@ class MotionList: public CRUDMenu {
         {"type", "delay"}, {"t", 0.2}
       }));
       return nameFor(motionData[index]);
+    });
+    addInserter("BHold", [&](int index) -> std::string {
+      motionData.insert(motionData.begin() + index, json::object({ {"type", "hold"} }));
+    });
+    addInserter("BCoast", [&](int index) -> std::string {
+      motionData.insert(motionData.begin() + index, json::object({ {"type", "coast"} }));
+    });
+    addInserter("BShort", [&](int index) -> std::string {
+      motionData.insert(motionData.begin() + index, json::object({ {"type", "short"} }));
     });
     //Add existing items
     for(auto &motion: motionData) {

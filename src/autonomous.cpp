@@ -174,6 +174,18 @@ void runMotion(json motionObject, bool isBlue) {
   if(type == "delay") {
     pros::delay((int)(1000 * motionObject["t"].get<double>()));
   }
+  if(type == "hold") {
+    bot. left.setBrakeMode(AbstractMotor::brakeMode::hold);
+    bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
+  }
+  if(type == "coast") {
+    bot. left.setBrakeMode(AbstractMotor::brakeMode::coast);
+    bot.right.setBrakeMode(AbstractMotor::brakeMode::coast);
+  }
+  if(type == "short") {
+    bot. left.setBrakeMode(AbstractMotor::brakeMode::brake);
+    bot.right.setBrakeMode(AbstractMotor::brakeMode::brake);
+  }
 }
 
 void runAuton(json& motionArray, bool isBlue) {
