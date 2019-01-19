@@ -41,8 +41,8 @@ json& getGPSState() {
     if(state.find("gps") == state.end()) {
         printf("Defaults were applied for the GPS.\n");
         state["gps"] = {
-            {"cpr", 415.17058983112384854086162961002},
-            {"cpi", 71.619724391352901095997693517631}
+            {"cpr", 885.050691498},
+            {"cpi", 68}
         };
         saveState();
     }

@@ -3,3 +3,4 @@
 std::string getSelectedAuton();
 void startupDisplay();
 void line_set(int line, std::string str);
+void debug(std::string message);

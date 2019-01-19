@@ -580,7 +580,8 @@ class AutonList: public CRUDMenu {
   }
 
   void handleSelect(int idx, const std::string& name) override {
-    taskOption<MotionList>(name);
+    MotionList auton(name);
+    auton();
   };
 
   void finalizeData() override {
