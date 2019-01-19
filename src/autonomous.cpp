@@ -6,7 +6,44 @@
 #include "elliot.hpp"
 using namespace std;
 
-void moveToSetpoint(RoboPosition pt, GPS& gps, int settleTime) {
+int tryGo(GPS& gps, double L, double R) {
+  double higher = max(abs(L), abs(R));
+  double scale = (int)gps.left.getGearing() / higher;
+  if(higher < 800) {
+    //Measure initial positions
+    double initial_left = gps.left.getPosition();
+    double initial_right = gps.right.getPosition();
+    //First, go full speed towards the targets.
+    gps.left.moveRelative(L, scale * L);
+    gps.right.moveRelative(R, scale * R);
+    //Create a settle detector
+    auto settleDetector = SettledUtilFactory::create();
+    //Now, re-adjust as the error closes in.
+    while(true) {
+      //Get errors, which should be smaller than higher.
+      double lerr = higher - abs(gps. left.getPosition() -  initial_left);
+      double rerr = higher - abs(gps.right.getPosition() - initial_right);
+      double err = max(lerr, rerr);
+      //Pass this error to settleDetector. If it's true, return.
+      if(settleDetector.isSettled(err)) {
+        return;
+      }
+      //If it's negative, return. Just in case.
+      if(err < 0) {
+        printf("Err was less than 0. (?)\n");
+        return;
+      }
+    }
+    return true;
+  } else {
+    //Find velocities
+    gps. left.moveVelocity(scale * L);
+    gps.right.moveVelocity(scale * R);
+  }
+  return false;
+}
+
+void moveToSetpoint(RoboPosition pt, GPS& gps) {
     //When sign of L going straight or dTheta*r turning changes, we're done.
     double initialSign = 0;
     double curSign = 0;
@@ -49,15 +86,15 @@ void moveToSetpoint(RoboPosition pt, GPS& gps, int settleTime) {
         if(initialSign == 0) {
             initialSign = curSign;
         }
-        //Find velocities
-        gps. left.moveVelocity(((int)gps. left.getGearing()) * (L / max(abs(R), abs(L))));
-        gps.right.moveVelocity(((int)gps.right.getGearing()) * (R / max(abs(R), abs(L))));
+        //Dance
+        if(tryGo(gps, L, R)) {
+          break;
+        }
         pros::delay(5);
-    } while(curSign == initialSign);
+    } while(true);
     //brake
     gps.left.controllerSet(0);
     gps.right.controllerSet(0);
-    pros::delay(settleTime);
 }
 
 bool isBlue;
