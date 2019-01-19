@@ -335,7 +335,9 @@ class MotionEditor: public ControllerMenu {
         auto old = bot.left.getBrakeMode();
         bot. left.setBrakeMode(AbstractMotor::brakeMode::hold);
         bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
-        runMotion(object, getBlue());
+        //Track with just current position
+        auto tracking = bot.gps.getPosition();
+        runMotion(object, tracking, getBlue());
         bot. left.setBrakeMode(old);
         bot.right.setBrakeMode(old);
       }},
@@ -345,16 +347,16 @@ class MotionEditor: public ControllerMenu {
         bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
         auto loc = auton.begin();
         //Process the first entry, an Origin.
-        RoboPosition origin = {
+        RoboPosition tracking = {
           (*loc)["x"].get<double>(),
           (*loc)["y"].get<double>(),
           (*loc)["o"].get<double>()
         };
-        bot.gps.setPosition(origin);
+        bot.gps.setPosition(tracking);
         loc++;
         for(; loc != auton.begin() + idx + 1; loc++) {
           puts(((*loc)["type"].get<std::string>()).c_str());
-          runMotion(*loc, getBlue());
+          runMotion(*loc, tracking, getBlue());
         }
       }}
     });
@@ -372,12 +374,6 @@ class MotionList: public CRUDMenu {
       RoboPosition pos = bot.gps.getPosition();
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "position"}, {"x", pos.x}, {"y", pos.y}, {"t", 0.2}
-      }));
-      return nameFor(motionData[index]);
-    });
-    addInserter("Direct", [&](int index) -> std::string {
-      motionData.insert(motionData.begin() + index, json::object({
-        {"type", "direct"}, {"l", 1.0}, {"r", 1.0}
       }));
       return nameFor(motionData[index]);
     });
@@ -466,9 +462,10 @@ class MotionList: public CRUDMenu {
             copy["y"].get<double>(),
             0
           }, getRobot().gps, 500);
-          copy["type"] = "rotation";
-          copy["o"] = copy["o"].get<double>() - getRobot().gps.getPosition().o;
-          runMotion(copy, getBlue());
+          copy["type"] = "rotateTo";
+          copy["o"] = copy["o"].get<double>();
+          RoboPosition tracking;
+          runMotion(copy, tracking, getBlue());
         }},
         //Shows up as "*Set Orientatio" due to character limit
         {"Set Orientation", [&motionSelected]() {
@@ -480,15 +477,10 @@ class MotionList: public CRUDMenu {
         {"x", 2, "Set X"},
         {"y", 2, "Set Y"}
       })();
-    } else if(type == "direct") {
-      MotionEditor(motionData, idx, {
-        {"l", 2, "Set left vel"},
-        {"r", 2, "Set right vel"}
-      })();
-    } else if(type == "rotation") {
+    } else if(type == "rotateTo") {
       //Use a manual convenience for the radian/degree conversion
       MotionEditor(motionData, idx, {}, {
-        {"Set Rotation", [&motionSelected]() {
+        {"Set Orientation", [&motionSelected]() {
           motionSelected["o"] = (PI / 180.0) * editNumber((180.0 / PI) * motionSelected["o"].get<double>(), 2);
         }}
       })();

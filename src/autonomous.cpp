@@ -26,13 +26,17 @@ int tryGo(GPS& gps, double L, double R) {
       double err = max(lerr, rerr);
       //Pass this error to settleDetector. If it's true, return.
       if(settleDetector.isSettled(err)) {
-        return;
+        break;
       }
       //If it's negative, return. Just in case.
       if(err < 0) {
         printf("Err was less than 0. (?)\n");
-        return;
+        break;
       }
+      //Error still high? Slow down.
+      gps. left.modifyProfiledVelocity(scale * L * ((err / higher) * 0.8 + 0.2));
+      gps.right.modifyProfiledVelocity(scale * L * ((err / higher) * 0.8 + 0.2));
+      pros::delay(5);
     }
     return true;
   } else {
@@ -43,7 +47,7 @@ int tryGo(GPS& gps, double L, double R) {
   return false;
 }
 
-void moveToSetpoint(RoboPosition pt, GPS& gps) {
+void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit) {
     //When sign of L going straight or dTheta*r turning changes, we're done.
     double initialSign = 0;
     double curSign = 0;
@@ -67,19 +71,19 @@ void moveToSetpoint(RoboPosition pt, GPS& gps) {
                 L = -dist;
                 R = -dist;
             }
-            curSign = L > 0 ? 1 : 0;
+            curSign = L > 0 ? 1 : -1;
         } else {
             //What's the turning radius we need?
             auto r = (dx*dx + dy*dy) / denom;
             auto Cx = robot.x - sin(robot.o) * r;
             auto Cy = robot.y + cos(robot.o) * r;
             auto spAngle = atan2(pt.y-Cy, pt.x-Cx);
-            auto rAngle = atan2(robot.y-Cy, robot.x-Cx);
+            auto rAngle = robot.o - PI/2;
             auto dTheta = periodicallyEfficient(spAngle - rAngle);
             //Find R/L
             L = dTheta * (r - 9);
             R = dTheta * (r + 9);
-            curSign = (dTheta * r) ? 2 : -2;
+            curSign = (dTheta * r) > 0 ? 1 : -1;
         }
         if(max(abs(R), abs(L)) == 0) break;
         //Set initialSign
@@ -107,35 +111,28 @@ bool getBlue() {
   return isBlue;
 }
 
-void runMotion(json motionObject, bool isBlue) {
+void runMotion(json motionObject, RoboPosition& lastPos, bool isBlue) {
   //set the brake mode in case it wasn't set before
   auto &bot = getRobot();
   //get the type of motion
   auto type = motionObject["type"].get<std::string>();
   //now, run the appropriate function for each type.
-  if(type == "direct") {
-    double l = motionObject["l"].get<double>() * (int)bot. left.getGearing();
-    double r = motionObject["r"].get<double>() * (int)bot.right.getGearing();
-    //If we're blue, swap left and right.
-    if(isBlue) {
-      bot.left .moveVelocity(r);
-      bot.right.moveVelocity(l);
-    } else {
-      bot.left .moveVelocity(l);
-      bot.right.moveVelocity(r);
-    }
-  }
   if(type == "position") {
-    RoboPosition pos = bot.gps.getPosition();
+    double rX = (isBlue ? -1 : 1) * motionObject["x"].get<double>();
+    double rY =                     motionObject["y"].get<double>();
+    lastPos.x += bot.gps.inchToCounts(rX);
+    lastPos.y += bot.gps.inchToCounts(rY);
     moveToSetpoint({
-      bot.gps.inchToCounts((isBlue ? -1 : 1) * motionObject["x"].get<double>() + pos.x),
-      bot.gps.inchToCounts(                    motionObject["y"].get<double>() + pos.y),
+      lastPos.x,
+      lastPos.y,
       0
     }, bot.gps, motionObject["t"].get<double>() * 1000);
   }
-  if(type == "rotation") {
-    double dTheta = periodicallyEfficient(motionObject["o"].get<double>());
+  if(type == "rotateTo") {
+    double dTheta = motionObject["o"].get<double>();
     if(isBlue) dTheta *= -1;
+    dTheta -= bot.gps.getPosition().o;
+    dTheta = periodicallyEfficient(dTheta);
     double initialSign = dTheta > 0 ? 1 : -1;
     double initialLeft = bot.left.getPosition();
     double initialRight = bot.right.getPosition();
@@ -156,6 +153,12 @@ void runMotion(json motionObject, bool isBlue) {
   }
   if(type == "sline") {
     double distance = bot.gps.inchToCounts(motionObject["d"].get<double>());
+    runMotion({
+      {"x", lastPos.x + cos(lastPos.o) * distance},
+      {"y", lastPos.y + sin(lastPos.o) * distance},
+      {"t", motionObject["t"].get<double>()},
+      {"v", motionObject["v"].get<double>()}
+    }, lastPos, isBlue);
     double initialSign = distance > 0 ? 1 : -1;
     double initialLeft = bot.left.getPosition();
     double initialRight = bot.right.getPosition();
@@ -171,6 +174,8 @@ void runMotion(json motionObject, bool isBlue) {
       }
       pros::delay(2);
     }
+    lastPos.x += cos(lastPos.o) * distance;
+    lastPos.y += sin(lastPos.o) * distance;
   }
   if(type == "scorer") {
     double v = motionObject["v"].get<double>() * (int)bot.score.getGearing();
@@ -231,15 +236,15 @@ void runAuton(json& motionArray, bool isBlue) {
   bot.left .setBrakeMode(AbstractMotor::brakeMode::hold);
   bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
   //Process the first entry, an Origin.
-  RoboPosition origin = {
+  RoboPosition tracking = {
     (*loc)["x"].get<double>(),
     (*loc)["y"].get<double>(),
     (*loc)["o"].get<double>()
   };
-  bot.gps.setPosition(origin);
+  bot.gps.setPosition(tracking);
   loc++;
   for(; loc != motionArray.end(); loc++) {
-    runMotion(*loc, isBlue);
+    runMotion(*loc, tracking, isBlue);
   }
 }
 
