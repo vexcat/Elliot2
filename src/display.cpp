@@ -10,6 +10,7 @@
 #include "editors.hpp"
 #include "catOS.hpp"
 #include <functional>
+#include "debugging.hpp"
 using namespace okapi;
 
 //Display code! This file contains the code for:
@@ -44,7 +45,7 @@ void rotateIt(lv_point_t* points, lv_point_t* dPoints, int count, double rotatio
     points++;
     dPoints++;
   }
-}
+}                    
 
 //Flips points upside down and makes all points positive.
 void fix(lv_point_t* points, int count) {
@@ -348,15 +349,21 @@ class MotionEditor: public ControllerMenu {
         auto loc = auton.begin();
         //Process the first entry, an Origin.
         RoboPosition tracking = {
-          (*loc)["x"].get<double>(),
-          (*loc)["y"].get<double>(),
+          bot.gps.inchToCounts((*loc)["x"].get<double>()),
+          bot.gps.inchToCounts((*loc)["y"].get<double>()),
           (*loc)["o"].get<double>()
         };
+        tracking.x = getBlue() ? (bot.gps.countsToInch(144) - tracking.x) : tracking.x;
+        tracking.o = getBlue() ? PI - tracking.o : tracking.o;
         bot.gps.setPosition(tracking);
         loc++;
         for(; loc != auton.begin() + idx + 1; loc++) {
           puts(((*loc)["type"].get<std::string>()).c_str());
-          runMotion(*loc, tracking, getBlue());
+          try {
+            runMotion(*loc, tracking, getBlue());
+          } catch(...) {
+            debug("An exception was thrown.\n");
+          }
         }
       }}
     });
@@ -373,20 +380,20 @@ class MotionList: public CRUDMenu {
     addInserter("Position", [&](int index) -> std::string {
       RoboPosition pos = bot.gps.getPosition();
       motionData.insert(motionData.begin() + index, json::object({
-        {"type", "position"}, {"x", pos.x}, {"y", pos.y}, {"t", 0.2}
+        {"type", "position"}, {"x", 0}, {"y", 0}, {"t", 0.2}, {"v", 1.0}
       }));
       return nameFor(motionData[index]);
     });
     addInserter("Rotation", [&](int index) -> std::string {
       RoboPosition pos = bot.gps.getPosition();
       motionData.insert(motionData.begin() + index, json::object({
-        {"type", "rotation"}, {"o", pos.o}, {"t", 0.2}
+        {"type", "rotateTo"}, {"o", 0}, {"t", 0.2}, {"v", 1.0}
       }));
       return nameFor(motionData[index]);
     });
     addInserter("SLine", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({
-        {"type", "sline"}, {"d", 12.0}, {"t", 0.2}
+        {"type", "sline"}, {"d", 12.0}, {"t", 0.2}, {"v", 1.0}
       }));
       return nameFor(motionData[index]);
     });
@@ -422,12 +429,15 @@ class MotionList: public CRUDMenu {
     });
     addInserter("BHold", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({ {"type", "hold"} }));
+      return nameFor(motionData[index]);
     });
     addInserter("BCoast", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({ {"type", "coast"} }));
+      return nameFor(motionData[index]);
     });
     addInserter("BShort", [&](int index) -> std::string {
       motionData.insert(motionData.begin() + index, json::object({ {"type", "short"} }));
+      return nameFor(motionData[index]);
     });
     //Add existing items
     for(auto &motion: motionData) {
@@ -458,10 +468,11 @@ class MotionList: public CRUDMenu {
         {"Move Here", [&motionSelected](){
           json copy = motionSelected;
           moveToSetpoint({
-            copy["x"].get<double>(),
-            copy["y"].get<double>(),
+            getRobot().gps.inchToCounts(copy["x"].get<double>()),
+            getRobot().gps.inchToCounts(copy["y"].get<double>()),
             0
-          }, getRobot().gps, 500);
+          }, getRobot().gps, 1.0, false);
+          pros::delay(500);
           copy["type"] = "rotateTo";
           copy["o"] = copy["o"].get<double>();
           RoboPosition tracking;
@@ -475,11 +486,15 @@ class MotionList: public CRUDMenu {
     } else if(type == "position") {
       MotionEditor(motionData, idx, {
         {"x", 2, "Set X"},
-        {"y", 2, "Set Y"}
+        {"y", 2, "Set Y"},
+        {"v", 2, "Set velocity"},
+        {"t", 3, "Set timing"}
       })();
     } else if(type == "rotateTo") {
       //Use a manual convenience for the radian/degree conversion
-      MotionEditor(motionData, idx, {}, {
+      MotionEditor(motionData, idx, {
+        {"v", 2, "Set velocity"}
+      }, {
         {"Set Orientation", [&motionSelected]() {
           motionSelected["o"] = (PI / 180.0) * editNumber((180.0 / PI) * motionSelected["o"].get<double>(), 2);
         }}
@@ -487,7 +502,8 @@ class MotionList: public CRUDMenu {
     } else if(type == "sline") {
       MotionEditor(motionData, idx, {
         {"d", 2, "Set distance"},
-        {"t", 3, "Set timing"}
+        {"t", 3, "Set timing"},
+        {"v", 2, "Set velocity"}
       })();
     } else if(type == "scorer" || type == "catapult" || type == "intake") {
       MotionEditor(motionData, idx, {
@@ -498,8 +514,11 @@ class MotionList: public CRUDMenu {
       motionData[idx]["t"] = editNumber(motionData[idx]["t"].get<double>(), 3);
     } else if(type == "shoot") {
       MotionEditor(motionData, idx, {})();
+    } else if(type == "rotation") {
+      motionData[idx]["type"] = "rotateTo";
     }
     updateItem(idx, nameFor(motionData[idx]));
+    finalizeData();
   }
   void finalizeData() override {
     saveState();
@@ -576,7 +595,6 @@ class AutonList: public CRUDMenu {
       throw "ur data is bad and u should feel bad";
     } else {
       autonData["unnamed"] = autonData[oldName];
-      autonData.erase(location);
       addAuton("unnamed");
     }
     return "unnamed";
