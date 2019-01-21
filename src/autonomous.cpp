@@ -234,22 +234,24 @@ void runMotion(json motionObject, RoboPosition& lastPos, bool isBlue) {
   }
 }
 
-void runAuton(json& motionArray, bool isBlue) {
-  auto loc = motionArray.begin();
+void runAuton(json::iterator loc, json::iterator end, bool isBlue) {
   auto &bot = getRobot();
-  bot.left .setBrakeMode(AbstractMotor::brakeMode::hold);
-  bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
+  auto oldBrake = bot.left.getBrakeMode();
+  bot. left.setBrakeMode(AbstractMotor::brakeMode::coast);
+  bot.right.setBrakeMode(AbstractMotor::brakeMode::coast);
   RoboPosition tracking = {0, 0, 0};
-  for(; loc != motionArray.end(); loc++) {
+  for(; loc != end; loc++) {
     runMotion(*loc, tracking, isBlue);
   }
+  bot. left.setBrakeMode(oldBrake);
+  bot.right.setBrakeMode(oldBrake);
 }
 
 void runAutonNamed(std::string name, bool isBlue) {
   auto &autons = getState()["autons"];
   auto autonWithName = (autons.find(name));
   if(autonWithName != autons.end()) {
-    runAuton(*autonWithName, isBlue);
+    runAuton(autonWithName->begin(), autonWithName->end(), isBlue);
     return;
   }
   printf("%s does not name an autonomous. Will stall.\n", name);

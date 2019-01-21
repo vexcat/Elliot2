@@ -343,19 +343,7 @@ class MotionEditor: public ControllerMenu {
         bot.right.setBrakeMode(old);
       }},
       {"Run to here", [&auton, idx]() {
-        auto &bot = getRobot();
-        bot.left .setBrakeMode(AbstractMotor::brakeMode::hold);
-        bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
-        auto loc = auton.begin();
-        RoboPosition tracking = {0, 0, 0};
-        for(; loc != auton.begin() + idx + 1; loc++) {
-          puts(((*loc)["type"].get<std::string>()).c_str());
-          try {
-            runMotion(*loc, tracking, getBlue());
-          } catch(...) {
-            debug("An exception was thrown.\n");
-          }
-        }
+        runAuton(auton.begin(), auton.begin() + idx + 1, getBlue());
       }}
     });
   }
