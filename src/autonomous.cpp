@@ -222,6 +222,16 @@ void runMotion(json motionObject, RoboPosition& lastPos, bool isBlue) {
     bot. left.setBrakeMode(AbstractMotor::brakeMode::brake);
     bot.right.setBrakeMode(AbstractMotor::brakeMode::brake);
   }
+  if(type == "origin") {
+    lastPos = {
+      bot.gps.inchToCounts(motionObject["x"].get<double>()),
+      bot.gps.inchToCounts(motionObject["y"].get<double>()),
+      motionObject["o"].get<double>()
+    };
+    lastPos.x = getBlue() ? (bot.gps.countsToInch(144) - lastPos.x) : lastPos.x;
+    lastPos.o = getBlue() ? PI - lastPos.o : lastPos.o;
+    bot.gps.setPosition(lastPos);
+  }
 }
 
 void runAuton(json& motionArray, bool isBlue) {
@@ -229,16 +239,7 @@ void runAuton(json& motionArray, bool isBlue) {
   auto &bot = getRobot();
   bot.left .setBrakeMode(AbstractMotor::brakeMode::hold);
   bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
-  //Process the first entry, an Origin.
-  RoboPosition tracking = {
-    bot.gps.inchToCounts((*loc)["x"].get<double>()),
-    bot.gps.inchToCounts((*loc)["y"].get<double>()),
-    (*loc)["o"].get<double>()
-  };
-  tracking.x = getBlue() ? (bot.gps.countsToInch(144) - tracking.x) : tracking.x;
-  tracking.o = getBlue() ? PI - tracking.o : tracking.o;
-  bot.gps.setPosition(tracking);
-  loc++;
+  RoboPosition tracking = {0, 0, 0};
   for(; loc != motionArray.end(); loc++) {
     runMotion(*loc, tracking, isBlue);
   }

@@ -347,16 +347,7 @@ class MotionEditor: public ControllerMenu {
         bot.left .setBrakeMode(AbstractMotor::brakeMode::hold);
         bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
         auto loc = auton.begin();
-        //Process the first entry, an Origin.
-        RoboPosition tracking = {
-          bot.gps.inchToCounts((*loc)["x"].get<double>()),
-          bot.gps.inchToCounts((*loc)["y"].get<double>()),
-          (*loc)["o"].get<double>()
-        };
-        tracking.x = getBlue() ? (bot.gps.countsToInch(144) - tracking.x) : tracking.x;
-        tracking.o = getBlue() ? PI - tracking.o : tracking.o;
-        bot.gps.setPosition(tracking);
-        loc++;
+        RoboPosition tracking = {0, 0, 0};
         for(; loc != auton.begin() + idx + 1; loc++) {
           puts(((*loc)["type"].get<std::string>()).c_str());
           try {
