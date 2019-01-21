@@ -14,7 +14,7 @@ int tryGo(GPS& gps, double L, double R, double velLimit) {
   //Set velocities
   gps. left.moveVelocity(scale * L);
   gps.right.moveVelocity(scale * R);
-  if(higher < gps.inchToCounts(4)) {
+  if(higher < gps.inchToCounts(8)) {
     //Measure initial positions
     double initial_left = gps.left.getPosition();
     double initial_right = gps.right.getPosition();
