@@ -423,16 +423,16 @@ class MotionList: public CRUDMenu {
       addItem(nameFor(motion));
     }
   }
-  virtual void attemptDelete(int idx, const std::string& oldName) {
+  void attemptDelete(int idx, const std::string& oldName) override {
     motionData.erase(motionData.begin() + idx);
   }
-  virtual void attemptMove(int idx, int newIdx, const std::string& oldName) {
+  void attemptMove(int idx, int newIdx, const std::string& oldName) override {
     std::swap(motionData[idx], motionData[newIdx]);
   }
-  virtual void attemptRename(int idx, std::string newName, const std::string& oldName) {
+  void attemptRename(int idx, std::string newName, const std::string& oldName) override {
     motionData[idx]["name"] = newName;
   }
-  virtual std::string attemptDuplicate(int idx, int newIdx, const std::string& oldName) {
+  std::string attemptDuplicate(int idx, int newIdx, const std::string& oldName) override {
     motionData.insert(motionData.begin() + newIdx, motionData[idx]);
     return nameFor(motionData[newIdx]);
   }
