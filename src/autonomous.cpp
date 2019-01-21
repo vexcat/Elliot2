@@ -41,9 +41,6 @@ int tryGo(GPS& gps, double L, double R, double velLimit) {
       pros::delay(5);
     }
     return true;
-  } else {
-    //Find velocities
-    //printf("Velocities used were %f,%f\n", scale * L, scale * R);
   }
   return false;
 }
