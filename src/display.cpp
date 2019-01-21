@@ -300,10 +300,12 @@ int checkTemporaryExit() {
     line_set(1, "Press B");
     line_set(2, "to exit.");
     auto &bot = getRobot();
+    //Let opcontrol continue.
+    bot.give();
     while(true) {
-      bot.drive(ctrl);
       if(ctrl.get_digital(DIGITAL_B)) {
         while(ctrl.get_digital(DIGITAL_B)) pros::delay(25);
+        bot.takeStopped();
         break;
       }
       pros::delay(5);
