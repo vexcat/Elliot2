@@ -358,6 +358,24 @@ class MotionList: public CRUDMenu {
   MotionList(std::string autonName): CRUDMenu(), motionData(getState()["autons"][autonName]) {
     //Add inserters here
     auto &bot = getRobot();
+    addInserter("Origin", [&](int index) -> std::string {
+      motionData.insert(motionData.begin() + index, json::object({
+        {"type", "origin"},
+        {"name", "ORIGIN"},
+        {"x", 0.0},
+        {"y", 0.0},
+        {"o", 0.0}
+      }));
+      return nameFor(motionData[index]);
+    });
+    addInserter("delta", [&](int index) -> std::string {
+      motionData.insert(motionData.begin() + index, json::object({
+        {"type", "delta"},
+        {"x", 0.0},
+        {"y", 0.0}
+      }));
+      return nameFor(motionData[index]);
+    });
     addInserter("Position", [&](int index) -> std::string {
       RoboPosition pos = bot.gps.getPosition();
       motionData.insert(motionData.begin() + index, json::object({
@@ -369,12 +387,6 @@ class MotionList: public CRUDMenu {
       RoboPosition pos = bot.gps.getPosition();
       motionData.insert(motionData.begin() + index, json::object({
         {"type", "rotateTo"}, {"o", 0}, {"t", 0.2}, {"v", 1.0}
-      }));
-      return nameFor(motionData[index]);
-    });
-    addInserter("SLine", [&](int index) -> std::string {
-      motionData.insert(motionData.begin() + index, json::object({
-        {"type", "sline"}, {"d", 12.0}, {"t", 0.2}, {"v", 1.0}
       }));
       return nameFor(motionData[index]);
     });
@@ -464,6 +476,11 @@ class MotionList: public CRUDMenu {
           motionSelected["o"] = (PI / 180.0) * editNumber((180.0 / PI) * motionSelected["o"].get<double>(), 2);
         }}
       })();
+    } else if(type == "delta") {
+      MotionEditor(motionData, idx, {
+        {"x", 2, "Set X"},
+        {"y", 2, "Set Y"}
+      }, {})();
     } else if(type == "position") {
       MotionEditor(motionData, idx, {
         {"x", 2, "Set X"},
@@ -479,12 +496,6 @@ class MotionList: public CRUDMenu {
         {"Set Orientation", [&motionSelected]() {
           motionSelected["o"] = (PI / 180.0) * editNumber((180.0 / PI) * motionSelected["o"].get<double>(), 2);
         }}
-      })();
-    } else if(type == "sline") {
-      MotionEditor(motionData, idx, {
-        {"d", 2, "Set distance"},
-        {"t", 3, "Set timing"},
-        {"v", 2, "Set velocity"}
       })();
     } else if(type == "scorer" || type == "catapult" || type == "intake") {
       MotionEditor(motionData, idx, {

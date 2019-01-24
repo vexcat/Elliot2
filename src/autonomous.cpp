@@ -114,26 +114,26 @@ bool getBlue() {
   return isBlue;
 }
 
-void runMotion(json motionObject, RoboPosition& lastPos, bool isBlue) {
+void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
   //set the brake mode in case it wasn't set before
   auto &bot = getRobot();
   //get the type of motion
   auto type = motionObject["type"].get<std::string>();
   //now, run the appropriate function for each type.
   if(type == "position") {
-    double rX = motionObject["x"].get<double>();
-    if(isBlue) {
-      rX *= -1;
-    }
-    double rY = motionObject["y"].get<double>();
-    lastPos.x += bot.gps.inchToCounts(rX);
-    lastPos.y += bot.gps.inchToCounts(rY);
-    moveToSetpoint({
-      lastPos.x,
-      lastPos.y,
+    //Get the target position.
+    RoboPosition target = {
+      bot.gps.inchToCounts(motionObject["x"].get<double>()) + offset.x,
+      bot.gps.inchToCounts(motionObject["y"].get<double>()) + offset.y,
       0
-    }, bot.gps, motionObject["v"].get<double>(), motionObject["_goStraight"].get<bool>());
-    pros::delay(motionObject["t"].get<double>() * 1000);
+    };
+    //Now, apply the blue mode by reversing the target x.
+    if(isBlue) target.x = bot.gps.inchToCounts(144) - target.x;
+    moveToSetpoint({
+      target.x,
+      target.y,
+      0
+    }, bot.gps, motionObject["v"].get<double>(), motionObject["s"].get<bool>());
   }
   if(type == "rotateTo") {
     double dTheta = motionObject["o"].get<double>();
@@ -155,18 +155,6 @@ void runMotion(json motionObject, RoboPosition& lastPos, bool isBlue) {
       }
       pros::delay(2);
     }
-  }
-  if(type == "sline") {
-    auto position = bot.gps.getPosition();
-    double distance = motionObject["d"].get<double>();
-    runMotion({
-      {"x", cos(getBlue() ? PI - position.o: position.o) * distance},
-      {"y", sin(getBlue() ? PI - position.o: position.o) * distance},
-      {"t", motionObject["t"].get<double>()},
-      {"v", motionObject["v"].get<double>()},
-      {"_goStraight", true},
-      {"type", "position"}
-    }, lastPos, isBlue);
   }
   if(type == "scorer") {
     double v = motionObject["v"].get<double>() * (int)bot.score.getGearing();
@@ -220,14 +208,27 @@ void runMotion(json motionObject, RoboPosition& lastPos, bool isBlue) {
     bot.right.setBrakeMode(AbstractMotor::brakeMode::brake);
   }
   if(type == "origin") {
-    lastPos = {
+    //Offset does not respect blueMode, but the GPS position should.
+    RoboPosition newPos = {
       bot.gps.inchToCounts(motionObject["x"].get<double>()),
       bot.gps.inchToCounts(motionObject["y"].get<double>()),
       motionObject["o"].get<double>()
     };
-    lastPos.x = getBlue() ? (bot.gps.countsToInch(144) - lastPos.x) : lastPos.x;
-    lastPos.o = getBlue() ? PI - lastPos.o : lastPos.o;
-    bot.gps.setPosition(lastPos);
+    offset = {
+      newPos.x,
+      newPos.y,
+      0
+    };
+    newPos.x = isBlue ? bot.gps.inchToCounts(144) - newPos.x : newPos.x;
+    newPos.o = isBlue ? PI - newPos.o : newPos.o;
+    bot.gps.setPosition(newPos);
+  }
+  if(type == "delta") {
+    offset = {
+      bot.gps.inchToCounts(motionObject["x"].get<double>()),
+      bot.gps.inchToCounts(motionObject["y"].get<double>()),
+      0
+    };
   }
 }
 
