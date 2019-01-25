@@ -1,0 +1,17 @@
+#Build script, ynot.
+set -e
+for var in "$@"; do
+  if [ $var = "all" ]; then
+    make clean
+    make -j 6
+  fi
+  if [ $var = "changed" ]; then
+    make -j 6
+  fi
+  if [ $var = "up" ]; then
+    prosv5 upload
+  fi
+  if [ $var = "term" ]; then
+    prosv5 terminal
+  fi
+done
