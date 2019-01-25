@@ -344,8 +344,30 @@ class MotionEditor: public ControllerMenu {
         bot. left.setBrakeMode(old);
         bot.right.setBrakeMode(old);
       }},
-      {"Run to here", [&auton, idx]() {
-        runAuton(auton.begin(), auton.begin() + idx + 1, getBlue());
+      {"Run to here", [&auton, idx, this]() {
+        //Okay to use a lambda, as long as it isn't destructed in the task's lifetime.
+        std::function<void(void)> lamb = [&auton, idx]() {
+          runAuton(auton.begin(), auton.begin() + idx + 1, getBlue());
+        };
+        //Start task
+        pros::Task autonRunner{[](void* param) {
+          (*(std::function<void(void)>*)param)();
+        }, (void*)&lamb};
+        //Display stoppable message
+        line_set(0, "Running auton,");
+        line_set(1, "Press B");
+        line_set(2, "to stop.");
+        //Take care of task
+        auto &ctrl = getRobot().controller;
+        while(autonRunner.get_state() != pros::E_TASK_STATE_DELETED) {
+          if(ctrl.get_digital_new_press(DIGITAL_B)) {
+            autonRunner.remove();
+            break;
+          }
+          pros::delay(5);
+        }
+        //Task is gone. Render, and close the scope.
+        render();
       }}
     });
   }
