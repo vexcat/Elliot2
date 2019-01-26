@@ -805,7 +805,7 @@ class RootList: public ControllerMenu {
 
 void drawCatOSScreen() {
   line_set(0, "catOS v1.2");
-  line_set(1, "press X+Y to");
+  line_set(1, "press <-+-> to");
   line_set(2, "activate menu");
 }
 
@@ -813,7 +813,7 @@ void catOS(void*) {
   pros::Controller ctrl(pros::E_CONTROLLER_MASTER);
   drawCatOSScreen();
   while(true) {
-    if(ctrl.get_digital(DIGITAL_X) && ctrl.get_digital(DIGITAL_Y)) {
+    if(ctrl.get_digital(DIGITAL_LEFT) && ctrl.get_digital(DIGITAL_RIGHT)) {
       getRobot().takeStopped();
       menuWasEntered = true;
       RootList()();
