@@ -5,19 +5,34 @@
 #include "state.hpp"
 #include "elliot.hpp"
 #include "debugging.hpp"
+#include "pros/apix.h"
 using namespace std;
 
-int tryGo(GPS& gps, double L, double R, double velLimit) {
+double maxVel(GPS& gps) {
+  return max(abs(gps.left.getActualVelocity()), abs(gps.right.getActualVelocity())) / (double)(int)gps.left.getGearing();
+}
+
+//Use this function directly if your L & R are not measured in counts.
+void tryGoAccel(GPS& gps, double L, double R, double velLimit) {
   double higher = max(abs(L), abs(R));
-  if(higher == 0) return true;
   double scale = (velLimit * (int)gps.left.getGearing()) / higher;
+  double speed = maxVel(gps);
+  if(speed < gps.getSpeedMinimum()) speed = gps.getSpeedMinimum();
+  speed *= gps.getAccelerator();
   //Set velocities
-  gps. left.moveVelocity(scale * L);
-  gps.right.moveVelocity(scale * R);
-  if(higher < gps.inchToCounts(8)) {
+  gps. left.moveVelocity((scale * L) * speed);
+  gps.right.moveVelocity((scale * R) * speed);
+}
+
+int tryGoAutomatic(GPS& gps, double L, double R, double velLimit) {
+  double higher = max(abs(L), abs(R));
+  double scale = (velLimit * (int)gps.left.getGearing()) / higher;
+  tryGoAccel(gps, L, R, velLimit);
+  if(higher < gps.getDecelTrigger()) {
     //Measure initial positions
     double initial_left = gps.left.getPosition();
     double initial_right = gps.right.getPosition();
+    auto lastTime = pros::millis();
     //Now, re-adjust as the error closes in.
     while(true) {
       //Get errors, which should be smaller than higher.
@@ -28,12 +43,15 @@ int tryGo(GPS& gps, double L, double R, double velLimit) {
       if(err < 0) {
         break;
       }
-      //Error still high? Slow down.
-      double  leftVel = scale * L * (((err / higher) * 0.8 + 0.2));
-      double rightVel = scale * R * (((err / higher) * 0.8 + 0.2));
+      //Error still high? Slow down, following the speedLimit.
+      double speedLimit = gps.getAccelerationLimiter() * maxVel(gps);
+      //But also follow the minSpeed.
+      if(speedLimit < gps.getSpeedMinimum()) speedLimit = gps.getSpeedMinimum();
+      double  leftVel = scale * L * speedLimit;
+      double rightVel = scale * R * speedLimit;
       gps. left.moveVelocity( leftVel);
       gps.right.moveVelocity(rightVel);
-      pros::delay(5);
+      pros::Task::delay_until(&lastTime, 5);
     }
     gps.left.moveVelocity(0);
     gps.right.moveVelocity(0);
@@ -43,6 +61,20 @@ int tryGo(GPS& gps, double L, double R, double velLimit) {
     return true;
   }
   return false;
+}
+
+void tryGoVeryAutomatic(GPS& gps, double L, double R, double velLimit) {
+  double last_left = gps.left.getPosition();
+  double last_right = gps.right.getPosition();
+  while(!tryGoAutomatic(gps, L, R, velLimit)) {
+    //Calculate change in l & r
+    double deltaL = gps. left.getPosition() -  last_left;
+    L -= deltaL;
+    last_left += deltaL;
+    double deltaR = gps.right.getPosition() - last_right;
+    R -= deltaR;
+    last_right += deltaR;
+  }
 }
 
 void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraight) {
@@ -91,7 +123,7 @@ void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraigh
             initialSign = curSign;
         }
         //Dance
-        if(tryGo(gps, L, R, velLimit)) {
+        if(tryGoAutomatic(gps, L, R, velLimit)) {
           break;
         }
         if(curSign != initialSign) {
@@ -112,6 +144,46 @@ void setBlue(bool blue) {
 
 bool getBlue() {
   return isBlue;
+}
+
+//Ball tracking function
+void trackBall(double maxVel, double threshold, double oovThreshold, double attack) {
+  auto &bot = getRobot();
+  bot.intake.moveVelocity(200);
+  while(true) {
+    //Where's the ball?
+    //Wait 50ms to definitively say there's no ball.
+    pros::vision_object_s_t object;
+    for(int i = 0; i < 10; i++) {
+      pros::delay(5);
+      object = bot.camera.get_by_sig(0, 1);
+      if(object.signature != VISION_OBJECT_ERR_SIG) {
+        break;
+      }
+    }
+    if(object.signature == VISION_OBJECT_ERR_SIG) break;
+    int centerThreshold = threshold/2;
+    int half = VISION_FOV_WIDTH/2;
+    //If the object is about to go out of view, stop.
+    if(VISION_FOV_HEIGHT - object.top_coord < oovThreshold) {
+      break;
+    }
+    //Too left
+    if(object.left_coord < half-centerThreshold) {
+      tryGoAccel(bot.gps, 0.75, 1.0, maxVel);
+    }
+    //Perfect
+    if(half-centerThreshold < object.left_coord && object.left_coord < half+centerThreshold) {
+      tryGoAccel(bot.gps, 1, 1, maxVel);
+    }
+    //Too right
+    if(object.left_coord < half+centerThreshold) {
+      tryGoAccel(bot.gps, 1, 1, maxVel);
+    }
+  }
+  //Go forward, intake off.
+  tryGoVeryAutomatic(bot.gps, attack, attack, maxVel);
+  bot.intake.moveVelocity(0);
 }
 
 void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
@@ -140,21 +212,11 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     dTheta = isBlue ? PI - dTheta : dTheta;
     dTheta -= bot.gps.getPosition().o;
     dTheta = periodicallyEfficient(dTheta);
-    double initialSign = dTheta > 0 ? 1 : -1;
-    double initialLeft = bot.left.getPosition();
-    double initialRight = bot.right.getPosition();
-    while(true) {
-      double lDelta = bot.left.getPosition() - initialLeft;
-      double rDelta = bot.right.getPosition() - initialRight;
-      double measuredDTheta = bot.gps.countsToRadians(rDelta - lDelta) / 2;
-      double velLimit = motionObject["v"].get<double>();
-      if(tryGo(bot.gps, -bot.gps.radiansToCounts(dTheta - measuredDTheta), bot.gps.radiansToCounts(dTheta - measuredDTheta), velLimit)) {
-        bot.gps.left.moveVelocity(0);
-        bot.gps.right.moveVelocity(0);
-        break;
-      }
-      pros::delay(2);
-    }
+    double velLimit = motionObject["v"].get<double>();
+    tryGoVeryAutomatic(bot.gps, -bot.gps.radiansToCounts(dTheta), bot.gps.radiansToCounts(dTheta), velLimit);
+  }
+  if(type == "autoball") {
+    trackBall(motionObject["v"].get<double>(), motionObject["c"].get<double>(), motionObject["d"].get<double>(), bot.gps.inchToCounts(motionObject["a"].get<double>()));
   }
   if(type == "scorer") {
     double v = motionObject["v"].get<double>() * (int)bot.score.getGearing();
