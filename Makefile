@@ -90,14 +90,14 @@ $(foreach asmext,$(ASMEXTS),$(eval $(call asm_rule,$(asmext))))
 define c_rule
 $(BINDIR)/%.$1.o: $(SRCDIR)/%.$1
 	$(VV)mkdir -p $$(dir $$@)
-	$$(call test_output,$D$(CC) -c $(INCLUDE) -iquote$(INCDIR)/$$(dir $$*) $(CFLAGS) $(EXTRA_CFLAGS) -o $$@ $$<,CC $$<. $(OK_STRING))
+	$$(call test_output,$D$(CC) -c $(INCLUDE) -iquote$(INCDIR)/$$(dir $$*) $(CFLAGS) $(EXTRA_CFLAGS) -o $$@ $$<,CC $$< $(OK_STRING))
 endef
 $(foreach cext,$(CEXTS),$(eval $(call c_rule,$(cext))))
 
 define cxx_rule
 $(BINDIR)/%.$1.o: $(SRCDIR)/%.$1
 	$(VV)mkdir -p $$(dir $$@)
-	$$(call test_output,$D$(CXX) -c $(INCLUDE) -iquote$(INCDIR)/$$(dir $$*) $(CXXFLAGS) $(EXTRA_CXXFLAGS) -o $$@ $$<,CXX $$<. $(OK_STRING))
+	$$(call test_output,$D$(CXX) -c $(INCLUDE) -iquote$(INCDIR)/$$(dir $$*) $(CXXFLAGS) $(EXTRA_CXXFLAGS) -o $$@ $$<,CXX $$< $(OK_STRING))
 endef
 $(foreach cxxext,$(CXXEXTS),$(eval $(call cxx_rule,$(cxxext))))
 
