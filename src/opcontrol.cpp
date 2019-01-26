@@ -52,13 +52,14 @@ void Elliot::drive(pros::Controller& m) {
 		}
 	}
 
-	//Debugging buttons
-	if(m.get_digital(DIGITAL_B)) {
-		RoboPosition yeet = gps.getPosition();
-		printf("I think I'm at x: %f y: %f, with an orientation of %f radians.\n", yeet.x, yeet.y, yeet.o);
+	//Brake buttons
+	if(m.get_digital_new_press(DIGITAL_X)) {
+		left .setBrakeMode(AbstractMotor::brakeMode::hold);
+		right.setBrakeMode(AbstractMotor::brakeMode::hold);
 	}
-	if(m.get_digital(DIGITAL_X)) {
-		printf("CPR: %f, CPI: %f\n", gps.radiansToCounts(1), gps.inchToCounts(1));
+	if(m.get_digital_new_press(DIGITAL_Y)) {
+		left .setBrakeMode(AbstractMotor::brakeMode::coast);
+		right.setBrakeMode(AbstractMotor::brakeMode::coast);
 	}
 
 	//Allow for controller menus to safely take over the robot.
