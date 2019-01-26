@@ -26,6 +26,7 @@ class Elliot {
     pros::Mutex usageGuard;
     public:
     pros::Controller controller;
+    pros::Vision camera;
 	MotorGroup left;
 	MotorGroup right;
 	MotorGroup catapultMtr;

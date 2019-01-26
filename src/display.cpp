@@ -432,6 +432,16 @@ class MotionList: public CRUDMenu {
       motionData.insert(motionData.begin() + index, json::object({ {"type", "short"} }));
       return nameFor(motionData[index]);
     });
+    addInserter("AutoBall", [&](int index) -> std::string {
+      motionData.insert(motionData.begin() + index, json::object({
+        {"type", "autoball"},
+        {"v", 1.0},
+        {"c", 50},
+        {"d", 40},
+        {"a", 8}
+      }));
+      return nameFor(motionData[index]);
+    });
     //Add existing items
     for(auto &motion: motionData) {
       addItem(nameFor(motion));
@@ -508,6 +518,13 @@ class MotionList: public CRUDMenu {
       MotionEditor(motionData, idx, {})();
     } else if(type == "rotation") {
       motionData[idx]["type"] = "rotateTo";
+    } else if(type == "autoball") {
+      MotionEditor(motionData, idx, {
+        {"v", 2, "Set vel"},
+        {"c", 0, "Set mid_thres"},
+        {"d", 0, "Set bot_thres"},
+        {"a", 2, "Set attack"}
+      })();
     }
     updateItem(idx, nameFor(motionData[idx]));
     finalizeData();
@@ -739,6 +756,15 @@ class GPSList: public ControllerMenu {
       }},
       {"Set CPI", [&]() {
         gps.setCPI(editNumber(gps.inchToCounts(1), 4));
+      }},
+      {"Set accelLimit", [&]() {
+        gps.setAccelerationLimiter(editNumber(gps.getAccelerationLimiter(), 6));
+      }},
+      {"Set speedMin", [&]() {
+        gps.setSpeedMinimum(editNumber(gps.getSpeedMinimum(), 6));
+      }},
+      {"Set speedMin", [&]() {
+        gps.setDecelTrigger(gps.inchToCounts(editNumber(gps.countsToInch(gps.getDecelTrigger()), 2)));
       }}
     });
   }

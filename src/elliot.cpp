@@ -39,10 +39,14 @@ bool Catapult::isGoingToSwitch() {
 json& getGPSState() {
     auto &state = getState();
     if(state.find("gps") == state.end()) {
-        printf("Defaults were applied for the GPS.\n");
+        printf("Defaults were applied for the GPS. Please run GPS calibration.\n");
         state["gps"] = {
             {"cpr", 885.050691498},
-            {"cpi", 68}
+            {"cpi", 68},
+            {"aL", 0.8},
+            {"sM", 0.2},
+            {"dT", 68 * 8},
+            {"ac", 1.4}
         };
         saveState();
     }
@@ -56,6 +60,7 @@ catapultMtr{5},
 score{7},
 intake{10},
 catapultLimit{2},
+camera{15},
 gps{left, right, getGPSState()},
 controller{CONTROLLER_MASTER},
 catapult{catapultMtr, catapultLimit} {

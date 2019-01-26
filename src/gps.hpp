@@ -17,6 +17,14 @@ class GPS {
     double cpr;
     //Counts Per Inch
     double cpi;
+    //Acceleration Limit (see tryGo of autonomous.cpp for more info)
+    double accelLimit;
+    //Speed Minimum - Minimum speed the robot should move in autonomous
+    double speedMin;
+    //Decel Trigger - Number of counts to target to cause decleration by speedMin and accelLimit.
+    double decelTrigger;
+    //Accelerator - (see tryGoAccel of autonomous.cpp for more info)
+    double accelerator;
     pros::Mutex daemonLock;
     json& data;
     public:
@@ -42,6 +50,18 @@ class GPS {
 
 	double radius2(double r, double l);
 	void addPosDelta(RoboPosition& robot, double L, double R);
+
+    double getAccelerationLimiter() { return accelLimit; }
+    void setAccelerationLimiter(double);
+
+    double getSpeedMinimum() { return speedMin; }
+    void setSpeedMinimum(double);
+
+    double getDecelTrigger() { return decelTrigger; }
+    void setDecelTrigger(double);
+
+    double getAccelerator() { return accelerator; }
+    void setAccelerator(double);
 };
 
 double periodicallyEfficient(double n, double p = PI * 2);

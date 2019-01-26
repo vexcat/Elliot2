@@ -16,6 +16,10 @@ double periodicallyEfficient(double n, double p) {
 GPS::GPS(MotorGroup& leftSide, MotorGroup& rightSide, json& idata): left(leftSide), right(rightSide), data(idata) {
     cpr = data["cpr"].get<double>();
     cpi = data["cpi"].get<double>();
+    accelLimit = data["aL"].get<double>();
+    speedMin = data["sM"].get<double>();
+    decelTrigger = data["dT"].get<double>();
+    accelerator = data["ac"].get<double>();
     pros::Task daemon([](void* obj){((GPS*)obj)->gpsDaemon();}, this);
 }
 
@@ -33,6 +37,30 @@ void GPS::setCPI(double newCPI) {
     data["cpi"] = newCPI;
     saveState();
     daemonLock.give();
+}
+
+void GPS::setAccelerationLimiter(double newValue) {
+    accelLimit = newValue;
+    data["aL"] = newValue;
+    saveState();
+}
+
+void GPS::setSpeedMinimum(double newValue) {
+    speedMin = newValue;
+    data["sM"] = newValue;
+    saveState();
+}
+
+void GPS::setDecelTrigger(double newValue) {
+    decelTrigger = newValue;
+    data["dT"] = newValue;
+    saveState();
+}
+
+void GPS::setAccelerator(double newValue) {
+    accelerator = newValue;
+    data["ac"] = newValue;
+    saveState();
 }
 
 RoboPosition GPS::getPosition() {
