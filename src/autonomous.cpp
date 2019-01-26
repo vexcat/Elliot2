@@ -177,8 +177,8 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
       tryGoAccel(bot.gps, 1, 1, maxVel);
     }
     //Too right
-    if(object.left_coord < half+centerThreshold) {
-      tryGoAccel(bot.gps, 1, 1, maxVel);
+    if(object.left_coord > half+centerThreshold) {
+      tryGoAccel(bot.gps, 1, 0.75, maxVel);
     }
   }
   //Go forward, intake off.
