@@ -152,10 +152,10 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
   bot.intake.moveVelocity(200);
   while(true) {
     //Where's the ball?
-    //Wait 50ms to definitively say there's no ball.
+    //Wait 400ms to definitively say there's no ball.
     pros::vision_object_s_t object;
-    for(int i = 0; i < 10; i++) {
-      pros::delay(5);
+    for(int i = 0; i < 4; i++) {
+      pros::delay(50);
       object = bot.camera.get_by_sig(0, 1);
       if(object.signature != VISION_OBJECT_ERR_SIG) {
         break;
