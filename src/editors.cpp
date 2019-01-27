@@ -40,11 +40,13 @@ double editNumber(double number, int fix) {
   while(!ctrl.get_digital_new_press(DIGITAL_A) && !ctrl.get_digital_new_press(DIGITAL_B)) {
     if(ctrl.get_digital_new_press(DIGITAL_LEFT)) {
       cursor--;
+      if(14 - cursor == fix) cursor--;
       if(cursor < 0) cursor = 0;
       renderNumberEditor(number, fix, cursor);
     }
     if(ctrl.get_digital_new_press(DIGITAL_RIGHT)) {
       cursor++;
+      if(14 - cursor == fix) cursor++;
       if(cursor > 14) cursor = 14;
       renderNumberEditor(number, fix, cursor);
     }
