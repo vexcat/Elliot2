@@ -32,6 +32,30 @@ void ControllerMenu::render() {
   }
 }
 
+int getMenuDirection() {
+  auto &ctrl = getRobot().controller;
+  int dir = (!!ctrl.get_digital_new_press(DIGITAL_DOWN) - !!ctrl.get_digital_new_press(DIGITAL_UP));
+  if(!dir) {
+    int ana = -ctrl.get_analog(ANALOG_LEFT_Y)/127.0;
+    if(ana > 0.75) {
+      dir = 3;
+    } else if(ana > 0.5) {
+      dir = 2;
+    } else if(ana > 0.25) {
+      dir = 1;
+    } else if(ana > 0) {
+      dir = 0;
+    } else if(ana > -0.25) {
+      dir = -1;
+    } else if(ana > -0.5) {
+      dir = -2;
+    } else if(ana > -0.75) {
+      dir = -3;
+    }
+  }
+  return dir;
+}
+
 int ControllerMenu::checkController() {
   auto &ctrl = getRobot().controller;
   if(ctrl.get_digital_new_press(DIGITAL_B)) return GO_UP;
@@ -39,14 +63,10 @@ int ControllerMenu::checkController() {
     list[index].second();
     render();
   }
-  if(ctrl.get_digital_new_press(DIGITAL_DOWN)) {
-    index++;
-    if(index >= list.size()) index = 0;
-    render();
-  }
-  if(ctrl.get_digital_new_press(DIGITAL_UP)) {
-    index--;
-    if(index < 0) index = list.size() - 1;
+  int dir = getMenuDirection();
+  if(dir) {
+    index += dir;
+    bound(index, list.size());
     render();
   }
 }
@@ -135,7 +155,6 @@ void CRUDMenu::render() {
   }
 }
 
-
 int CRUDMenu::checkController() {
   auto &ctrl = getRobot().controller;
   if(ctrl.get_digital_new_press(DIGITAL_B)) {
@@ -159,22 +178,13 @@ int CRUDMenu::checkController() {
     }
     render();
   }
-  if(ctrl.get_digital_new_press(DIGITAL_DOWN)) {
+  int dir = getMenuDirection();
+  if(dir) {
     if(selectedVector != ITEM_NAME_LIST) {
-      crudIndex++;
+      crudIndex += dir;
       bound(crudIndex, crudOptions.size());
     } else {
-      idx++;
-      bound(idx, items.size());
-    }
-    render();
-  }
-  if(ctrl.get_digital_new_press(DIGITAL_UP)) {
-    if(selectedVector != ITEM_NAME_LIST) {
-      crudIndex--;
-      bound(crudIndex, crudOptions.size());
-    } else {
-      idx--;
+      idx += dir;
       bound(idx, items.size());
     }
     render();
