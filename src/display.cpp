@@ -524,7 +524,7 @@ class MotionList: public CRUDMenu {
           motionSelected["o"] = (PI / 180.0) * editNumber((180.0 / PI) * motionSelected["o"].get<double>(), 2);
         }},
         {"Set to Current", [&motionSelected, idx]() {
-          motionSelected["o"] = getRobot().getPosition().o;
+          motionSelected["o"] = getRobot().gps.getPosition().o;
         }}
       })();
     } else if(type == "scorer" || type == "catapult" || type == "intake") {
