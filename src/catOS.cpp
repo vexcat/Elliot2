@@ -36,22 +36,8 @@ int getMenuDirection() {
   auto &ctrl = getRobot().controller;
   int dir = (!!ctrl.get_digital_new_press(DIGITAL_DOWN) - !!ctrl.get_digital_new_press(DIGITAL_UP));
   if(!dir) {
-    int ana = -ctrl.get_analog(ANALOG_LEFT_Y)/127.0;
-    if(ana > 0.75) {
-      dir = 3;
-    } else if(ana > 0.5) {
-      dir = 2;
-    } else if(ana > 0.25) {
-      dir = 1;
-    } else if(ana > 0) {
-      dir = 0;
-    } else if(ana > -0.25) {
-      dir = -1;
-    } else if(ana > -0.5) {
-      dir = -2;
-    } else if(ana > -0.75) {
-      dir = -3;
-    }
+    dir = 4 * -ctrl.get_analog(ANALOG_LEFT_Y)/127.0;
+    dir = std::clamp(dir, -3, 3);
   }
   return dir;
 }
