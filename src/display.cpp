@@ -373,6 +373,23 @@ class MotionEditor: public ControllerMenu {
   }
 };
 
+//Gives the current position offset for an auton position.
+RoboPosition offsetFor(const json& auton, int idx) {
+  auto &bot = getRobot();
+  auto loc = auton.begin() + idx + 1;
+  while(loc != auton.begin()) {
+    loc--;
+    auto type = (*loc)["type"].get<std::string>();
+    if(type == "origin" || type == "delta") {
+      return {
+        bot.gps.inchToCounts((*loc)["x"].get<double>()),
+        bot.gps.inchToCounts((*loc)["y"].get<double>()),
+        0
+      };
+    }
+  }
+}
+
 //Can edit an autonomous, given its motion list.
 class MotionList: public CRUDMenu {
   json &motionData;
@@ -489,6 +506,14 @@ class MotionList: public CRUDMenu {
         {"y", 2, "Set Y"},
         {"v", 2, "Set velocity"},
         {"t", 3, "Set timing"}
+      }, {
+        {"Set to Current", [&motionSelected, idx]() {
+          auto delta = offsetFor(motionSelected, idx);
+          auto &gps = getRobot().gps;
+          auto realPos = gps.getPosition();
+          motionSelected["x"] = gps.countsToInch(realPos.x) - delta.x;
+          motionSelected["y"] = gps.countsToInch(realPos.y) - delta.y;
+        }}
       })();
     } else if(type == "rotateTo") {
       //Use a manual convenience for the radian/degree conversion
@@ -497,6 +522,9 @@ class MotionList: public CRUDMenu {
       }, {
         {"Set Orientation", [&motionSelected]() {
           motionSelected["o"] = (PI / 180.0) * editNumber((180.0 / PI) * motionSelected["o"].get<double>(), 2);
+        }},
+        {"Set to Current", [&motionSelected, idx]() {
+          motionSelected["o"] = getRobot().getPosition().o;
         }}
       })();
     } else if(type == "scorer" || type == "catapult" || type == "intake") {
