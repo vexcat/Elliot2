@@ -15,6 +15,11 @@ double maxVel(GPS& gps) {
 //Use this function directly if your L & R are not measured in counts.
 void tryGoAccel(GPS& gps, double L, double R, double velLimit) {
   double higher = max(abs(L), abs(R));
+  if(higher == 0) {
+    gps. left.moveVelocity(0);
+    gps.right.moveVelocity(0);
+    return;
+  }
   double scale = (velLimit * (int)gps.left.getGearing()) / higher;
   double speed = maxVel(gps);
   if(speed < gps.getSpeedMinimum()) speed = gps.getSpeedMinimum();
@@ -28,6 +33,7 @@ int tryGoAutomatic(GPS& gps, double L, double R, double velLimit) {
   double higher = max(abs(L), abs(R));
   double scale = (velLimit * (int)gps.left.getGearing()) / higher;
   tryGoAccel(gps, L, R, velLimit);
+  if(higher == 0) return true;
   if(higher < gps.getDecelTrigger()) {
     //Measure initial positions
     double initial_left = gps.left.getPosition();
