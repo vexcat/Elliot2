@@ -498,9 +498,20 @@ class MotionList: public CRUDMenu {
     } else if(type == "delta") {
       MotionEditor(motionData, idx, {
         {"x", 2, "Set X"},
-        {"y", 2, "Set Y"},
-        {"o", 2, "Set O"}
-      }, {})();
+        {"y", 2, "Set Y"}
+      }, {
+        {"Set to Current", [&motionSelected]() {
+          auto &gps = getRobot().gps;
+          auto realPos = gps.getPosition();
+          motionSelected["x"] = gps.countsToInch(realPos.x);
+          motionSelected["y"] = gps.countsToInch(realPos.y);
+          motionSelected["o"] = realPos.o;
+        }},
+        //Shows up as "*Set Orientatio" due to character limit
+        {"Set Orientation", [&motionSelected]() {
+          motionSelected["o"] = (PI / 180.0) * editNumber((180.0 / PI) * motionSelected["o"].get<double>(), 2);
+        }}
+      })();
     } else if(type == "position") {
       MotionEditor(motionData, idx, {
         {"x", 2, "Set X"},
