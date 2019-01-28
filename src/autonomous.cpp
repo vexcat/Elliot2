@@ -295,7 +295,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     offset = {
       bot.gps.inchToCounts(motionObject["x"].get<double>()),
       bot.gps.inchToCounts(motionObject["y"].get<double>()),
-      0
+      motionObject["o"].get<double>()
     };
   }
 }

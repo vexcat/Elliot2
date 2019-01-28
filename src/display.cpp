@@ -409,7 +409,7 @@ class MotionList: public CRUDMenu {
     });
     jsonInserter("Delta", {
       {"type", "delta"},
-      {"x", 0.0}, {"y", 0.0}
+      {"x", 0.0}, {"y", 0.0}, {"o", 0.0}
     });
     jsonInserter("Position", {
       {"type", "position"},
@@ -498,7 +498,8 @@ class MotionList: public CRUDMenu {
     } else if(type == "delta") {
       MotionEditor(motionData, idx, {
         {"x", 2, "Set X"},
-        {"y", 2, "Set Y"}
+        {"y", 2, "Set Y"},
+        {"o", 2, "Set O"}
       }, {})();
     } else if(type == "position") {
       MotionEditor(motionData, idx, {
