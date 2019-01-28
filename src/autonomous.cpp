@@ -251,12 +251,8 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     }
   }
   if(type == "shoot") {
-    bot.catapult.setVelocity((int)bot.catapultMtr.getGearing());
-    pros::delay(300);
-    bot.catapult.setVelocity(0);
     bot.catapult.goToSwitch();
-    //Bit of a hack, but whatever.
-    while(bot.catapultMtr.getTargetVelocity()) {
+    while(bot.catapult.isGoingToSwitch()) {
       pros::delay(5);
     }
   }
