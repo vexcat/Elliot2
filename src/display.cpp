@@ -479,14 +479,17 @@ class MotionList: public CRUDMenu {
       }, {
         {"Move Here", [&motionSelected](){
           json copy = motionSelected;
+          double x = copy["x"].get<double>();
+          if(getBlue()) {
+            x = 144 - x;
+          }
           moveToSetpoint({
-            getRobot().gps.inchToCounts(copy["x"].get<double>()),
+            getRobot().gps.inchToCounts(x),
             getRobot().gps.inchToCounts(copy["y"].get<double>()),
             0
           }, getRobot().gps, 1.0, false);
           pros::delay(500);
           copy["type"] = "rotateTo";
-          copy["o"] = copy["o"].get<double>();
           RoboPosition tracking;
           runMotion(copy, tracking, getBlue());
         }},
@@ -506,6 +509,10 @@ class MotionList: public CRUDMenu {
           motionSelected["x"] = gps.countsToInch(realPos.x);
           motionSelected["y"] = gps.countsToInch(realPos.y);
           motionSelected["o"] = realPos.o;
+          if(getBlue()) {
+            motionSelected["x"] = 144 - motionSelected["x"].get<double>();
+            motionSelected["o"] = PI - motionSelected["o"].get<double>();
+          }
         }},
         //Shows up as "*Set Orientatio" due to character limit
         {"Set Orientation", [&motionSelected]() {
@@ -523,6 +530,10 @@ class MotionList: public CRUDMenu {
           auto delta = offsetFor(motionSelected, idx);
           auto &gps = getRobot().gps;
           auto realPos = gps.getPosition();
+          if(getBlue()) {
+            realPos.x = gps.inchToCounts(144) - realPos.x;
+            realPos.o = PI - realPos.o;
+          }
           motionSelected["x"] = gps.countsToInch(realPos.x) - delta.x;
           motionSelected["y"] = gps.countsToInch(realPos.y) - delta.y;
         }}
@@ -537,6 +548,9 @@ class MotionList: public CRUDMenu {
         }},
         {"Set to Current", [&motionSelected, idx]() {
           motionSelected["o"] = getRobot().gps.getPosition().o;
+          if(getBlue()) {
+            motionSelected["o"] = PI - motionSelected["o"].get<double>();
+          }
         }}
       })();
     } else if(type == "scorer" || type == "catapult" || type == "intake") {
