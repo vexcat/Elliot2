@@ -869,7 +869,7 @@ void catOS(void*) {
       getRobot().give();
       menuWasEntered = false;
     }
-    if(checkBattery()) {
+    if(checkBattery(ctrl)) {
       drawCatOSScreen();
     }
     pros::delay(5);
