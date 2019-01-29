@@ -12,6 +12,65 @@ double maxVel(GPS& gps) {
   return max(abs(gps.left.getActualVelocity()), abs(gps.right.getActualVelocity())) / (double)(int)gps.left.getGearing();
 }
 
+//The goal of this class is mainly to limit acceleration by using PID.
+//This acceleration limiting affects both sides of the robot equally.
+class PIDController {
+  MotorGroup &left;
+  MotorGroup &right;
+  PIDGains& gains;
+  double target;
+  enum {
+    FOLLOWING_NONE,
+    FOLLOWING_LEFT,
+    FOLLOWING_RIGHT
+  } follow;
+  IterativePosPIDController controller;
+  double velLimit;
+  public:
+  PIDController(MotorGroup &outputLeft, MotorGroup &outputRight, PIDGains gains, double limit): left(outputLeft), right(outputRight), gains(gains),
+  controller(IterativeControllerFactory::posPID(gains.kP, gains.kI, gains.kD)), velLimit(limit) {}
+
+  void step(double L, double R, bool farTarget = false) {
+    //farTarget means L & R are not a target, but a movement ratio. Only accelerate, no deceleration.
+    if(farTarget) {
+      L *= 100000.0;
+      R *= 100000.0;
+    }
+    //For the sake of including both turns and forward motions, target will be the max of L & R.
+    //moveToSetpoint is responsible for tuning R/L ratio.
+    bool amFollowingLeft = abs(L) > abs(R);
+    if(follow == FOLLOWING_NONE) {
+      if(abs(L) > abs(R)) {
+        follow = FOLLOWING_LEFT;
+      } else {
+        follow = FOLLOWING_RIGHT;
+      }
+      target = max(abs(L), abs(R));
+      controller.setTarget(target);
+    }
+    //Step controller based on follow.
+    double controllerOutput;
+    if(follow == FOLLOWING_LEFT) {
+      controllerOutput = controller.step(abs(L));
+    } else if(follow == FOLLOWING_RIGHT) {
+      controllerOutput = controller.step(abs(R));
+    }
+    double higher = max(abs(L), abs(R));
+    double scale = (velLimit * (int)left.getGearing()) / higher;
+    left.moveVelocity(scale * L * controllerOutput);
+    right.moveVelocity(scale * R * controllerOutput);
+  }
+
+  void reset() {
+    follow = FOLLOWING_NONE;
+  }
+
+  void stopMtrs() {
+    left.moveVelocity(0);
+    right.moveVelocity(0);
+  }
+};
+
 void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraight) {
     //printf("moveToSetpoint was called with %f,%f on %f,%f.\n", pt.x, pt.y, gps.getPosition().x, gps.getPosition().y);
     //When sign of L going straight or dTheta*r turning changes, we're done.
