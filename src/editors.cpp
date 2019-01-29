@@ -69,12 +69,12 @@ double editNumber(double number, int fix) {
       }
       number += dir * std::pow(10, place);
       renderNumberEditor(number, fix, cursor);
+    }
 
-      //Floor button
-      if(ctrl.get_digital_new_press(DIGITAL_X)) {
-        number = std::floor(number);
-        renderNumberEditor(number, fix, cursor);
-      }
+    //Floor button
+    if(ctrl.get_digital_new_press(DIGITAL_X)) {
+      number = std::floor(number);
+      renderNumberEditor(number, fix, cursor);
     }
     pros::delay(5);
   }
