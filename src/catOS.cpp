@@ -32,7 +32,7 @@ void ControllerMenu::render() {
   }
 }
 
-int getVerticalDirection(int flip = 1) {
+int getVerticalDirection(int flip) {
   auto &ctrl = getRobot().controller;
   int dir = (!!ctrl.get_digital_new_press(DIGITAL_UP) - !!ctrl.get_digital_new_press(DIGITAL_DOWN));
   if(!dir) {
@@ -42,7 +42,7 @@ int getVerticalDirection(int flip = 1) {
   return dir * flip;
 }
 
-int getHorizontalDirection(int flip = 1) {
+int getHorizontalDirection(int flip) {
   auto &ctrl = getRobot().controller;
   int dir = (!!ctrl.get_digital_new_press(DIGITAL_RIGHT) - !!ctrl.get_digital_new_press(DIGITAL_LEFT));
   if(!dir) {
