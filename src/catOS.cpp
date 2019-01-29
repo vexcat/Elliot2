@@ -32,14 +32,24 @@ void ControllerMenu::render() {
   }
 }
 
-int getMenuDirection() {
+int getVerticalDirection(int flip = 1) {
   auto &ctrl = getRobot().controller;
-  int dir = (!!ctrl.get_digital_new_press(DIGITAL_DOWN) - !!ctrl.get_digital_new_press(DIGITAL_UP));
+  int dir = (!!ctrl.get_digital_new_press(DIGITAL_UP) - !!ctrl.get_digital_new_press(DIGITAL_DOWN));
   if(!dir) {
-    dir = 4 * -ctrl.get_analog(ANALOG_LEFT_Y)/127.0;
+    dir = 4 * ctrl.get_analog(ANALOG_LEFT_Y)/127.0;
     dir = std::clamp(dir, -3, 3);
   }
-  return dir;
+  return dir * flip;
+}
+
+int getHorizontalDirection(int flip = 1) {
+  auto &ctrl = getRobot().controller;
+  int dir = (!!ctrl.get_digital_new_press(DIGITAL_RIGHT) - !!ctrl.get_digital_new_press(DIGITAL_LEFT));
+  if(!dir) {
+    dir = 4 * -ctrl.get_analog(ANALOG_LEFT_X)/127.0;
+    dir = std::clamp(dir, -3, 3);
+  }
+  return dir * flip;
 }
 
 int ControllerMenu::checkController() {
@@ -49,7 +59,7 @@ int ControllerMenu::checkController() {
     list[index].second();
     render();
   }
-  int dir = getMenuDirection();
+  int dir = getVerticalDirection(-1);
   if(dir) {
     index += dir;
     bound(index, list.size());
@@ -164,7 +174,7 @@ int CRUDMenu::checkController() {
     }
     render();
   }
-  int dir = getMenuDirection();
+  int dir = getVerticalDirection(-1);
   if(dir) {
     if(selectedVector != ITEM_NAME_LIST) {
       crudIndex += dir;
