@@ -82,3 +82,6 @@ class CRUDMenu: public ControllerTask {
 };
 
 int checkTemporaryExit();
+int getVerticalDirection(int flip = 1);
+int getHorizontalDirection(int flip = 1);
+void bound(int& index, int size);

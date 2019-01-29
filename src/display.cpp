@@ -292,6 +292,29 @@ void uiExecutor(void*) {
 //  what JSON-based autons can do, take a look at autonomous.cpp and gps.cpp.
 //-----------------------------------------------------------------------------------
 
+//Whether a critical battery message has been dismissed
+bool criticalBattIgnored = false;
+
+int checkBattery(pros::Controller& ctrl) {
+  printf("Battery is %f\n", pros::battery::get_capacity());
+  if(!criticalBattIgnored && pros::battery::get_capacity() < 0.15) {
+    line_set(0, "Battery is");
+    line_set(1, "< 15. Please");
+    line_set(2, "B to dismiss");
+    int iter = 0;
+    while(!(criticalBattIgnored = ctrl.get_digital_new_press(DIGITAL_B))) {
+      pros::delay(20);
+      iter++;
+      if(iter == 100) {
+        iter = 0;
+        ctrl.rumble(".");
+      }
+    }
+    return 1;
+  }
+  return 0;
+}
+
 //Allows you to drive before selecting a menu option.
 int checkTemporaryExit() {
   auto &ctrl = getRobot().controller;
@@ -312,6 +335,7 @@ int checkTemporaryExit() {
     }
     return true;
   }
+  checkBattery(ctrl);
   return false;
 }
 
@@ -861,6 +885,9 @@ void catOS(void*) {
       drawCatOSScreen();
       getRobot().give();
       menuWasEntered = false;
+    }
+    if(checkBattery(ctrl)) {
+      drawCatOSScreen();
     }
     pros::delay(5);
   }

@@ -144,6 +144,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
   }
   if(type == "rotateTo") {
     double dTheta = motionObject["o"].get<double>();
+    dTheta += offset.o;
     dTheta = isBlue ? PI - dTheta : dTheta;
     dTheta -= bot.gps.getPosition().o;
     dTheta = periodicallyEfficient(dTheta);

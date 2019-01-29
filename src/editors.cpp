@@ -1,6 +1,7 @@
 #include "main.h"
 #include "display.hpp"
 #include "elliot.hpp"
+#include "catOS.hpp"
 
 //------------------------------------------------------------------------------------
 //  Controller Editors
@@ -38,23 +39,19 @@ double editNumber(double number, int fix) {
   int cursor = 14 - fix - (fix > 0);
   renderNumberEditor(number, fix, cursor);
   while(!ctrl.get_digital_new_press(DIGITAL_A) && !ctrl.get_digital_new_press(DIGITAL_B)) {
-    if(ctrl.get_digital_new_press(DIGITAL_LEFT)) {
-      cursor--;
-      if(14 - cursor == fix) cursor--;
-      if(cursor < 0) cursor = 0;
-      renderNumberEditor(number, fix, cursor);
+    int hdir = getHorizontalDirection();
+    cursor += hdir;
+    bound(cursor, 15);
+    if(14 - cursor == fix) {
+      if(hdir < 0) cursor --;
+      if(hdir > 0) cursor ++;
     }
-    if(ctrl.get_digital_new_press(DIGITAL_RIGHT)) {
-      cursor++;
-      if(14 - cursor == fix) cursor++;
-      if(cursor > 14) cursor = 14;
-      renderNumberEditor(number, fix, cursor);
-    }
+    if(hdir) renderNumberEditor(number, fix, cursor);
 
-    int dir = (!!ctrl.get_digital_new_press(DIGITAL_UP) - !!ctrl.get_digital_new_press(DIGITAL_DOWN));
-    if(dir && cursor == 0) {
+    int vdir = getVerticalDirection();
+    if(vdir && cursor == 0) {
       number *= -1;
-    } else if(dir) {
+    } else if(vdir) {
       int place;
       if(fix == 0) {
         place = 14 - cursor;
@@ -67,7 +64,7 @@ double editNumber(double number, int fix) {
           place = 13 - cursor - fix;
         }
       }
-      number += dir * std::pow(10, place);
+      number += vdir * std::pow(10, place);
       renderNumberEditor(number, fix, cursor);
     }
 
@@ -97,21 +94,15 @@ std::string editString(std::string text) {
   text.insert(text.size(), 15 - text.size(), ' ');
   renderStringEditor(text, cursor);
   while(!ctrl.get_digital_new_press(DIGITAL_A) && !ctrl.get_digital_new_press(DIGITAL_B)) {
-    if(ctrl.get_digital_new_press(DIGITAL_LEFT)) {
-      cursor--;
-      if(cursor < 0) cursor = 0;
-      renderStringEditor(text, cursor);
-    }
-    if(ctrl.get_digital_new_press(DIGITAL_RIGHT)) {
-      cursor++;
-      if(cursor > 14) cursor = 14;
-      renderStringEditor(text, cursor);
-    }
+    int hdir = getHorizontalDirection();
+    cursor += hdir;
+    bound(cursor, 15);
+    if(hdir) renderStringEditor(text, cursor);
 
-    int dir = (!!ctrl.get_digital_new_press(DIGITAL_UP) - !!ctrl.get_digital_new_press(DIGITAL_DOWN));
-    auto &sym = text[cursor] += dir;
+    int vdir = getVerticalDirection();
+    auto &sym = text[cursor] += vdir;
 
-    if(dir > 0) {
+    if(vdir > 0) {
       if(sym == ' ' + 1) {
         sym = 'a';
       }
@@ -126,7 +117,7 @@ std::string editString(std::string text) {
       }
     }
 
-    if(dir < 0) {
+    if(vdir < 0) {
       if(sym == ' ' - 1) {
         sym = '9';
       }
@@ -141,8 +132,7 @@ std::string editString(std::string text) {
       }
     }
 
-    if(dir)
-      renderStringEditor(text, cursor);
+    if(vdir) renderStringEditor(text, cursor);
 
     pros::delay(5);
   }
