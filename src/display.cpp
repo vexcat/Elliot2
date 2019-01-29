@@ -830,13 +830,19 @@ class GPSGainList: public ControllerMenu {
     auto &gps = getRobot().gps;
     list.insert(list.end(), {
       {"Set kP", [&]() {
-        
+        auto gains = gps.getPIDGains();
+        gains.kP = editNumber(gains.kP, 4);
+        gps.setPosition(gains.kP);
       }},
       {"Set kI", [&]() {
-        
+        auto gains = gps.getPIDGains();
+        gains.kI = editNumber(gains.kI, 4);
+        gps.setPosition(gains.kI);
       }},
       {"Set kD", [&]() {
-        
+        auto gains = gps.getPIDGains();
+        gains.kD = editNumber(gains.kD, 4);
+        gps.setPosition(gains.kD);
       }},
     });
   }
