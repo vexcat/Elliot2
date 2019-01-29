@@ -776,12 +776,11 @@ class GPSCalibrator: public ControllerTask {
   }
 };
 
-class GPSList: public ControllerMenu {
+class GPSPositionList: public ControllerMenu {
   public:
-  GPSList() {
+  GPSPositionList() {
     auto &gps = getRobot().gps;
     list.insert(list.end(), {
-      {"Calibrate GPS", taskOption<GPSCalibrator>},
       {"Set X", [&]() {
         RoboPosition pos = gps.getPosition();
         pos.x = editNumber(pos.x, 3);
@@ -797,20 +796,38 @@ class GPSList: public ControllerMenu {
         pos.o = editNumber(pos.o, 3);
         gps.setPosition(pos);
       }},
+    });
+  }
+};
+
+class GPSGainList: public ControllerMenu {
+  public:
+  GPSGainList() {
+    auto &gps = getRobot().gps;
+    list.insert(list.end(), {
+      {"Set kP", [&]() {
+        
+      }},
+      {"Set kI", [&]() {
+        
+      }},
+      {"Set kD", [&]() {
+        
+      }},
+    });
+  }
+};
+
+class GPSList: public ControllerMenu {
+  public:
+  GPSList() {
+    auto &gps = getRobot().gps;
+    list.insert(list.end(), {
+      {"Calibrate GPS", taskOption<GPSCalibrator>},
+      {"Set Position", taskOption<GPSPositionList>},
+      {"Set Gains", taskOption<GPSGainList>},
       {"Set CPR", [&]() {
         gps.setCPR(editNumber(gps.radiansToCounts(1), 4));
-      }},
-      {"Set CPI", [&]() {
-        gps.setCPI(editNumber(gps.inchToCounts(1), 4));
-      }},
-      {"Set accelLimit", [&]() {
-        gps.setAccelerationLimiter(editNumber(gps.getAccelerationLimiter(), 6));
-      }},
-      {"Set speedMin", [&]() {
-        gps.setSpeedMinimum(editNumber(gps.getSpeedMinimum(), 6));
-      }},
-      {"Set speedMin", [&]() {
-        gps.setDecelTrigger(gps.inchToCounts(editNumber(gps.countsToInch(gps.getDecelTrigger()), 2)));
       }}
     });
   }
