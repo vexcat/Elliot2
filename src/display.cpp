@@ -848,6 +848,66 @@ class GPSGainList: public ControllerMenu {
   }
 };
 
+//OkapiLib issue #317 workaround. Normally, you could directly use a MotorGroup as an output,
+//but due to okapi::MotorGroup::controllerSet not respecting gearsets, you can't.
+class MotorGroupOutput: public ControllerOutput<double> {
+  MotorGroup &group;
+  public:
+  MotorGroupOutput(MotorGroup& groupRef): group(groupRef) {}
+  void controllerSet(double vel) {
+    group.moveVelocity(vel * (int)group.getGearing());
+  }
+};
+
+void tuneGains() { 
+  //TODO: Fix the hardcoded ports!
+  MotorGroup entireBase{3, 4, -2, -1};
+  //Create the tuna
+  //kP: when (kP * error) < 1 slow down
+  //So max kP is 1/error where we want the smallest error it would be reasonable for kP to slow down from.
+  //The smallest I want it to be is 2in, or 140 counts.
+  //So, it should be limited to about 1/140, or 0.00714.
+  //We can round to 0.008 just to be safe.
+  //kI will accumulate error while close to the target, when kP is not just 1.
+  //It has a similar maximum.
+  //kD is generally much smaller, so it will be limited to 0.0035.
+  auto tuna = PIDTunerFactory::create(entireBase.getEncoder(), std::make_shared<MotorGroupOutput>(entireBase),
+    5_s, getRobot().gps.inchToCounts(36),
+    0, 0.008,
+    0, 0.008,
+    0, 0.0035
+  );
+  //Autotune using the tuna
+  auto tune = tuna.autotune();
+  //Now apply the tuned gains to the gps object
+  getRobot().gps.setPIDGains({
+    tune.kP,
+    tune.kI,
+    tune.kD
+  });
+}
+
+class GainTuner: public ControllerMenu {
+  public:
+  GainTuner() {}
+  void render() override {
+    line_set(0, "Give bot 48in");
+    line_set(1, "space fwd/rev");
+    line_set(2, "then press A.");
+  }
+  int checkController() override {
+    auto &ctrl = getRobot().controller;
+    if(ctrl.get_digital_new_press(DIGITAL_B)) return GO_UP;
+    if(ctrl.get_digital_new_press(DIGITAL_A)) {
+      line_set(0, "Now tuning,");
+      line_set(1, "");
+      line_set(2, "Please wait.");
+      tuneGains();
+      return GO_UP;
+    }
+  }
+};
+
 class GPSList: public ControllerMenu {
   public:
   GPSList() {
@@ -856,6 +916,7 @@ class GPSList: public ControllerMenu {
       {"Calibrate GPS", taskOption<GPSCalibrator>},
       {"Set Position", taskOption<GPSPositionList>},
       {"Set Gains", taskOption<GPSGainList>},
+      {"Tune Gains", taskOption<GainTuner>},
       {"Set CPR", [&]() {
         gps.setCPR(editNumber(gps.radiansToCounts(1), 4));
       }},
