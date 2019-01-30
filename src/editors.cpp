@@ -42,7 +42,7 @@ double editNumber(double number, int fix) {
     int hdir = getHorizontalDirection();
     cursor += hdir;
     bound(cursor, 15);
-    if(14 - cursor == fix) {
+    if(14 - cursor == fix && fix != 0) {
       if(hdir < 0) cursor --;
       if(hdir > 0) cursor ++;
     }
