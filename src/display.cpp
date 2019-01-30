@@ -473,7 +473,7 @@ class MotionList: public CRUDMenu {
     });
     jsonInserter("AutoBall", {
       {"type", "autoball"},
-      {"v", 1.0}, {"c", 50}, {"d", 40}, {"a", 8}
+      {"v", 1.0}, {"c", 50}, {"d", 40}, {"a", 8}, {"t", 0.2}
     });
     //Add existing items
     for(auto &motion: motionData) {

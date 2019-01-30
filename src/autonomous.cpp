@@ -81,10 +81,12 @@ PIDController controllerFromGPS(GPS& gps, double velLimit) {
   return PIDController(gps.left, gps.right, gps.getPIDGains(), velLimit);
 }
 
-void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraight) {
+void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraight, int extraTime) {
   auto controller = controllerFromGPS(gps, velLimit);
   //printf("moveToSetpoint was called with %f,%f on %f,%f.\n", pt.x, pt.y, gps.getPosition().x, gps.getPosition().y);
   //When sign of L going straight or dTheta*r turning changes, we're done.
+  bool doneTimerStarted = false;
+  uint64_t timeDone;
   while(true) {
     RoboPosition robot = gps.getPosition();
     auto dx = pt.x - robot.x;
@@ -121,7 +123,15 @@ void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraigh
     if(max(abs(R), abs(L)) == 0) break;
     //Dance
     controller.step(L, R);
-    if(controller.done()) break;
+    //The controller thinks the motion is done. Activate the timed exit condition.
+    if(controller.done()) {
+      doneTimerStarted = true;
+      timeDone = pros::millis();
+    }
+    //If the motion has been done for more than extraTime, break the loop.
+    if(pros::millis() >= timeDone + extraTime) {
+      break;
+    }
     pros::delay(5);
   }
   //brake
@@ -138,16 +148,21 @@ bool getBlue() {
   return isBlue;
 }
 
-void automaticControl(double L, double R, double velLimit) {
+void automaticControl(double L, double R, double velLimit, int extraTime = 0) {
   auto controller = controllerFromGPS(getRobot().gps, velLimit);
   do {
     controller.step(L, R);
   } while(!controller.done());
+  while(extraTime > 0) {
+    controller.step(L, R);
+    pros::delay(10);
+    extraTime -= 10;
+  }
   controller.stopMtrs();
 }
 
 //Ball tracking function
-void trackBall(double maxVel, double threshold, double oovThreshold, double attack) {
+void trackBall(double maxVel, double threshold, double oovThreshold, double attack, int extraTime) {
   auto &bot = getRobot();
   bot.intake.moveVelocity(200);
   auto controller = controllerFromGPS(bot.gps, maxVel);
@@ -183,7 +198,7 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
     }
   }
   //Go forward, intake off.
-  automaticControl(attack, attack, maxVel);
+  automaticControl(attack, attack, maxVel, extraTime);
   bot.intake.moveVelocity(0);
 }
 
@@ -206,7 +221,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
       target.x,
       target.y,
       0
-    }, bot.gps, motionObject["v"].get<double>(), motionObject["s"].get<bool>());
+    }, bot.gps, motionObject["v"].get<double>(), motionObject["s"].get<bool>(), motionObject["t"].get<double>() * 1000);
   }
   if(type == "rotateTo") {
     double dTheta = motionObject["o"].get<double>();
@@ -215,10 +230,15 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     dTheta -= bot.gps.getPosition().o;
     dTheta = periodicallyEfficient(dTheta);
     double velLimit = motionObject["v"].get<double>();
-    automaticControl(-bot.gps.radiansToCounts(dTheta), bot.gps.radiansToCounts(dTheta), velLimit);
+    automaticControl(-bot.gps.radiansToCounts(dTheta), bot.gps.radiansToCounts(dTheta), velLimit, motionObject["t"].get<double>());
   }
   if(type == "autoball") {
-    trackBall(motionObject["v"].get<double>(), motionObject["c"].get<double>(), motionObject["d"].get<double>(), bot.gps.inchToCounts(motionObject["a"].get<double>()));
+    trackBall(
+      motionObject["v"].get<double>(),
+      motionObject["c"].get<double>(),
+      motionObject["d"].get<double>(),
+      bot.gps.inchToCounts(motionObject["a"].get<double>()),
+      motionObject["t"].get<double>() * 1000);
   }
   if(type == "scorer") {
     double v = motionObject["v"].get<double>() * (int)bot.score.getGearing();
