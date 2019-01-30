@@ -511,7 +511,7 @@ class MotionList: public CRUDMenu {
             getRobot().gps.inchToCounts(x),
             getRobot().gps.inchToCounts(copy["y"].get<double>()),
             0
-          }, getRobot().gps, 1.0, false);
+          }, getRobot().gps, 1.0, false, 1000);
           pros::delay(500);
           copy["type"] = "rotateTo";
           RoboPosition tracking;
