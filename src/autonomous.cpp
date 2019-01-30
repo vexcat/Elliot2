@@ -30,30 +30,40 @@ class PIDController {
   PIDController(MotorGroup &outputLeft, MotorGroup &outputRight, PIDGains gains, double limit): left(outputLeft), right(outputRight), gains(gains),
   controller(IterativeControllerFactory::posPID(gains.kP, gains.kI, gains.kD)), velLimit(limit) {}
 
-  void step(double L, double R, bool farTarget = false) {
+  void setTarget(double L, double R) {
+    //For the sake of including both turns and forward motions, target will be the max of L & R.
+    //moveToSetpoint is responsible for tuning R/L ratio.
+    if(abs(L) > abs(R)) {
+      follow = FOLLOWING_LEFT;
+      target = L;
+    } else {
+      follow = FOLLOWING_RIGHT;
+      target = R;
+    }
+    controller.setTarget(target);
+  }
+
+  void stepError(double L, double R, bool farTarget = false) {
     //farTarget means L & R are not a target, but a movement ratio. Only accelerate, no deceleration.
     if(farTarget) {
       L *= 100000.0;
       R *= 100000.0;
     }
-    //For the sake of including both turns and forward motions, target will be the max of L & R.
-    //moveToSetpoint is responsible for tuning R/L ratio.
-    bool amFollowingLeft = abs(L) > abs(R);
+    //Set the target if none is set.
     if(follow == FOLLOWING_NONE) {
-      if(abs(L) > abs(R)) {
-        follow = FOLLOWING_LEFT;
-      } else {
-        follow = FOLLOWING_RIGHT;
-      }
-      target = max(abs(L), abs(R));
-      controller.setTarget(target);
+      setTarget(L, R);
     }
+    //Now step with "absolute" position.
+    stepAbs(target - abs(L), target - abs(R));
+  }
+
+  void stepAbs(double L, double R) {
     //Step controller based on follow.
     double controllerOutput;
     if(follow == FOLLOWING_LEFT) {
-      controllerOutput = controller.step(abs(L));
+      controllerOutput = controller.step(L);
     } else if(follow == FOLLOWING_RIGHT) {
-      controllerOutput = controller.step(abs(R));
+      controllerOutput = controller.step(R);
     }
     double higher = max(abs(L), abs(R));
     double scale = (velLimit * (int)left.getGearing()) / higher;
@@ -63,6 +73,7 @@ class PIDController {
 
   void reset() {
     follow = FOLLOWING_NONE;
+    controller.reset();
   }
 
   void stopMtrs() {
@@ -122,7 +133,7 @@ void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraigh
     }
     if(max(abs(R), abs(L)) == 0) break;
     //Dance
-    controller.step(L, R);
+    controller.stepError(L, R);
     //The controller thinks the motion is done. Activate the timed exit condition.
     if(controller.done()) {
       doneTimerStarted = true;
@@ -149,12 +160,14 @@ bool getBlue() {
 }
 
 void automaticControl(double L, double R, double velLimit, int extraTime = 0) {
-  auto controller = controllerFromGPS(getRobot().gps, velLimit);
+  auto &gps = getRobot().gps;
+  auto controller = controllerFromGPS(gps, velLimit);
+  controller.setTarget(L + gps.left.getPosition(), R + gps.right.getPosition());
   do {
-    controller.step(L, R);
+    controller.stepAbs(gps.left.getPosition(), gps.right.getPosition());
   } while(!controller.done());
   while(extraTime > 0) {
-    controller.step(L, R);
+    controller.stepAbs(gps.left.getPosition(), gps.right.getPosition());
     pros::delay(10);
     extraTime -= 10;
   }
@@ -186,15 +199,15 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
     }
     //Too left
     if(object.left_coord < half-centerThreshold) {
-      controller.step(0.75, 1.0, true);
+      controller.stepError(0.75, 1.0, true);
     }
     //Perfect
     if(half-centerThreshold < object.left_coord && object.left_coord < half+centerThreshold) {
-      controller.step(1.0, 1.0, true);
+      controller.stepError(1.0, 1.0, true);
     }
     //Too right
     if(object.left_coord > half+centerThreshold) {
-      controller.step(1.0, 0.75, true);
+      controller.stepError(1.0, 0.75, true);
     }
   }
   //Go forward, intake off.
