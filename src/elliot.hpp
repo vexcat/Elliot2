@@ -37,9 +37,7 @@ class Elliot {
     GPS gps;
     Elliot();
     Elliot(const Elliot&) = delete;
-    Elliot(Elliot&&) = delete;
     Elliot& operator=(const Elliot&) = delete;
-    Elliot& operator=(Elliot&&) = delete;
     void stop();
     void takeCoast();
     void takeStopped();
