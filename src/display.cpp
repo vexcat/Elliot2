@@ -832,17 +832,17 @@ class GPSGainList: public ControllerMenu {
       {"Set kP", [&]() {
         auto gains = gps.getPIDGains();
         gains.kP = editNumber(gains.kP, 4);
-        gps.setPosition(gains.kP);
+        gps.setPIDGains(gains);
       }},
       {"Set kI", [&]() {
         auto gains = gps.getPIDGains();
         gains.kI = editNumber(gains.kI, 4);
-        gps.setPosition(gains.kI);
+        gps.setPIDGains(gains);
       }},
       {"Set kD", [&]() {
         auto gains = gps.getPIDGains();
         gains.kD = editNumber(gains.kD, 4);
-        gps.setPosition(gains.kD);
+        gps.setPIDGains(gains);
       }},
     });
   }
