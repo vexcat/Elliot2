@@ -858,6 +858,9 @@ class GPSList: public ControllerMenu {
       {"Set Gains", taskOption<GPSGainList>},
       {"Set CPR", [&]() {
         gps.setCPR(editNumber(gps.radiansToCounts(1), 4));
+      }},
+      {"Set CPI", [&]() {
+        gps.setCPI(editNumber(gps.inchToCounts(1), 4));
       }}
     });
   }
