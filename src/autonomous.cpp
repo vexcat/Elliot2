@@ -8,10 +8,6 @@
 #include "pros/apix.h"
 using namespace std;
 
-double maxVel(GPS& gps) {
-  return max(abs(gps.left.getActualVelocity()), abs(gps.right.getActualVelocity())) / (double)(int)gps.left.getGearing();
-}
-
 //The goal of this class is mainly to limit acceleration by using PID.
 //This acceleration limiting affects both sides of the robot equally.
 class PIDController {
