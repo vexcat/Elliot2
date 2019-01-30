@@ -69,65 +69,63 @@ class PIDController {
     left.moveVelocity(0);
     right.moveVelocity(0);
   }
+
+  bool done() {
+    //Assume that if there is no movement past 60 units of error, we're done.
+    if(abs(left.getActualVelocity()) < 5 && abs(right.getActualVelocity()) < 5 && abs(controller.getError()) < 60) return true;
+    return false; 
+  }
 };
 
+PIDController controllerFromGPS(GPS& gps, double velLimit) {
+  return PIDController(gps.left, gps.right, gps.getPIDGains(), velLimit);
+}
+
 void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraight) {
-    //printf("moveToSetpoint was called with %f,%f on %f,%f.\n", pt.x, pt.y, gps.getPosition().x, gps.getPosition().y);
-    //When sign of L going straight or dTheta*r turning changes, we're done.
-    double initialSign = 0;
-    double curSign = 0;
-    while(true) {
-        RoboPosition robot = gps.getPosition();
-        auto dx = pt.x - robot.x;
-        auto dy = pt.y - robot.y;
-        auto denom = (2*dy*cos(robot.o) - 2*dx*sin(robot.o));
-        double L;
-        double R;
-        if(abs(denom) < 0.001 || stayStraight) {
-            //If denominator is 0, the turning radius is infinite.
-            //We can compare the angle of the object relative to the robot to the robot's actual position to check forwards/backwards.
-            auto spRAngle = periodicallyEfficient(atan2(dy, dx) - robot.o);
-            auto dist = sqrt(dx*dx + dy*dy);
-            //If it's within pi of robot.o, go forward.
-            if(-PI/2 < spRAngle && spRAngle < PI/2) {
-                L = dist;
-                R = dist;
-            } else {
-                L = -dist;
-                R = -dist;
-            }
-            curSign = L > 0 ? 1 : -1;
-        } else {
-            //What's the turning radius we need?
-            auto r = (dx*dx + dy*dy) / denom;
-            auto Cx = robot.x - sin(robot.o) * r;
-            auto Cy = robot.y + cos(robot.o) * r;
-            auto spAngle = atan2(pt.y-Cy, pt.x-Cx);
-            auto rAngle = atan2(robot.y-Cy, robot.x-Cx);
-            auto dTheta = periodicallyEfficient(spAngle - rAngle);
-            //Find R/L
-            L = dTheta * (r - getRobot().gps.radiansToCounts(1));
-            R = dTheta * (r + getRobot().gps.radiansToCounts(1));
-            curSign = (dTheta * r) > 0 ? 1 : -1;
-            //printf("r = %f, dTheta = %f, L = %f, R = %f\n", r, dTheta, L, R);
-        }
-        if(max(abs(R), abs(L)) == 0) break;
-        //Set initialSign
-        if(initialSign == 0) {
-            initialSign = curSign;
-        }
-        //Dance
-        if(tryGoAutomatic(gps, L, R, velLimit)) {
-          break;
-        }
-        if(curSign != initialSign) {
-          break;
-        }
-        pros::delay(5);
+  auto controller = controllerFromGPS(gps, velLimit);
+  //printf("moveToSetpoint was called with %f,%f on %f,%f.\n", pt.x, pt.y, gps.getPosition().x, gps.getPosition().y);
+  //When sign of L going straight or dTheta*r turning changes, we're done.
+  while(true) {
+    RoboPosition robot = gps.getPosition();
+    auto dx = pt.x - robot.x;
+    auto dy = pt.y - robot.y;
+    auto denom = (2*dy*cos(robot.o) - 2*dx*sin(robot.o));
+    double L;
+    double R;
+    if(abs(denom) < 0.001 || stayStraight) {
+      //If denominator is 0, the turning radius is infinite.
+      //We can compare the angle of the object relative to the robot to the robot's actual position to check forwards/backwards.
+      auto spRAngle = periodicallyEfficient(atan2(dy, dx) - robot.o);
+      auto dist = sqrt(dx*dx + dy*dy);
+      //If it's within pi of robot.o, go forward.
+      if(-PI/2 < spRAngle && spRAngle < PI/2) {
+        L = dist;
+        R = dist;
+      } else {
+        L = -dist;
+        R = -dist;
+      }
+    } else {
+      //What's the turning radius we need?
+      auto r = (dx*dx + dy*dy) / denom;
+      auto Cx = robot.x - sin(robot.o) * r;
+      auto Cy = robot.y + cos(robot.o) * r;
+      auto spAngle = atan2(pt.y-Cy, pt.x-Cx);
+      auto rAngle = atan2(robot.y-Cy, robot.x-Cx);
+      auto dTheta = periodicallyEfficient(spAngle - rAngle);
+      //Find R/L
+      L = dTheta * (r - getRobot().gps.radiansToCounts(1));
+      R = dTheta * (r + getRobot().gps.radiansToCounts(1));
+      //printf("r = %f, dTheta = %f, L = %f, R = %f\n", r, dTheta, L, R);
     }
-    //brake
-    gps.left.controllerSet(0);
-    gps.right.controllerSet(0);
+    if(max(abs(R), abs(L)) == 0) break;
+    //Dance
+    controller.step(L, R);
+    if(controller.done()) break;
+    pros::delay(5);
+  }
+  //brake
+  controller.stopMtrs();
 }
 
 bool isBlue;
@@ -140,10 +138,19 @@ bool getBlue() {
   return isBlue;
 }
 
+void automaticControl(double L, double R, double velLimit) {
+  auto controller = controllerFromGPS(getRobot().gps, velLimit);
+  do {
+    controller.step(L, R);
+  } while(!controller.done());
+  controller.stopMtrs();
+}
+
 //Ball tracking function
 void trackBall(double maxVel, double threshold, double oovThreshold, double attack) {
   auto &bot = getRobot();
   bot.intake.moveVelocity(200);
+  auto controller = controllerFromGPS(bot.gps, maxVel);
   while(true) {
     //Where's the ball?
     //Wait 400ms to definitively say there's no ball.
@@ -164,19 +171,19 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
     }
     //Too left
     if(object.left_coord < half-centerThreshold) {
-      tryGoAccel(bot.gps, 0.75, 1.0, maxVel);
+      controller.step(0.75, 1.0, true);
     }
     //Perfect
     if(half-centerThreshold < object.left_coord && object.left_coord < half+centerThreshold) {
-      tryGoAccel(bot.gps, 1, 1, maxVel);
+      controller.step(1.0, 1.0, true);
     }
     //Too right
     if(object.left_coord > half+centerThreshold) {
-      tryGoAccel(bot.gps, 1, 0.75, maxVel);
+      controller.step(1.0, 0.75, true);
     }
   }
   //Go forward, intake off.
-  tryGoVeryAutomatic(bot.gps, attack, attack, maxVel);
+  automaticControl(attack, attack, maxVel);
   bot.intake.moveVelocity(0);
 }
 
@@ -208,7 +215,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     dTheta -= bot.gps.getPosition().o;
     dTheta = periodicallyEfficient(dTheta);
     double velLimit = motionObject["v"].get<double>();
-    tryGoVeryAutomatic(bot.gps, -bot.gps.radiansToCounts(dTheta), bot.gps.radiansToCounts(dTheta), velLimit);
+    automaticControl(-bot.gps.radiansToCounts(dTheta), bot.gps.radiansToCounts(dTheta), velLimit);
   }
   if(type == "autoball") {
     trackBall(motionObject["v"].get<double>(), motionObject["c"].get<double>(), motionObject["d"].get<double>(), bot.gps.inchToCounts(motionObject["a"].get<double>()));
