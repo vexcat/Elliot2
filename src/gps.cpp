@@ -102,10 +102,6 @@ void GPS::gpsDaemon() {
     }
 }
 
-double GPS::radius2(double r, double l) {
-    return radiansToCounts((r + l) / (r - l));
-}
-
 void GPS::addPosDelta(RoboPosition& robot, double L, double R) {
     //No motion
     if(R == 0 && L == 0) {
@@ -123,7 +119,7 @@ void GPS::addPosDelta(RoboPosition& robot, double L, double R) {
     }
 
     //Turning circle radius
-    double r = radius2(R, L);
+    double r = radiansToCounts((R + L) / (R - L));
 	
     //Rotation around turning circle by dTheta
     //The math here is quite compact, but there's a simple way to think about it.

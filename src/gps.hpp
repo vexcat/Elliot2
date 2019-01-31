@@ -50,7 +50,6 @@ class GPS {
     
     void gpsDaemon();
 
-	double radius2(double r, double l);
 	void addPosDelta(RoboPosition& robot, double L, double R);
 
     PIDGains getPIDGains() { return gains; }
