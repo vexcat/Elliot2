@@ -19,6 +19,7 @@ GPS::GPS(MotorGroup& leftSide, MotorGroup& rightSide, json& idata): left(leftSid
     gains.kP = data["kP"].get<double>();
     gains.kI = data["kI"].get<double>();
     gains.kD = data["kD"].get<double>();
+    dT = data["dT"].get<double>();
 }
 
 void GPS::beginTask() {
@@ -46,6 +47,12 @@ void GPS::setPIDGains(PIDGains newGains) {
     data["kP"] = newGains.kP;
     data["kI"] = newGains.kI;
     data["kD"] = newGains.kD; 
+    saveState();
+}
+
+void GPS::setDeltaTime(int delta) {
+    dT = delta;
+    data["dT"] = delta;
     saveState();
 }
 

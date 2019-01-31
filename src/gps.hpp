@@ -25,6 +25,8 @@ class GPS {
     double cpi;
     //PID Gains
     PIDGains gains;
+    //Delta Time - How often to apply PID in ms
+    int dT;
     pros::Mutex daemonLock;
     json& data;
     public:
@@ -53,6 +55,9 @@ class GPS {
 
     PIDGains getPIDGains() { return gains; }
     void setPIDGains(PIDGains gains);
+
+    int getDeltaTime() { return dT; }
+    void setDeltaTime(int delta);
     
     void beginTask();
 };

@@ -843,6 +843,9 @@ class GPSGainList: public ControllerMenu {
         gains.kD = editNumber(gains.kD, 4);
         gps.setPIDGains(gains);
       }},
+      {"Set dT", [&]() {
+        gps.setDeltaTime(editNumber(gps.getDeltaTime() / 1000.0, 3) * 1000);        
+      }}
     });
   }
 };

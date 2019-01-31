@@ -93,7 +93,8 @@ void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraigh
   //printf("moveToSetpoint was called with %f,%f on %f,%f.\n", pt.x, pt.y, gps.getPosition().x, gps.getPosition().y);
   //When sign of L going straight or dTheta*r turning changes, we're done.
   bool doneTimerStarted = false;
-  uint64_t timeDone;
+  uint32_t timeDone;
+  auto lastTime = pros::millis();
   while(true) {
     RoboPosition robot = gps.getPosition();
     auto dx = pt.x - robot.x;
@@ -139,7 +140,7 @@ void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraigh
     if(pros::millis() >= timeDone + extraTime) {
       break;
     }
-    pros::delay(5);
+    pros::Task::delay_until(&lastTime, gps.getDeltaTime());
   }
   //brake
   controller.stopMtrs();
@@ -161,10 +162,11 @@ void automaticControl(double L, double R, double velLimit, int extraTime = 0) {
   controller.setTarget(L + gps.left.getPosition(), R + gps.right.getPosition());
   do {
     controller.stepAbs(gps.left.getPosition(), gps.right.getPosition());
+    pros::delay(gps.getDeltaTime());
   } while(!controller.done());
   while(extraTime > 0) {
     controller.stepAbs(gps.left.getPosition(), gps.right.getPosition());
-    pros::delay(10);
+    pros::delay(gps.getDeltaTime());
     extraTime -= 10;
   }
   controller.stopMtrs();
