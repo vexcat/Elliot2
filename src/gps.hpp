@@ -62,6 +62,8 @@ class GPS {
 
     double getAccelerator() { return accelerator; }
     void setAccelerator(double);
+    
+    void beginTask();
 };
 
 double periodicallyEfficient(double n, double p = PI * 2);

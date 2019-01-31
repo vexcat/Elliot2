@@ -8,7 +8,9 @@
 #include <deque>
 using namespace okapi;
 
-Catapult::Catapult(MotorGroup& cata, pros::ADIDigitalIn& sensor): cata(cata), sensor(sensor) {
+Catapult::Catapult(MotorGroup& cata, pros::ADIDigitalIn& sensor): cata(cata), sensor(sensor) {}
+
+void Catapult::beginTask() {
     pros::Task cataTask([](void* obj){((Catapult*)obj)->catapultTask();}, this);
 }
 
@@ -100,6 +102,11 @@ void Elliot::give() {
     usageGuard.give();
     left .setBrakeMode(AbstractMotor::brakeMode::coast);
     right.setBrakeMode(AbstractMotor::brakeMode::coast);
+}
+
+void Elliot::beginTasks() {
+    catapult.beginTask();
+    gps.beginTask();
 }
 
 Elliot* elliot;

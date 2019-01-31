@@ -20,6 +20,9 @@ GPS::GPS(MotorGroup& leftSide, MotorGroup& rightSide, json& idata): left(leftSid
     speedMin = data["sM"].get<double>();
     decelTrigger = data["dT"].get<double>();
     accelerator = data["ac"].get<double>();
+}
+
+void GPS::beginTask() {
     pros::Task daemon([](void* obj){((GPS*)obj)->gpsDaemon();}, this);
 }
 
