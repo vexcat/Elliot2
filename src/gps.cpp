@@ -19,6 +19,9 @@ GPS::GPS(MotorGroup& leftSide, MotorGroup& rightSide, json& idata): left(leftSid
     gains.kP = data["kP"].get<double>();
     gains.kI = data["kI"].get<double>();
     gains.kD = data["kD"].get<double>();
+}
+
+void GPS::beginTask() {
     pros::Task daemon([](void* obj){((GPS*)obj)->gpsDaemon();}, this);
 }
 

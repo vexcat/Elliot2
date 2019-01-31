@@ -16,6 +16,7 @@ class Catapult {
     void goToSwitch();
     void setVelocity(double vel);
     bool isGoingToSwitch();
+    void beginTask();
 };
 
 class Elliot {
@@ -44,6 +45,7 @@ class Elliot {
     void give();
     void giveDirect();
     void drive(pros::Controller&);
+    void beginTasks();
 };
 void createRobot();
 extern Elliot* elliot;

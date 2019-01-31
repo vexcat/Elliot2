@@ -4,4 +4,5 @@
 void initialize() {
   createRobot();
   startupDisplay();
+  getRobot().beginTasks();
 }

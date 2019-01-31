@@ -53,6 +53,8 @@ class GPS {
 
     PIDGains getPIDGains() { return gains; }
     void setPIDGains(PIDGains gains);
+    
+    void beginTask();
 };
 
 double periodicallyEfficient(double n, double p = PI * 2);
