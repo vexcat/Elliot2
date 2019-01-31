@@ -296,8 +296,7 @@ void uiExecutor(void*) {
 bool criticalBattIgnored = false;
 
 int checkBattery(pros::Controller& ctrl) {
-  printf("Battery is %f\n", pros::battery::get_capacity());
-  if(!criticalBattIgnored && pros::battery::get_capacity() < 0.15) {
+  if(!criticalBattIgnored && pros::battery::get_capacity() < 15) {
     line_set(0, "Battery is");
     line_set(1, "< 15. Please");
     line_set(2, "B to dismiss");
