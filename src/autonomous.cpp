@@ -160,15 +160,14 @@ void automaticControl(double L, double R, double velLimit, int extraTime = 0) {
   auto &gps = getRobot().gps;
   auto controller = controllerFromGPS(gps, velLimit);
   controller.setTarget(L + gps.left.getPosition(), R + gps.right.getPosition());
+  bool finished = false;
+  auto lastTime = pros::millis();
   do {
     controller.stepAbs(gps.left.getPosition(), gps.right.getPosition());
-    pros::delay(gps.getDeltaTime());
-  } while(!controller.done());
-  while(extraTime > 0) {
-    controller.stepAbs(gps.left.getPosition(), gps.right.getPosition());
-    pros::delay(gps.getDeltaTime());
-    extraTime -= 10;
-  }
+    pros::Task::delay_until(&lastTime, gps.getDeltaTime());
+    finished = finished || controller.done();
+    if(finished) extraTime -= gps.getDeltaTime();
+  } while(!finished || extraTime > 0);
   controller.stopMtrs();
 }
 
