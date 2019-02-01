@@ -526,7 +526,7 @@ class MotionList: public CRUDMenu {
         {"x", 2, "Set X"},
         {"y", 2, "Set Y"}
       }, {
-        {"Set to Current", [&motionSelected]() {
+        {"Set to Current", [&motionSelected, idx, this]() {
           auto &gps = getRobot().gps;
           auto realPos = gps.getPosition();
           motionSelected["x"] = gps.countsToInch(realPos.x);
@@ -536,6 +536,10 @@ class MotionList: public CRUDMenu {
             motionSelected["x"] = 144 - motionSelected["x"].get<double>();
             motionSelected["o"] = PI - motionSelected["o"].get<double>();
           }
+          auto delta = offsetFor(motionData, idx);
+          motionSelected["x"] = motionSelected["x"].get<double>() - delta.x;
+          motionSelected["y"] = motionSelected["y"].get<double>() - delta.y;
+          motionSelected["o"] = motionSelected["o"].get<double>() - delta.o;
         }},
         //Shows up as "*Set Orientatio" due to character limit
         {"Set Orientation", [&motionSelected]() {
@@ -569,11 +573,13 @@ class MotionList: public CRUDMenu {
         {"Set Orientation", [&motionSelected]() {
           motionSelected["o"] = (PI / 180.0) * editNumber((180.0 / PI) * motionSelected["o"].get<double>(), 2);
         }},
-        {"Set to Current", [&motionSelected, idx]() {
+        {"Set to Current", [&motionSelected, idx, this]() {
           motionSelected["o"] = getRobot().gps.getPosition().o;
           if(getBlue()) {
             motionSelected["o"] = PI - motionSelected["o"].get<double>();
           }
+          auto delta = offsetFor(motionData, idx);
+          motionSelected["o"] = motionSelected["o"].get<double>() - delta.o;
         }}
       })();
     } else if(type == "scorer" || type == "catapult" || type == "intake") {
