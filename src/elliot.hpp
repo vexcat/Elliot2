@@ -34,6 +34,8 @@ class Elliot {
 	MotorGroup score;
 	MotorGroup intake;
     pros::ADIDigitalIn catapultLimit;
+    pros::ADIUltrasonic leftSonic;
+    pros::ADIUltrasonic rightSonic;
     Catapult catapult;
     GPS gps;
     Elliot();

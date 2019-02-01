@@ -65,6 +65,8 @@ catapultLimit{2},
 camera{15},
 gps{left, right, getGPSState()},
 controller{CONTROLLER_MASTER},
+leftSonic{'C', 'D'},
+rightSonic{'E', 'F'},
 catapult{catapultMtr, catapultLimit} {
     score.setBrakeMode(AbstractMotor::brakeMode::hold);
     left.setGearing(AbstractMotor::gearset::green);
