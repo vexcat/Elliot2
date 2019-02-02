@@ -39,7 +39,6 @@ class PIDController {
     }
     lTarget = L;
     rTarget = R;
-    controller.setTarget(max(abs(L), abs(R)));
   }
 
   void stepError(double L, double R, bool farTarget = false) {
