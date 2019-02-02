@@ -32,8 +32,10 @@ class PIDController {
     //moveToSetpoint is responsible for tuning R/L ratio.
     if(abs(L) > abs(R)) {
       follow = FOLLOWING_LEFT;
+      controller.setTarget(L);
     } else {
       follow = FOLLOWING_RIGHT;
+      controller.setTarget(R);
     }
     lTarget = L;
     rTarget = R;
