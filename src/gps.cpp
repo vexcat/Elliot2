@@ -16,10 +16,10 @@ double periodicallyEfficient(double n, double p) {
 GPS::GPS(MotorGroup& leftSide, MotorGroup& rightSide, json& idata): left(leftSide), right(rightSide), data(idata) {
     cpr = data["cpr"].get<double>();
     cpi = data["cpi"].get<double>();
-    accelLimit = data["aL"].get<double>();
-    speedMin = data["sM"].get<double>();
-    decelTrigger = data["dT"].get<double>();
-    accelerator = data["ac"].get<double>();
+    gains.kP = data["kP"].get<double>();
+    gains.kI = data["kI"].get<double>();
+    gains.kD = data["kD"].get<double>();
+    dT = data["dT"].get<double>();
 }
 
 void GPS::beginTask() {
@@ -42,27 +42,17 @@ void GPS::setCPI(double newCPI) {
     daemonLock.give();
 }
 
-void GPS::setAccelerationLimiter(double newValue) {
-    accelLimit = newValue;
-    data["aL"] = newValue;
+void GPS::setPIDGains(PIDGains newGains) {
+    gains = newGains;
+    data["kP"] = newGains.kP;
+    data["kI"] = newGains.kI;
+    data["kD"] = newGains.kD; 
     saveState();
 }
 
-void GPS::setSpeedMinimum(double newValue) {
-    speedMin = newValue;
-    data["sM"] = newValue;
-    saveState();
-}
-
-void GPS::setDecelTrigger(double newValue) {
-    decelTrigger = newValue;
-    data["dT"] = newValue;
-    saveState();
-}
-
-void GPS::setAccelerator(double newValue) {
-    accelerator = newValue;
-    data["ac"] = newValue;
+void GPS::setDeltaTime(int delta) {
+    dT = delta;
+    data["dT"] = delta;
     saveState();
 }
 
@@ -112,10 +102,6 @@ void GPS::gpsDaemon() {
     }
 }
 
-double GPS::radius2(double r, double l) {
-    return radiansToCounts((r + l) / (r - l));
-}
-
 void GPS::addPosDelta(RoboPosition& robot, double L, double R) {
     //No motion
     if(R == 0 && L == 0) {
@@ -133,7 +119,7 @@ void GPS::addPosDelta(RoboPosition& robot, double L, double R) {
     }
 
     //Turning circle radius
-    double r = radius2(R, L);
+    double r = radiansToCounts((R + L) / (R - L));
 	
     //Rotation around turning circle by dTheta
     //The math here is quite compact, but there's a simple way to think about it.

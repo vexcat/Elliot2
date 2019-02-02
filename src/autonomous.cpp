@@ -8,138 +8,149 @@
 #include "pros/apix.h"
 using namespace std;
 
-double maxVel(GPS& gps) {
-  return max(abs(gps.left.getActualVelocity()), abs(gps.right.getActualVelocity())) / (double)(int)gps.left.getGearing();
-}
+//The goal of this class is mainly to limit acceleration by using PID.
+//This acceleration limiting affects both sides of the robot equally.
+class PIDController {
+  MotorGroup &left;
+  MotorGroup &right;
+  PIDGains& gains;
+  double lTarget;
+  double rTarget;
+  enum {
+    FOLLOWING_NONE,
+    FOLLOWING_LEFT,
+    FOLLOWING_RIGHT
+  } follow;
+  IterativePosPIDController controller;
+  double velLimit;
+  public:
+  PIDController(MotorGroup &outputLeft, MotorGroup &outputRight, PIDGains gains, double limit): left(outputLeft), right(outputRight), gains(gains),
+  controller(IterativeControllerFactory::posPID(gains.kP, gains.kI, gains.kD)), velLimit(limit) {}
 
-//Use this function directly if your L & R are not measured in counts.
-void tryGoAccel(GPS& gps, double L, double R, double velLimit) {
-  double higher = max(abs(L), abs(R));
-  if(higher == 0) {
-    gps. left.moveVelocity(0);
-    gps.right.moveVelocity(0);
-    return;
+  void setTarget(double L, double R) {
+    //For the sake of including both turns and forward motions, target will be the max of L & R.
+    //moveToSetpoint is responsible for tuning R/L ratio.
+    if(abs(L) > abs(R)) {
+      follow = FOLLOWING_LEFT;
+      controller.setTarget(L);
+    } else {
+      follow = FOLLOWING_RIGHT;
+      controller.setTarget(R);
+    }
+    lTarget = L;
+    rTarget = R;
   }
-  double scale = (velLimit * (int)gps.left.getGearing()) / higher;
-  double speed = maxVel(gps);
-  if(speed < gps.getSpeedMinimum()) speed = gps.getSpeedMinimum();
-  speed *= gps.getAccelerator();
-  //Set velocities
-  gps. left.moveVelocity((scale * L) * speed);
-  gps.right.moveVelocity((scale * R) * speed);
+
+  void stepError(double L, double R, bool farTarget = false) {
+    //farTarget means L & R are not a target, but a movement ratio. Only accelerate, no deceleration.
+    if(farTarget) {
+      L *= 100000.0;
+      R *= 100000.0;
+    }
+    //Set the target if none is set.
+    if(follow == FOLLOWING_NONE) {
+      setTarget(L, R);
+    }
+    //Now step with "absolute" position.
+    stepAbs(lTarget - L, rTarget - R);
+  }
+
+  void stepAbs(double L, double R) {
+    //Step controller based on follow.
+    double controllerOutput;
+    if(follow == FOLLOWING_LEFT) {
+      controllerOutput = controller.step(L);
+    } else if(follow == FOLLOWING_RIGHT) {
+      controllerOutput = controller.step(R);
+    }
+    double higher = max(abs(lTarget - L), abs(rTarget - R));
+    if(higher == 0) {
+      left.moveVelocity(0);
+      right.moveVelocity(0);
+      return;
+    }
+    double scale = (velLimit * (int)left.getGearing()) / higher;
+    left.moveVelocity(scale * (lTarget - L) * controllerOutput);
+    right.moveVelocity(scale * (rTarget - R) * controllerOutput);
+  }
+
+  void reset() {
+    follow = FOLLOWING_NONE;
+    controller.reset();
+  }
+
+  void stopMtrs() {
+    left.moveVelocity(0);
+    right.moveVelocity(0);
+  }
+
+  bool done() {
+    //Assume that if there is no movement past 60 units of error, we're done.
+    if(abs(left.getActualVelocity()) < 5 && abs(right.getActualVelocity()) < 5 && abs(controller.getError()) < 60) return true;
+    return false; 
+  }
+};
+
+PIDController controllerFromGPS(GPS& gps, double velLimit) {
+  return PIDController(gps.left, gps.right, gps.getPIDGains(), velLimit);
 }
 
-int tryGoAutomatic(GPS& gps, double L, double R, double velLimit) {
-  double higher = max(abs(L), abs(R));
-  double scale = (velLimit * (int)gps.left.getGearing()) / higher;
-  tryGoAccel(gps, L, R, velLimit);
-  if(higher == 0) return true;
-  if(higher < gps.getDecelTrigger()) {
-    //Measure initial positions
-    double initial_left = gps.left.getPosition();
-    double initial_right = gps.right.getPosition();
-    auto lastTime = pros::millis();
-    //Now, re-adjust as the error closes in.
-    while(true) {
-      //Get errors, which should be smaller than higher.
-      double lerr = higher - abs(gps. left.getPosition() -  initial_left);
-      double rerr = higher - abs(gps.right.getPosition() - initial_right);
-      double err = max(lerr, rerr);
-      //If it's negative, return.
-      if(err < 0) {
-        break;
+void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraight, int extraTime) {
+  auto controller = controllerFromGPS(gps, velLimit);
+  //printf("moveToSetpoint was called with %f,%f on %f,%f.\n", pt.x, pt.y, gps.getPosition().x, gps.getPosition().y);
+  //When sign of L going straight or dTheta*r turning changes, we're done.
+  bool doneTimerStarted = false;
+  uint32_t timeDone;
+  auto lastTime = pros::millis();
+  while(true) {
+    RoboPosition robot = gps.getPosition();
+    auto dx = pt.x - robot.x;
+    auto dy = pt.y - robot.y;
+    auto denom = (2*dy*cos(robot.o) - 2*dx*sin(robot.o));
+    double L;
+    double R;
+    if(abs(denom) < 0.001 || stayStraight) {
+      //If denominator is 0, the turning radius is infinite.
+      //We can compare the angle of the object relative to the robot to the robot's actual position to check forwards/backwards.
+      auto spRAngle = periodicallyEfficient(atan2(dy, dx) - robot.o);
+      auto dist = sqrt(dx*dx + dy*dy);
+      //If it's within pi of robot.o, go forward.
+      if(-PI/2 < spRAngle && spRAngle < PI/2) {
+        L = dist;
+        R = dist;
+      } else {
+        L = -dist;
+        R = -dist;
       }
-      //Error still high? Slow down, following the speedLimit.
-      double speedLimit = gps.getAccelerationLimiter() * maxVel(gps);
-      //But also follow the minSpeed.
-      if(speedLimit < gps.getSpeedMinimum()) speedLimit = gps.getSpeedMinimum();
-      double  leftVel = scale * L * speedLimit;
-      double rightVel = scale * R * speedLimit;
-      gps. left.moveVelocity( leftVel);
-      gps.right.moveVelocity(rightVel);
-      pros::Task::delay_until(&lastTime, 5);
+    } else {
+      //What's the turning radius we need?
+      auto r = (dx*dx + dy*dy) / denom;
+      auto Cx = robot.x - sin(robot.o) * r;
+      auto Cy = robot.y + cos(robot.o) * r;
+      auto spAngle = atan2(pt.y-Cy, pt.x-Cx);
+      auto rAngle = atan2(robot.y-Cy, robot.x-Cx);
+      auto dTheta = periodicallyEfficient(spAngle - rAngle);
+      //Find R/L
+      L = dTheta * (r - getRobot().gps.radiansToCounts(1));
+      R = dTheta * (r + getRobot().gps.radiansToCounts(1));
+      //printf("r = %f, dTheta = %f, L = %f, R = %f\n", r, dTheta, L, R);
     }
-    gps.left.moveVelocity(0);
-    gps.right.moveVelocity(0);
-    while(gps.left.getActualVelocity() || gps.right.getActualVelocity()) {
-      pros::delay(5);
+    if(max(abs(R), abs(L)) == 0) break;
+    //Dance
+    controller.stepError(L, R);
+    //The controller thinks the motion is done. Activate the timed exit condition.
+    if(controller.done()) {
+      doneTimerStarted = true;
+      timeDone = pros::millis();
     }
-    return true;
+    //If the motion has been done for more than extraTime, break the loop.
+    if(pros::millis() >= timeDone + extraTime) {
+      break;
+    }
+    pros::Task::delay_until(&lastTime, gps.getDeltaTime());
   }
-  return false;
-}
-
-void tryGoVeryAutomatic(GPS& gps, double L, double R, double velLimit) {
-  double last_left = gps.left.getPosition();
-  double last_right = gps.right.getPosition();
-  while(!tryGoAutomatic(gps, L, R, velLimit)) {
-    //Calculate change in l & r
-    double deltaL = gps. left.getPosition() -  last_left;
-    L -= deltaL;
-    last_left += deltaL;
-    double deltaR = gps.right.getPosition() - last_right;
-    R -= deltaR;
-    last_right += deltaR;
-  }
-}
-
-void moveToSetpoint(RoboPosition pt, GPS& gps, double velLimit, bool stayStraight) {
-    //printf("moveToSetpoint was called with %f,%f on %f,%f.\n", pt.x, pt.y, gps.getPosition().x, gps.getPosition().y);
-    //When sign of L going straight or dTheta*r turning changes, we're done.
-    double initialSign = 0;
-    double curSign = 0;
-    while(true) {
-        RoboPosition robot = gps.getPosition();
-        auto dx = pt.x - robot.x;
-        auto dy = pt.y - robot.y;
-        auto denom = (2*dy*cos(robot.o) - 2*dx*sin(robot.o));
-        double L;
-        double R;
-        if(abs(denom) < 0.001 || stayStraight) {
-            //If denominator is 0, the turning radius is infinite.
-            //We can compare the angle of the object relative to the robot to the robot's actual position to check forwards/backwards.
-            auto spRAngle = periodicallyEfficient(atan2(dy, dx) - robot.o);
-            auto dist = sqrt(dx*dx + dy*dy);
-            //If it's within pi of robot.o, go forward.
-            if(-PI/2 < spRAngle && spRAngle < PI/2) {
-                L = dist;
-                R = dist;
-            } else {
-                L = -dist;
-                R = -dist;
-            }
-            curSign = L > 0 ? 1 : -1;
-        } else {
-            //What's the turning radius we need?
-            auto r = (dx*dx + dy*dy) / denom;
-            auto Cx = robot.x - sin(robot.o) * r;
-            auto Cy = robot.y + cos(robot.o) * r;
-            auto spAngle = atan2(pt.y-Cy, pt.x-Cx);
-            auto rAngle = atan2(robot.y-Cy, robot.x-Cx);
-            auto dTheta = periodicallyEfficient(spAngle - rAngle);
-            //Find R/L
-            L = dTheta * (r - getRobot().gps.radiansToCounts(1));
-            R = dTheta * (r + getRobot().gps.radiansToCounts(1));
-            curSign = (dTheta * r) > 0 ? 1 : -1;
-            //printf("r = %f, dTheta = %f, L = %f, R = %f\n", r, dTheta, L, R);
-        }
-        if(max(abs(R), abs(L)) == 0) break;
-        //Set initialSign
-        if(initialSign == 0) {
-            initialSign = curSign;
-        }
-        //Dance
-        if(tryGoAutomatic(gps, L, R, velLimit)) {
-          break;
-        }
-        if(curSign != initialSign) {
-          break;
-        }
-        pros::delay(5);
-    }
-    //brake
-    gps.left.controllerSet(0);
-    gps.right.controllerSet(0);
+  //brake
+  controller.stopMtrs();
 }
 
 bool isBlue;
@@ -152,10 +163,26 @@ bool getBlue() {
   return isBlue;
 }
 
+void automaticControl(double L, double R, double velLimit, int extraTime = 0) {
+  auto &gps = getRobot().gps;
+  auto controller = controllerFromGPS(gps, velLimit);
+  controller.setTarget(L + gps.left.getPosition(), R + gps.right.getPosition());
+  bool finished = false;
+  auto lastTime = pros::millis();
+  do {
+    controller.stepAbs(gps.left.getPosition(), gps.right.getPosition());
+    pros::Task::delay_until(&lastTime, gps.getDeltaTime());
+    finished = finished || controller.done();
+    if(finished) extraTime -= gps.getDeltaTime();
+  } while(!finished || extraTime > 0);
+  controller.stopMtrs();
+}
+
 //Ball tracking function
-void trackBall(double maxVel, double threshold, double oovThreshold, double attack) {
+void trackBall(double maxVel, double threshold, double oovThreshold, double attack, int extraTime) {
   auto &bot = getRobot();
   bot.intake.moveVelocity(200);
+  auto controller = controllerFromGPS(bot.gps, maxVel);
   while(true) {
     //Where's the ball?
     //Wait 400ms to definitively say there's no ball.
@@ -176,19 +203,19 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
     }
     //Too left
     if(object.left_coord < half-centerThreshold) {
-      tryGoAccel(bot.gps, 0.75, 1.0, maxVel);
+      controller.stepError(0.75, 1.0, true);
     }
     //Perfect
     if(half-centerThreshold < object.left_coord && object.left_coord < half+centerThreshold) {
-      tryGoAccel(bot.gps, 1, 1, maxVel);
+      controller.stepError(1.0, 1.0, true);
     }
     //Too right
     if(object.left_coord > half+centerThreshold) {
-      tryGoAccel(bot.gps, 1, 0.75, maxVel);
+      controller.stepError(1.0, 0.75, true);
     }
   }
   //Go forward, intake off.
-  tryGoVeryAutomatic(bot.gps, attack, attack, maxVel);
+  automaticControl(attack, attack, maxVel, extraTime);
   bot.intake.moveVelocity(0);
 }
 
@@ -211,7 +238,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
       target.x,
       target.y,
       0
-    }, bot.gps, motionObject["v"].get<double>(), motionObject["s"].get<bool>());
+    }, bot.gps, motionObject["v"].get<double>(), motionObject["s"].get<bool>(), motionObject["t"].get<double>() * 1000);
   }
   if(type == "rotateTo") {
     double dTheta = motionObject["o"].get<double>();
@@ -220,10 +247,15 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     dTheta -= bot.gps.getPosition().o;
     dTheta = periodicallyEfficient(dTheta);
     double velLimit = motionObject["v"].get<double>();
-    tryGoVeryAutomatic(bot.gps, -bot.gps.radiansToCounts(dTheta), bot.gps.radiansToCounts(dTheta), velLimit);
+    automaticControl(-bot.gps.radiansToCounts(dTheta), bot.gps.radiansToCounts(dTheta), velLimit, motionObject["t"].get<double>());
   }
   if(type == "autoball") {
-    trackBall(motionObject["v"].get<double>(), motionObject["c"].get<double>(), motionObject["d"].get<double>(), bot.gps.inchToCounts(motionObject["a"].get<double>()));
+    trackBall(
+      motionObject["v"].get<double>(),
+      motionObject["c"].get<double>(),
+      motionObject["d"].get<double>(),
+      bot.gps.inchToCounts(motionObject["a"].get<double>()),
+      motionObject["t"].get<double>() * 1000);
   }
   if(type == "scorer") {
     double v = motionObject["v"].get<double>() * (int)bot.score.getGearing();

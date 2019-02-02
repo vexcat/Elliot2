@@ -472,7 +472,7 @@ class MotionList: public CRUDMenu {
     });
     jsonInserter("AutoBall", {
       {"type", "autoball"},
-      {"v", 1.0}, {"c", 50}, {"d", 40}, {"a", 8}
+      {"v", 1.0}, {"c", 50}, {"d", 40}, {"a", 8}, {"t", 0.2}
     });
     //Add existing items
     for(auto &motion: motionData) {
@@ -510,7 +510,7 @@ class MotionList: public CRUDMenu {
             getRobot().gps.inchToCounts(x),
             getRobot().gps.inchToCounts(copy["y"].get<double>()),
             0
-          }, getRobot().gps, 1.0, false);
+          }, getRobot().gps, 1.0, false, 1000);
           pros::delay(500);
           copy["type"] = "rotateTo";
           RoboPosition tracking;
@@ -806,12 +806,11 @@ class GPSCalibrator: public ControllerTask {
   }
 };
 
-class GPSList: public ControllerMenu {
+class GPSPositionList: public ControllerMenu {
   public:
-  GPSList() {
+  GPSPositionList() {
     auto &gps = getRobot().gps;
     list.insert(list.end(), {
-      {"Calibrate GPS", taskOption<GPSCalibrator>},
       {"Set X", [&]() {
         RoboPosition pos = gps.getPosition();
         pos.x = editNumber(pos.x, 3);
@@ -827,20 +826,114 @@ class GPSList: public ControllerMenu {
         pos.o = editNumber(pos.o, 3);
         gps.setPosition(pos);
       }},
+    });
+  }
+};
+
+class GPSGainList: public ControllerMenu {
+  public:
+  GPSGainList() {
+    auto &gps = getRobot().gps;
+    list.insert(list.end(), {
+      {"Set kP", [&]() {
+        auto gains = gps.getPIDGains();
+        gains.kP = editNumber(gains.kP, 12);
+        gps.setPIDGains(gains);
+      }},
+      {"Set kI", [&]() {
+        auto gains = gps.getPIDGains();
+        gains.kI = editNumber(gains.kI, 12);
+        gps.setPIDGains(gains);
+      }},
+      {"Set kD", [&]() {
+        auto gains = gps.getPIDGains();
+        gains.kD = editNumber(gains.kD, 12);
+        gps.setPIDGains(gains);
+      }},
+      {"Set dT", [&]() {
+        gps.setDeltaTime(editNumber(gps.getDeltaTime() / 1000.0, 3) * 1000);        
+      }}
+    });
+  }
+};
+
+//OkapiLib issue #317 workaround. Normally, you could directly use a MotorGroup as an output,
+//but due to okapi::MotorGroup::controllerSet not respecting gearsets, you can't.
+class MotorGroupOutput: public ControllerOutput<double> {
+  MotorGroup &group;
+  double scale;
+  public:
+  MotorGroupOutput(MotorGroup& groupRef, double scaler): group(groupRef), scale(scaler) {}
+  void controllerSet(double vel) {
+    group.moveVelocity(vel * (int)group.getGearing() * scale);
+  }
+};
+
+void tuneGains() { 
+  //TODO: Fix the hardcoded ports!
+  MotorGroup entireBase{3, 4, -2, -1};
+  entireBase.setEncoderUnits(AbstractMotor::encoderUnits::counts);
+  //Create the tuna
+  //kP: when (kP * error) < 1 slow down
+  //So max kP is 1/error where we want the smallest error it would be reasonable for kP to slow down from.
+  //The smallest I want it to be is 2in, or 140 counts.
+  //So, it should be limited to about 1/140, or 0.00714.
+  //We can round to 0.008 just to be safe.
+  //kI will accumulate error while close to the target, when kP is not just 1.
+  //It has a similar maximum.
+  //kD is generally much smaller, so it will be limited to 0.0035.
+  auto tuna = PIDTunerFactory::create(entireBase.getEncoder(), std::make_shared<MotorGroupOutput>(entireBase, 0.8),
+    5_s, getRobot().gps.inchToCounts(36),
+    0, 0.0020,
+    0, 0.0025,
+    0, 0.008
+  );
+  //Autotune using the tuna
+  auto tune = tuna.autotune();
+  //Now apply the tuned gains to the gps object
+  getRobot().gps.setPIDGains({
+    tune.kP,
+    tune.kI,
+    tune.kD
+  });
+}
+
+class GainTuner: public ControllerMenu {
+  public:
+  GainTuner() {}
+  void render() override {
+    line_set(0, "Give bot 48in");
+    line_set(1, "space fwd/rev");
+    line_set(2, "then press A.");
+  }
+  int checkController() override {
+    auto &ctrl = getRobot().controller;
+    if(ctrl.get_digital_new_press(DIGITAL_B)) return GO_UP;
+    if(ctrl.get_digital_new_press(DIGITAL_A)) {
+      line_set(0, "Now tuning,");
+      line_set(1, "");
+      line_set(2, "Please wait.");
+      tuneGains();
+      return GO_UP;
+    }
+    return NO_CHANGE;
+  }
+};
+
+class GPSList: public ControllerMenu {
+  public:
+  GPSList() {
+    auto &gps = getRobot().gps;
+    list.insert(list.end(), {
+      {"Calibrate GPS", taskOption<GPSCalibrator>},
+      {"Set Position", taskOption<GPSPositionList>},
+      {"Set Gains", taskOption<GPSGainList>},
+      {"Tune Gains", taskOption<GainTuner>},
       {"Set CPR", [&]() {
         gps.setCPR(editNumber(gps.radiansToCounts(1), 4));
       }},
       {"Set CPI", [&]() {
         gps.setCPI(editNumber(gps.inchToCounts(1), 4));
-      }},
-      {"Set accelLimit", [&]() {
-        gps.setAccelerationLimiter(editNumber(gps.getAccelerationLimiter(), 6));
-      }},
-      {"Set speedMin", [&]() {
-        gps.setSpeedMinimum(editNumber(gps.getSpeedMinimum(), 6));
-      }},
-      {"Set speedMin", [&]() {
-        gps.setDecelTrigger(gps.inchToCounts(editNumber(gps.countsToInch(gps.getDecelTrigger()), 2)));
       }}
     });
   }

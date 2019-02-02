@@ -11,20 +11,22 @@ struct RoboPosition {
 	double o;
 };
 
+struct PIDGains {
+    double kP;
+    double kI;
+    double kD;
+};
+
 class GPS {
     RoboPosition position = {0, 0, 0};
     //Counts Per Radian (the important one)
     double cpr;
     //Counts Per Inch
     double cpi;
-    //Acceleration Limit (see tryGo of autonomous.cpp for more info)
-    double accelLimit;
-    //Speed Minimum - Minimum speed the robot should move in autonomous
-    double speedMin;
-    //Decel Trigger - Number of counts to target to cause decleration by speedMin and accelLimit.
-    double decelTrigger;
-    //Accelerator - (see tryGoAccel of autonomous.cpp for more info)
-    double accelerator;
+    //PID Gains
+    PIDGains gains;
+    //Delta Time - How often to apply PID in ms
+    int dT;
     pros::Mutex daemonLock;
     json& data;
     public:
@@ -48,20 +50,13 @@ class GPS {
     
     void gpsDaemon();
 
-	double radius2(double r, double l);
 	void addPosDelta(RoboPosition& robot, double L, double R);
 
-    double getAccelerationLimiter() { return accelLimit; }
-    void setAccelerationLimiter(double);
+    PIDGains getPIDGains() { return gains; }
+    void setPIDGains(PIDGains gains);
 
-    double getSpeedMinimum() { return speedMin; }
-    void setSpeedMinimum(double);
-
-    double getDecelTrigger() { return decelTrigger; }
-    void setDecelTrigger(double);
-
-    double getAccelerator() { return accelerator; }
-    void setAccelerator(double);
+    int getDeltaTime() { return dT; }
+    void setDeltaTime(int delta);
     
     void beginTask();
 };
