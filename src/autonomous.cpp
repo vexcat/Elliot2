@@ -28,6 +28,7 @@ class PIDController {
   controller(IterativeControllerFactory::posPID(gains.kP, gains.kI, gains.kD)), velLimit(limit) {}
 
   void setTarget(double L, double R) {
+    printf("setTarget() = %f, %f\n", L, R);
     //For the sake of including both turns and forward motions, target will be the max of L & R.
     //moveToSetpoint is responsible for tuning R/L ratio.
     if(abs(L) > abs(R)) {
@@ -42,6 +43,7 @@ class PIDController {
   }
 
   void stepError(double L, double R, bool farTarget = false) {
+    printf("stepError() = %f, %f\n", L, R);
     //farTarget means L & R are not a target, but a movement ratio. Only accelerate, no deceleration.
     if(farTarget) {
       L *= 100000.0;
@@ -56,6 +58,7 @@ class PIDController {
   }
 
   void stepAbs(double L, double R) {
+    printf("stepAbs() = %f, %f\n", L, R);
     //Step controller based on follow.
     double controllerOutput;
     if(follow == FOLLOWING_LEFT) {
@@ -70,8 +73,8 @@ class PIDController {
       return;
     }
     double scale = (velLimit * (int)left.getGearing()) / higher;
-    left.moveVelocity(scale * (lTarget - L) * controllerOutput);
-    right.moveVelocity(scale * (rTarget - R) * controllerOutput);
+    left.moveVelocity(scale * lTarget - L * abs(controllerOutput));
+    right.moveVelocity(scale * rTarget - R * abs(controllerOutput));
   }
 
   void reset() {
