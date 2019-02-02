@@ -65,6 +65,7 @@ int ControllerMenu::checkController() {
     bound(index, list.size());
     render();
   }
+  return NO_CHANGE;
 }
 
 void bound(int& index, int size) {
@@ -185,6 +186,7 @@ int CRUDMenu::checkController() {
     }
     render();
   }
+  return NO_CHANGE;
 }
 
 void CRUDMenu::addInserter(const std::string name, std::function<const std::string(int)> attemptAdd) {

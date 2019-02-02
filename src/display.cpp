@@ -785,6 +785,7 @@ class GPSCalibrator: public ControllerTask {
       state++;
       if(state == 4) return GO_UP;
       render();
+      return NO_CHANGE;
     }
     if(state == 0) {
       double y = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
