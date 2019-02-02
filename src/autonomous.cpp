@@ -73,8 +73,8 @@ class PIDController {
       return;
     }
     double scale = (velLimit * (int)left.getGearing()) / higher;
-    left.moveVelocity(scale * lTarget - L * abs(controllerOutput));
-    right.moveVelocity(scale * rTarget - R * abs(controllerOutput));
+    left.moveVelocity(scale * (lTarget - L) * abs(controllerOutput));
+    right.moveVelocity(scale * (rTarget - R) * abs(controllerOutput));
   }
 
   void reset() {
