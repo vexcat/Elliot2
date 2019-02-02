@@ -785,6 +785,7 @@ class GPSCalibrator: public ControllerTask {
       state++;
       if(state == 4) return GO_UP;
       render();
+      return NO_CHANGE;
     }
     if(state == 0) {
       double y = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
@@ -836,17 +837,17 @@ class GPSGainList: public ControllerMenu {
     list.insert(list.end(), {
       {"Set kP", [&]() {
         auto gains = gps.getPIDGains();
-        gains.kP = editNumber(gains.kP, 4);
+        gains.kP = editNumber(gains.kP, 12);
         gps.setPIDGains(gains);
       }},
       {"Set kI", [&]() {
         auto gains = gps.getPIDGains();
-        gains.kI = editNumber(gains.kI, 4);
+        gains.kI = editNumber(gains.kI, 12);
         gps.setPIDGains(gains);
       }},
       {"Set kD", [&]() {
         auto gains = gps.getPIDGains();
-        gains.kD = editNumber(gains.kD, 4);
+        gains.kD = editNumber(gains.kD, 12);
         gps.setPIDGains(gains);
       }},
       {"Set dT", [&]() {
@@ -860,16 +861,18 @@ class GPSGainList: public ControllerMenu {
 //but due to okapi::MotorGroup::controllerSet not respecting gearsets, you can't.
 class MotorGroupOutput: public ControllerOutput<double> {
   MotorGroup &group;
+  double scale;
   public:
-  MotorGroupOutput(MotorGroup& groupRef): group(groupRef) {}
+  MotorGroupOutput(MotorGroup& groupRef, double scaler): group(groupRef), scale(scaler) {}
   void controllerSet(double vel) {
-    group.moveVelocity(vel * (int)group.getGearing());
+    group.moveVelocity(vel * (int)group.getGearing() * scale);
   }
 };
 
 void tuneGains() { 
   //TODO: Fix the hardcoded ports!
   MotorGroup entireBase{3, 4, -2, -1};
+  entireBase.setEncoderUnits(AbstractMotor::encoderUnits::counts);
   //Create the tuna
   //kP: when (kP * error) < 1 slow down
   //So max kP is 1/error where we want the smallest error it would be reasonable for kP to slow down from.
@@ -879,11 +882,11 @@ void tuneGains() {
   //kI will accumulate error while close to the target, when kP is not just 1.
   //It has a similar maximum.
   //kD is generally much smaller, so it will be limited to 0.0035.
-  auto tuna = PIDTunerFactory::create(entireBase.getEncoder(), std::make_shared<MotorGroupOutput>(entireBase),
+  auto tuna = PIDTunerFactory::create(entireBase.getEncoder(), std::make_shared<MotorGroupOutput>(entireBase, 0.8),
     5_s, getRobot().gps.inchToCounts(36),
-    0, 0.008,
-    0, 0.008,
-    0, 0.0035
+    0, 0.0020,
+    0, 0.0025,
+    0, 0.008
   );
   //Autotune using the tuna
   auto tune = tuna.autotune();
@@ -913,6 +916,7 @@ class GainTuner: public ControllerMenu {
       tuneGains();
       return GO_UP;
     }
+    return NO_CHANGE;
   }
 };
 
