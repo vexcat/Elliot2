@@ -73,8 +73,21 @@ class PIDController {
       return;
     }
     double scale = (velLimit * (int)left.getGearing()) / higher;
-    left.moveVelocity(scale * (lTarget - L) * abs(controllerOutput));
-    right.moveVelocity(scale * (rTarget - R) * abs(controllerOutput));
+    //controllerOutput will have the correct sign for the followed side,
+    //but not always for the non-followed side. For the followed side, it
+    //is easy to just multiply scale * abs(err) to get the vel ratio right,
+    //then multiply by controllerOutput. For the non-followed side, you've gotta
+    //check for a difference in error sign. If there is a difference, negate the
+    //output. 2ez.
+    if(follow == FOLLOWING_LEFT) {
+      left.moveVelocity(scale * abs(lTarget - L) * controllerOutput);
+      int factor = -1 * (std::copysign(1.0, lTarget - L) != std::copysign(1.0, rTarget - R));
+      right.moveVelocity(scale * factor * abs(rTarget - R) * controllerOutput);
+    } else {
+      right.moveVelocity(scale * abs(rTarget - R) * controllerOutput);
+      int factor = -1 * (std::copysign(1.0, lTarget - L) != std::copysign(1.0, rTarget - R));
+      left.moveVelocity(scale * factor * abs(lTarget - L) * controllerOutput);
+    }
   }
 
   void reset() {
