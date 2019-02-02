@@ -14,7 +14,8 @@ class PIDController {
   MotorGroup &left;
   MotorGroup &right;
   PIDGains& gains;
-  double target;
+  double lTarget;
+  double rTarget;
   enum {
     FOLLOWING_NONE,
     FOLLOWING_LEFT,
@@ -31,12 +32,12 @@ class PIDController {
     //moveToSetpoint is responsible for tuning R/L ratio.
     if(abs(L) > abs(R)) {
       follow = FOLLOWING_LEFT;
-      target = L;
     } else {
       follow = FOLLOWING_RIGHT;
-      target = R;
     }
-    controller.setTarget(target);
+    lTarget = L;
+    rTarget = R;
+    controller.setTarget(max(abs(L), abs(R)));
   }
 
   void stepError(double L, double R, bool farTarget = false) {
@@ -50,7 +51,7 @@ class PIDController {
       setTarget(L, R);
     }
     //Now step with "absolute" position.
-    stepAbs(target - abs(L), target - abs(R));
+    stepAbs(lTarget - L, rTarget - R);
   }
 
   void stepAbs(double L, double R) {
@@ -61,10 +62,15 @@ class PIDController {
     } else if(follow == FOLLOWING_RIGHT) {
       controllerOutput = controller.step(R);
     }
-    double higher = max(abs(L), abs(R));
+    double higher = max(abs(lTarget - L), abs(rTarget - R));
+    if(higher == 0) {
+      left.moveVelocity(0);
+      right.moveVelocity(0);
+      return;
+    }
     double scale = (velLimit * (int)left.getGearing()) / higher;
-    left.moveVelocity(scale * L * controllerOutput);
-    right.moveVelocity(scale * R * controllerOutput);
+    left.moveVelocity(scale * (lTarget - L) * controllerOutput);
+    right.moveVelocity(scale * (rTarget - R) * controllerOutput);
   }
 
   void reset() {
