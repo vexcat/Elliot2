@@ -376,13 +376,9 @@ class MotionEditor: public ControllerMenu {
       {"Run this", [&auton, idx, &object]() {
         auto &bot = getRobot();
         auto old = bot.left.getBrakeMode();
-        bot. left.setBrakeMode(AbstractMotor::brakeMode::hold);
-        bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
         //Track with current offset
         auto tracking = offsetFor(auton, idx);
         runMotion(object, tracking, getBlue());
-        bot. left.setBrakeMode(old);
-        bot.right.setBrakeMode(old);
       }},
       {"Run to here", [&auton, idx, this]() {
         //Okay to use a lambda, as long as it isn't destructed in the task's lifetime.
