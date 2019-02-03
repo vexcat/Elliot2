@@ -356,13 +356,13 @@ class MotionEditor: public ControllerMenu {
     }
     list.insert(list.end(), conveniences);
     list.insert(list.end(), {
-      {"Run this", [&]() {
+      {"Run this", [&, this]() {
         auto &bot = getRobot();
         auto old = bot.left.getBrakeMode();
         bot. left.setBrakeMode(AbstractMotor::brakeMode::hold);
         bot.right.setBrakeMode(AbstractMotor::brakeMode::hold);
-        //Track with just current position
-        auto tracking = bot.gps.getPosition();
+        //Track with current offset
+        auto tracking = offsetFor(auton, idx);
         runMotion(object, tracking, getBlue());
         bot. left.setBrakeMode(old);
         bot.right.setBrakeMode(old);
