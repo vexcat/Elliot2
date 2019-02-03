@@ -2,7 +2,13 @@
 #include "display.hpp"
 
 void initialize() {
-  createRobot();
-  startupDisplay();
-  getRobot().beginTasks();
+  try {
+    createRobot();
+    startupDisplay();
+    getRobot().beginTasks();
+  } catch(const std::exception& e) {
+    std::cout << "Fatal initialization error: " + std::string(e.what()) << std::endl;
+  } catch(...) {
+    std::cout << "Unknown fatal initialization error." << std::endl;
+  }
 }
