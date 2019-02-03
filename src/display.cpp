@@ -524,8 +524,7 @@ class MotionList: public CRUDMenu {
     } else if(type == "delta") {
       MotionEditor(motionData, idx, {
         {"x", 2, "Set X"},
-        {"y", 2, "Set Y"},
-        {"t", 3, "Set timing"}
+        {"y", 2, "Set Y"}
       }, {
         {"Set to Current", [&motionSelected, idx, this]() {
           auto &gps = getRobot().gps;
@@ -569,7 +568,8 @@ class MotionList: public CRUDMenu {
     } else if(type == "rotateTo") {
       //Use a manual convenience for the radian/degree conversion
       MotionEditor(motionData, idx, {
-        {"v", 2, "Set velocity"}
+        {"v", 2, "Set velocity"},
+        {"t", 3, "Set timing"}
       }, {
         {"Set Orientation", [&motionSelected]() {
           motionSelected["o"] = (PI / 180.0) * editNumber((180.0 / PI) * motionSelected["o"].get<double>(), 2);
