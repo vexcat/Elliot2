@@ -524,7 +524,8 @@ class MotionList: public CRUDMenu {
     } else if(type == "delta") {
       MotionEditor(motionData, idx, {
         {"x", 2, "Set X"},
-        {"y", 2, "Set Y"}
+        {"y", 2, "Set Y"},
+        {"t", 3, "Set timing"}
       }, {
         {"Set to Current", [&motionSelected, idx, this]() {
           auto &gps = getRobot().gps;
