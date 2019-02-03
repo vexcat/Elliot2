@@ -263,7 +263,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     dTheta -= bot.gps.getPosition().o;
     dTheta = periodicallyEfficient(dTheta);
     double velLimit = motionObject["v"].get<double>();
-    automaticControl(-bot.gps.radiansToCounts(dTheta), bot.gps.radiansToCounts(dTheta), velLimit, motionObject["t"].get<double>());
+    automaticControl(-bot.gps.radiansToCounts(dTheta), bot.gps.radiansToCounts(dTheta), velLimit, motionObject["t"].get<double>() * 1000);
   }
   if(type == "autoball") {
     trackBall(
