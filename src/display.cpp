@@ -344,9 +344,7 @@ RoboPosition offsetFor(const json& auton, int idx) {
   auto loc = auton.begin() + idx + 1;
   while(loc != auton.begin()) {
     loc--;
-    debug(std::to_string(loc - auton.begin()) + "\n");
     auto type = (*loc)["type"].get<std::string>();
-    debug(type + "\n");
     if(type == "origin" || type == "delta") {
       return {
         bot.gps.inchToCounts((*loc)["x"].get<double>()),
