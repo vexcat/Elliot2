@@ -344,7 +344,9 @@ RoboPosition offsetFor(const json& auton, int idx) {
   auto loc = auton.begin() + idx + 1;
   while(loc != auton.begin()) {
     loc--;
+    debug(std::to_string(loc - auton.begin()) + "\n");
     auto type = (*loc)["type"].get<std::string>();
+    debug(type + "\n");
     if(type == "origin" || type == "delta") {
       return {
         bot.gps.inchToCounts((*loc)["x"].get<double>()),
@@ -373,7 +375,7 @@ class MotionEditor: public ControllerMenu {
     }
     list.insert(list.end(), conveniences);
     list.insert(list.end(), {
-      {"Run this", [&]() {
+      {"Run this", [&auton, idx, &object]() {
         auto &bot = getRobot();
         auto old = bot.left.getBrakeMode();
         bot. left.setBrakeMode(AbstractMotor::brakeMode::hold);
