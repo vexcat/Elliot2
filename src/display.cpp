@@ -349,7 +349,7 @@ RoboPosition offsetFor(const json& auton, int idx) {
       return {
         bot.gps.inchToCounts((*loc)["x"].get<double>()),
         bot.gps.inchToCounts((*loc)["y"].get<double>()),
-        0
+        bot.gps.inchToCounts((*loc)["o"].get<double>()),
       };
     }
   }
@@ -373,7 +373,7 @@ class MotionEditor: public ControllerMenu {
     }
     list.insert(list.end(), conveniences);
     list.insert(list.end(), {
-      {"Run this", [&, this]() {
+      {"Run this", [&]() {
         auto &bot = getRobot();
         auto old = bot.left.getBrakeMode();
         bot. left.setBrakeMode(AbstractMotor::brakeMode::hold);
