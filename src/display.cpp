@@ -338,6 +338,23 @@ int checkTemporaryExit() {
   return false;
 }
 
+//Gives the current position offset for an auton position.
+RoboPosition offsetFor(const json& auton, int idx) {
+  auto &bot = getRobot();
+  auto loc = auton.begin() + idx + 1;
+  while(loc != auton.begin()) {
+    loc--;
+    auto type = (*loc)["type"].get<std::string>();
+    if(type == "origin" || type == "delta") {
+      return {
+        bot.gps.inchToCounts((*loc)["x"].get<double>()),
+        bot.gps.inchToCounts((*loc)["y"].get<double>()),
+        0
+      };
+    }
+  }
+}
+
 //Can edit a motion object, given its keys.
 class MotionEditor: public ControllerMenu {
   std::vector<std::pair<std::string, std::string>> options;
@@ -395,23 +412,6 @@ class MotionEditor: public ControllerMenu {
     });
   }
 };
-
-//Gives the current position offset for an auton position.
-RoboPosition offsetFor(const json& auton, int idx) {
-  auto &bot = getRobot();
-  auto loc = auton.begin() + idx + 1;
-  while(loc != auton.begin()) {
-    loc--;
-    auto type = (*loc)["type"].get<std::string>();
-    if(type == "origin" || type == "delta") {
-      return {
-        bot.gps.inchToCounts((*loc)["x"].get<double>()),
-        bot.gps.inchToCounts((*loc)["y"].get<double>()),
-        0
-      };
-    }
-  }
-}
 
 //Can edit an autonomous, given its motion list.
 class MotionList: public CRUDMenu {
