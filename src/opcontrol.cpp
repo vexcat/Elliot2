@@ -21,8 +21,8 @@ void Elliot::drive(pros::Controller& m) {
 	//Base drive
 	int y = m.get_analog(ANALOG_LEFT_Y) * (speedMultiplier / 127.0);
 	int x = m.get_analog(ANALOG_LEFT_X) * (speedMultiplier / 127.0);
-	left.moveVelocity(dz(multiplier * y + x, 32));
-	right.moveVelocity(dz(multiplier * y - x, 32));
+
+	box->base.arcade(multiplier * y, x, 32);
 
 	//Scorer drive
 	int scoreVel = 150 * (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
