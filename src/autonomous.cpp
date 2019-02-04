@@ -103,7 +103,7 @@ class PIDController {
   bool done() {
     //Assume that if there is no movement past 60 units of error, we're done.
     printf("done error: %f\n", controller.getError());
-    if(abs(left.getActualVelocity()) < 5 && abs(right.getActualVelocity()) < 5 && abs(controller.getError()) < 60) return true;
+    if(abs(left.getActualVelocity()) < 5 && abs(right.getActualVelocity()) < 5 && abs(controller.getError()) < 100) return true;
     return false; 
   }
 };
