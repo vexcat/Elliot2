@@ -81,11 +81,11 @@ class PIDController {
     //output. 2ez.
     if(follow == FOLLOWING_LEFT) {
       left.moveVelocity(scale * abs(lTarget - L) * controllerOutput);
-      int factor = -1 * (std::copysign(1.0, lTarget - L) != std::copysign(1.0, rTarget - R));
+      int factor = (std::copysign(1.0, lTarget - L) != std::copysign(1.0, rTarget - R)) ? -1 : 1;
       right.moveVelocity(scale * factor * abs(rTarget - R) * controllerOutput);
     } else {
       right.moveVelocity(scale * abs(rTarget - R) * controllerOutput);
-      int factor = -1 * (std::copysign(1.0, lTarget - L) != std::copysign(1.0, rTarget - R));
+      int factor = (std::copysign(1.0, lTarget - L) != std::copysign(1.0, rTarget - R)) ? -1 : 1;
       left.moveVelocity(scale * factor * abs(lTarget - L) * controllerOutput);
     }
   }
@@ -102,6 +102,7 @@ class PIDController {
 
   bool done() {
     //Assume that if there is no movement past 60 units of error, we're done.
+    printf("done error: %f\n", controller.getError());
     if(abs(left.getActualVelocity()) < 5 && abs(right.getActualVelocity()) < 5 && abs(controller.getError()) < 60) return true;
     return false; 
   }
