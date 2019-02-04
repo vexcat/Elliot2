@@ -936,13 +936,43 @@ class GPSList: public ControllerMenu {
   }
 };
 
+class CameraList: public ControllerMenu {
+  void updateAWB() {
+    auto &cam = getRobot().camSettings;
+    if(cam.getAutoWhiteBalance()) {
+      list[0].first = "AutoWhite: ON";
+    } else {
+      list[0].first = "AutoWhite: OFF";
+    }
+  }
+  public:
+  CameraList() {
+    auto &cam = getRobot().camSettings;
+    auto &state = getState();
+    list.insert(list.end(), {
+      {"????", [&]() {
+        cam.setAutoWhiteBalance(!cam.getAutoWhiteBalance());
+        updateAWB();
+      }},
+      {"Set WhiteBal", [&]() {
+        cam.setWhiteBalance(editNumber(cam.getWhiteBalance(), 0));
+      }},
+      {"Set Exposure", [&]() {
+        cam.setExposure(editNumber(cam.getExposure(), 0));
+      }}
+    });
+    updateAWB();
+  }
+};
+
 class RootList: public ControllerMenu {
   public:
   RootList() {
     list.insert(list.end(), {
-      {"Autonomous"  , taskOption<AutonList>},
-      {"Motors"      , taskOption<MotorList>},
-      {"GPS Settings", taskOption<  GPSList>}
+      {"Autonomous"   , taskOption<AutonList>},
+      {"Motors"       , taskOption<MotorList>},
+      {"GPS Settings" , taskOption<  GPSList>},
+      {"Camera Tuning", taskOption<CameraList>}
     });
   }
 };

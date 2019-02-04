@@ -55,6 +55,20 @@ json& getGPSState() {
     return state["gps"];
 }
 
+json& getCameraState(pros::Vision& def) {
+    auto &state = getState();
+    if(state.find("cam") == state.end()) {
+        printf("Defaults were applied for the camera.\n");
+        state["cam"] = {
+            {"auto", false},
+            {"white", (int)def.get_white_balance()},
+            {"exposure", (int)def.get_exposure()}
+        };
+        saveState();
+    }
+    return state["cam"];
+}
+
 Elliot::Elliot():
 left{3, 4},
 right{-2, -1},
@@ -63,6 +77,7 @@ score{7},
 intake{10},
 catapultLimit{2},
 camera{15},
+camSettings{camera, getCameraState(camera)},
 gps{left, right, getGPSState()},
 controller{CONTROLLER_MASTER},
 leftSonic{'C', 'D'},

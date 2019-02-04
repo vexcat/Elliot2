@@ -197,6 +197,8 @@ void automaticControl(double L, double R, double velLimit, int extraTime = 0) {
 //Ball tracking function
 void trackBall(double maxVel, double threshold, double oovThreshold, double attack, int extraTime) {
   auto &bot = getRobot();
+  //"Green card" signature
+  bot.camera.print_signature(bot.camera.get_signature(1));
   bot.intake.moveVelocity(200);
   auto controller = controllerFromGPS(bot.gps, maxVel);
   while(true) {
@@ -210,12 +212,14 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
         break;
       }
     }
+    printf("Object sig was %d\n", object.signature);
     if(object.signature == VISION_OBJECT_ERR_SIG) break;
     int centerThreshold = threshold/2;
     int half = VISION_FOV_WIDTH/2;
+    printf("Ball coords: %d, %d\n", object.left_coord, object.top_coord);
     //If the object is about to go out of view, stop.
     if(VISION_FOV_HEIGHT - object.top_coord < oovThreshold) {
-      break;
+      //break;
     }
     //Too left
     if(object.left_coord < half-centerThreshold) {

@@ -3,6 +3,7 @@
 #include "okapi/api.hpp"
 #include "gps.hpp"
 #include "display.hpp"
+#include "camera.hpp"
 #include <deque>
 using namespace okapi;
 
@@ -28,6 +29,7 @@ class Elliot {
     public:
     pros::Controller controller;
     pros::Vision camera;
+    CameraSettings camSettings;
 	MotorGroup left;
 	MotorGroup right;
 	MotorGroup catapultMtr;
