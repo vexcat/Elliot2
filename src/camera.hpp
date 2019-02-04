@@ -1,3 +1,4 @@
+#pragma once
 #include "main.h"
 #include "json.hpp"
 #include "state.hpp"

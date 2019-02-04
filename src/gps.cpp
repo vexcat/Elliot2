@@ -13,15 +13,7 @@ double periodicallyEfficient(double n, double p) {
     return n;
 }
 
-GPS::GPS(MotorGroup& leftSide, MotorGroup& rightSide, json& idata): left(leftSide), right(rightSide), data(idata) {
-    cpr = data["cpr"].get<double>();
-    cpi = data["cpi"].get<double>();
-    gains.kP = data["kP"].get<double>();
-    gains.kI = data["kI"].get<double>();
-    gains.kD = data["kD"].get<double>();
-    dT = data["dT"].get<double>();
-}
-
+GPS::GPS(MotorGroup& leftSide, MotorGroup& rightSide, json& idata): left(leftSide), right(rightSide), data(idata) {}
 void GPS::beginTask() {
     pros::Task daemon([](void* obj){((GPS*)obj)->gpsDaemon();}, this);
 }
@@ -40,20 +32,6 @@ void GPS::setCPI(double newCPI) {
     data["cpi"] = newCPI;
     saveState();
     daemonLock.give();
-}
-
-void GPS::setPIDGains(PIDGains newGains) {
-    gains = newGains;
-    data["kP"] = newGains.kP;
-    data["kI"] = newGains.kI;
-    data["kD"] = newGains.kD; 
-    saveState();
-}
-
-void GPS::setDeltaTime(int delta) {
-    dT = delta;
-    data["dT"] = delta;
-    saveState();
 }
 
 RoboPosition GPS::getPosition() {

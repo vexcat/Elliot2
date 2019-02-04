@@ -23,10 +23,6 @@ class GPS {
     double cpr;
     //Counts Per Inch
     double cpi;
-    //PID Gains
-    PIDGains gains;
-    //Delta Time - How often to apply PID in ms
-    int dT;
     pros::Mutex daemonLock;
     json& data;
     public:
@@ -51,12 +47,6 @@ class GPS {
     void gpsDaemon();
 
 	void addPosDelta(RoboPosition& robot, double L, double R);
-
-    PIDGains getPIDGains() { return gains; }
-    void setPIDGains(PIDGains gains);
-
-    int getDeltaTime() { return dT; }
-    void setDeltaTime(int delta);
     
     void beginTask();
 };

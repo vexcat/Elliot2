@@ -4,6 +4,7 @@
 #include "gps.hpp"
 #include "display.hpp"
 #include "camera.hpp"
+#include "base.hpp"
 #include <deque>
 using namespace okapi;
 
@@ -18,6 +19,10 @@ class Catapult {
     void setVelocity(double vel);
     bool isGoingToSwitch();
     void beginTask();
+};
+
+struct BaseBox {
+    okapi::ChassisControllerPID base;
 };
 
 class Elliot {
@@ -40,6 +45,8 @@ class Elliot {
     pros::ADIUltrasonic rightSonic;
     Catapult catapult;
     GPS gps;
+    BaseBox* box;
+    BaseSettings baseSettings;
     Elliot();
     Elliot(const Elliot&) = delete;
     Elliot& operator=(const Elliot&) = delete;

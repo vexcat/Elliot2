@@ -43,16 +43,38 @@ json& getGPSState() {
     if(state.find("gps") == state.end()) {
         printf("Defaults were applied for the GPS. Please run GPS calibration.\n");
         state["gps"] = {
-            {"cpr", 885.050691498},
-            {"cpi", 68},
-            {"kP", 0},
-            {"kI", 0},
-            {"kD", 0},
-            {"dT", 0}
+            {"cpr", 442.5252999999999 * (360.0 / 900.0)},
+            {"cpi", 68.5052 * (360.0 / 900.0)}
         };
         saveState();
     }
     return state["gps"];
+}
+
+json& getBaseState() {
+    auto &state = getState();
+    if(state.find("base") == state.end()) {
+        printf("Defaults were applied for the base. Please change base PID.\n");
+        state["base"] = {
+            {"dist", {
+                {"kP", 0},
+                {"kI", 0},
+                {"kD", 0},
+            }},
+            {"angle", {
+                {"kP", 0},
+                {"kI", 0},
+                {"kD", 0},
+            }},
+            {"turn", {
+                {"kP", 0},
+                {"kI", 0},
+                {"kD", 0},
+            }}
+        };
+        saveState();
+    }
+    return state["base"];
 }
 
 json& getCameraState(pros::Vision& def) {
@@ -70,24 +92,26 @@ json& getCameraState(pros::Vision& def) {
 }
 
 Elliot::Elliot():
+controller{CONTROLLER_MASTER},
+camera{15},
+camSettings{camera, getCameraState(camera)},
 left{3, 4},
 right{-2, -1},
 catapultMtr{5},
 score{7},
 intake{10},
 catapultLimit{2},
-camera{15},
-camSettings{camera, getCameraState(camera)},
-gps{left, right, getGPSState()},
-controller{CONTROLLER_MASTER},
 leftSonic{'C', 'D'},
 rightSonic{'E', 'F'},
-catapult{catapultMtr, catapultLimit} {
+catapult{catapultMtr, catapultLimit},
+gps{left, right, getGPSState()},
+box{nullptr},
+baseSettings{box, getBaseState()} {
     score.setBrakeMode(AbstractMotor::brakeMode::hold);
     left.setGearing(AbstractMotor::gearset::green);
     right.setGearing(AbstractMotor::gearset::green);
-    left .setEncoderUnits(AbstractMotor::encoderUnits::counts);
-    right.setEncoderUnits(AbstractMotor::encoderUnits::counts);
+    left .setEncoderUnits(AbstractMotor::encoderUnits::degrees);
+    right.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
     catapultMtr.setGearing(AbstractMotor::gearset::red);
     catapultMtr.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
     score.setGearing(AbstractMotor::gearset::green);
@@ -99,8 +123,7 @@ void Elliot::takeCoast() {
 }
 
 void Elliot::stop() {
-    left.moveVelocity(0);
-    right.moveVelocity(0);
+    box->base.stop();
     catapult.setVelocity(0);
     score.moveVelocity(0);
     intake.moveVelocity(0);
@@ -119,6 +142,7 @@ void Elliot::give() {
     usageGuard.give();
     left .setBrakeMode(AbstractMotor::brakeMode::coast);
     right.setBrakeMode(AbstractMotor::brakeMode::coast);
+    box->base.stop();
 }
 
 void Elliot::beginTasks() {
