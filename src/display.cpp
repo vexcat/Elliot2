@@ -398,6 +398,7 @@ class MotionEditor: public ControllerMenu {
         while(autonRunner.get_state() != pros::E_TASK_STATE_DELETED) {
           if(ctrl.get_digital_new_press(DIGITAL_B)) {
             autonRunner.remove();
+            getRobot().stop();
             break;
           }
           pros::delay(5);

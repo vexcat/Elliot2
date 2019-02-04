@@ -20,7 +20,7 @@ class PIDController {
     FOLLOWING_NONE,
     FOLLOWING_LEFT,
     FOLLOWING_RIGHT
-  } follow;
+  } follow = FOLLOWING_NONE;
   IterativePosPIDController controller;
   double velLimit;
   public:
@@ -58,7 +58,7 @@ class PIDController {
   }
 
   void stepAbs(double L, double R) {
-    printf("stepAbs() = %f, %f\n", L, R);
+    printf("stepAbs() = %f, %f, %f, %f, %d\n", L, R, lTarget, rTarget, (int)follow);
     //Step controller based on follow.
     double controllerOutput;
     if(follow == FOLLOWING_LEFT) {
