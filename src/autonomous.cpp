@@ -258,7 +258,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
       target.x,
       target.y,
       0
-    }, bot.gps, motionObject["v"].get<double>(), motionObject["s"].get<bool>(), motionObject["t"].get<double>() * 1000);
+    }, bot.gps, motionObject["v"].get<double>(), false, motionObject["t"].get<double>() * 1000);
   }
   if(type == "rotateTo") {
     double dTheta = motionObject["o"].get<double>();
