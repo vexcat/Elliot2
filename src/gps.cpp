@@ -13,7 +13,10 @@ double periodicallyEfficient(double n, double p) {
     return n;
 }
 
-GPS::GPS(MotorGroup& leftSide, MotorGroup& rightSide, json& idata): left(leftSide), right(rightSide), data(idata) {}
+GPS::GPS(MotorGroup& leftSide, MotorGroup& rightSide, json& idata): left(leftSide), right(rightSide), data(idata) {
+    cpi = data["cpi"].get<double>();
+    cpr = data["cpr"].get<double>();
+}
 void GPS::beginTask() {
     pros::Task daemon([](void* obj){((GPS*)obj)->gpsDaemon();}, this);
 }
