@@ -5,6 +5,7 @@
 #include "display.hpp"
 #include "camera.hpp"
 #include "base.hpp"
+#include "debugging.hpp"
 #include <deque>
 using namespace okapi;
 
@@ -23,6 +24,8 @@ class Catapult {
 
 struct BaseBox {
     okapi::ChassisControllerPID base;
+    BaseBox(okapi::MotorGroup &l, okapi::MotorGroup &r, okapi::IterativePosPIDController::Gains d, okapi::IterativePosPIDController::Gains a, okapi::IterativePosPIDController::Gains t, okapi::AbstractMotor::GearsetRatioPair gear, okapi::ChassisScales s):
+    base(okapi::ChassisControllerFactory::create(l, r, d, a, t, gear, s)) {}
 };
 
 class Elliot {

@@ -4,6 +4,7 @@
 #include "state.hpp"
 #include "okapi/api.hpp"
 #include "elliot.hpp"
+#include "debugging.hpp"
 #include <utility>
 using json = nlohmann::json;
 struct BaseBox;
@@ -15,7 +16,8 @@ class BaseSettings {
         return {
             data[name]["kP"].get<double>(),
             data[name]["kI"].get<double>(),
-            data[name]["kD"].get<double>()
+            data[name]["kD"].get<double>(),
+            0
         };
     }
     public:
