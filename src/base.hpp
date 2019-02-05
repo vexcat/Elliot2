@@ -10,6 +10,7 @@ struct BaseBox;
 class BaseSettings {
     json &data;
     BaseBox* &base;
+    GPS &gps;
     okapi::IterativePosPIDController::Gains loadGains(const char* name) {
         return {
             data[name]["kP"].get<double>(),
@@ -45,7 +46,7 @@ class BaseSettings {
     void setTurnGains(okapi::IterativePosPIDController::Gains newGains) {
         modGains("turn", newGains);
     }
-    BaseSettings(BaseBox* & ibase, json& settingsLocation): base(ibase), data(settingsLocation) {
+    BaseSettings(GPS &igps, BaseBox* & ibase, json& settingsLocation): base(ibase), data(settingsLocation), gps(igps) {
         loadState();
     }
 };

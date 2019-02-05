@@ -1,15 +1,15 @@
 #include "main.h"
 #include "elliot.hpp"
 #include "base.hpp"
+#include "debugging.hpp"
 
 void BaseSettings::loadState() {
-    auto &bot = getRobot();
     if(base) delete base;
     base = new BaseBox {
-        okapi::ChassisControllerFactory::create(bot.left, bot.right, 
+        okapi::ChassisControllerFactory::create(gps.left, gps.right, 
         loadGains("dist"), loadGains("angle"), loadGains("turn"),
         AbstractMotor::gearset::green, {
-            bot.gps.countsToInch(360) / PI, bot.gps.radiansToCounts(2)
+            gps.countsToInch(360) / PI, gps.radiansToCounts(2)
         })
     };
     base->base.startThread();
