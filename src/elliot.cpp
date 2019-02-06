@@ -124,6 +124,7 @@ void Elliot::takeCoast() {
 
 void Elliot::stop() {
     box->base.stop();
+    getRobot().baseSettings.loadState();
     catapult.setVelocity(0);
     score.moveVelocity(0);
     intake.moveVelocity(0);
@@ -142,7 +143,7 @@ void Elliot::give() {
     usageGuard.give();
     left .setBrakeMode(AbstractMotor::brakeMode::coast);
     right.setBrakeMode(AbstractMotor::brakeMode::coast);
-    box->base.stop();
+    stop();
 }
 
 void Elliot::beginTasks() {

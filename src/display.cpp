@@ -405,6 +405,7 @@ class MotionEditor: public ControllerMenu {
           pros::delay(5);
         }
         getRobot().box->base.stop();
+        getRobot().baseSettings.loadState();
         //Task is gone. Render, and close the scope.
         render();
       }}
