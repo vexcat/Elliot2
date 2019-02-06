@@ -891,9 +891,9 @@ class MotorGroupOutput: public ControllerOutput<double> {
 void tuneGains() { 
   //TODO: Fix the hardcoded ports!
   MotorGroup entireBase{3, 4, -2, -1};
-  entireBase.setEncoderUnits(AbstractMotor::encoderUnits::counts);
+  entireBase.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
   MotorGroup turningBase{3, 4, 2, 1};
-  turningBase.setEncoderUnits(AbstractMotor::encoderUnits::counts);
+  turningBase.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
   //Base Settings - controls PID Gains on chassis object
   auto &settings = getRobot().baseSettings;
   //Create the tuna for distance
