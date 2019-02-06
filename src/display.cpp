@@ -513,9 +513,12 @@ class MotionList: public CRUDMenu {
           }, 1.0, false, 1000);
           pros::delay(500);
           copy["type"] = "rotateTo";
+          copy["v"] = 1.0;
+          copy["t"] = 2.0;
+          debug(copy.dump() + "\n");
           RoboPosition tracking;
           runMotion(copy, tracking, getBlue());
-          getRobot().box->base.stop();
+          getRobot().baseSettings.loadState();
         }},
         //Shows up as "*Set Orientatio" due to character limit
         {"Set Orientation", [&motionSelected]() {
