@@ -122,7 +122,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     dTheta -= bot.gps.getPosition().o;
     dTheta = periodicallyEfficient(dTheta);
     double velLimit = motionObject["v"].get<double>();
-    bot.box->base.setMaxVelocity(velLimit);
+    bot.box->base.setMaxVelocity(velLimit * (int)bot.left.getGearing());
     bot.box->base.turnAngle(dTheta * -(180 / PI));
     pros::delay(motionObject["t"].get<double>() * 1000);
     //Reconstruct CCPID to unstarve the LVGL task.
