@@ -44,6 +44,7 @@ json& getState() {
         curState = new json();
         try {
             *curState = json::parse(get_file_contents(filePath));
+            puts(curState->dump().c_str());
         } catch(...) {
             printf("No SD card data found.\n");
         }
