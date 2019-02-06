@@ -87,6 +87,8 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int ext
   //Move by dist degrees
   cha.moveDistance(dist);
   printf("Did distance.\n");
+  //Wait for extraTime ms.
+  pros::delay(extraTime);
 }
 
 void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
