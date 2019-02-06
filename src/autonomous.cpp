@@ -69,7 +69,7 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int ext
   auto &gps = bot.gps;
   auto &cha = bot.box->base;
   //Stick to the speed limit
-  cha.setMaxVelocity(velLimit);
+  cha.setMaxVelocity(velLimit * (int)bot.left.getGearing());
   //Get current position
   auto curPos = gps.getPosition();
   //Calculate distance
@@ -81,9 +81,12 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int ext
   //Calculate change in angle
   double dTheta = atan2(dy, dx) - curPos.o;
   //Turn by dTheta radians CCW
+  printf("Turning by %f degrees, then going %f wheel degrees.\n", dTheta * -(180.0 / PI), dist);
   cha.turnAngle(dTheta * -(180.0 / PI));
+  printf("Did turn.\n");
   //Move by dist degrees
   cha.moveDistance(dist);
+  printf("Did distance.\n");
 }
 
 void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
