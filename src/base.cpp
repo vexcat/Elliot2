@@ -12,7 +12,7 @@ void BaseSettings::loadState() {
         gps.left, gps.right, 
         dist, angle, turn,
         AbstractMotor::gearset::green, {
-            gps.countsToInch(360) / PI, gps.radiansToCounts(2)
+            (gps.countsToInch(360) / PI) * okapi::inch, gps.countsToInch(gps.radiansToCounts(2)) * okapi::inch
         }
     );
     base->base.startThread();

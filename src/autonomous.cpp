@@ -87,7 +87,7 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int ext
   }
   //Turn by dTheta radians CCW
   printf("Turning by %f degrees, then going %f wheel degrees.\n", dTheta * -(180.0 / PI), dist);
-  cha.turnAngle(dTheta * -(180.0 / PI));
+  cha.turnAngle(dTheta * -(180.0 / PI) * okapi::degree);
   printf("Did turn.\n");
   //Move by dist degrees
   cha.moveDistance(dist);
@@ -128,7 +128,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     dTheta = periodicallyEfficient(dTheta);
     double velLimit = motionObject["v"].get<double>();
     bot.box->base.setMaxVelocity(velLimit * (int)bot.left.getGearing());
-    bot.box->base.turnAngle(dTheta * -(180 / PI));
+    bot.box->base.turnAngle(dTheta * -(180 / PI) * okapi::degree);
     pros::delay(motionObject["t"].get<double>() * 1000);
     //Reconstruct CCPID to unstarve the LVGL task.
     //No idea why this is necessary. Both me and 7842F have this issue.
