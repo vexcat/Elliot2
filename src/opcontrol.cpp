@@ -19,10 +19,10 @@ double dz(double a, double zone) {
 
 void Elliot::drive(pros::Controller& m) {
 	//Base drive
-	int y = m.get_analog(ANALOG_LEFT_Y) * (speedMultiplier / 127.0);
-	int x = m.get_analog(ANALOG_LEFT_X) * (speedMultiplier / 127.0);
+	double y = m.get_analog(ANALOG_LEFT_Y) * (speedMultiplier / 127.0);
+	double x = m.get_analog(ANALOG_LEFT_X) * (speedMultiplier / 127.0);
 
-	box->base.arcade(multiplier * y, x, 32);
+	box->base.arcade(multiplier * y, x, 32 / 200.0);
 
 	//Scorer drive
 	int scoreVel = 150 * (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
@@ -50,10 +50,10 @@ void Elliot::drive(pros::Controller& m) {
 
 	//Slow button
 	if(m.get_digital_new_press(DIGITAL_DOWN)) {
-		if(speedMultiplier == 200) {
-			speedMultiplier = 150;
+		if(speedMultiplier == 1.0) {
+			speedMultiplier = 0.75;
 		} else {
-			speedMultiplier = 200;
+			speedMultiplier = 1.0;
 		}
 	}
 
