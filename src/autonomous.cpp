@@ -124,7 +124,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     double velLimit = motionObject["v"].get<double>();
     bot.box->base.setMaxVelocity(velLimit);
     bot.box->base.turnAngle(dTheta * -(180 / PI));
-    pros::delay(motionObject["t"].get<double>());
+    pros::delay(motionObject["t"].get<double>() * 1000);
     //Reconstruct CCPID to unstarve the LVGL task.
     //No idea why this is necessary. Both me and 7842F have this issue.
     bot.baseSettings.loadState();
