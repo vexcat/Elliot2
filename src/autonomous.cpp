@@ -80,6 +80,11 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int ext
   if(dist == 0) return;
   //Calculate change in angle
   double dTheta = atan2(dy, dx) - curPos.o;
+  //If it's behind the robot, flip and generate a negative distance.
+  if(-PI/2 > dTheta || dTheta > PI/2) {
+    dTheta = periodicallyEfficient(dTheta + PI);
+    dist *= -1;
+  }
   //Turn by dTheta radians CCW
   printf("Turning by %f degrees, then going %f wheel degrees.\n", dTheta * -(180.0 / PI), dist);
   cha.turnAngle(dTheta * -(180.0 / PI));
