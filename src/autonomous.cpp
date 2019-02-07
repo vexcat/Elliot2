@@ -79,7 +79,7 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int ext
   //Is it 0? We're done.
   if(dist == 0) return;
   //Calculate change in angle
-  double dTheta = atan2(dy, dx) - curPos.o;
+  double dTheta = periodicallyEfficient(atan2(dy, dx) - curPos.o);
   //If it's behind the robot, flip and generate a negative distance.
   if(-PI/2 > dTheta || dTheta > PI/2) {
     dTheta = periodicallyEfficient(dTheta + PI);
