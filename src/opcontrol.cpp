@@ -66,9 +66,6 @@ void Elliot::drive(pros::Controller& m) {
 		left .setBrakeMode(AbstractMotor::brakeMode::coast);
 		right.setBrakeMode(AbstractMotor::brakeMode::coast);
 	}
-
-	//Allow for controller menus to safely take over the robot.
-	//See display.cpp
 }
 
 void opcontrol() {
