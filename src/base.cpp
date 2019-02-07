@@ -8,6 +8,10 @@ void BaseSettings::loadState() {
     auto dist = loadGains("dist");
     auto angle = loadGains("angle");
     auto turn = loadGains("turn");
+    //Negate D gains to workaround OkapiLib/OkapiLib#332
+    dist .kD *= -1;
+    angle.kD *= -1;
+    turn .kD *= -1;
     base = new BaseBox(
         gps.left, gps.right, 
         dist, angle, turn,
