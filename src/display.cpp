@@ -511,13 +511,13 @@ class MotionList: public CRUDMenu {
             getRobot().gps.inchToCounts(copy["y"].get<double>()),
             0
           }, 1.0, false, 1000);
-          pros::delay(500);
-          copy["type"] = "rotateTo";
-          copy["v"] = 1.0;
-          copy["t"] = 2.0;
-          debug(copy.dump() + "\n");
           RoboPosition tracking;
-          runMotion(copy, tracking, getBlue());
+          runMotion({
+            {"type", "rotateTo"},
+            {"o", copy["o"].get<double>()},
+            {"v", 1.0},
+            {"t", 2.0}
+          }, tracking, getBlue());
           getRobot().baseSettings.loadState();
         }},
         //Shows up as "*Set Orientatio" due to character limit
