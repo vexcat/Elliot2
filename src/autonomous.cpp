@@ -92,9 +92,6 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int ext
   //Move by dist degrees
   cha.moveDistance(dist);
   printf("Did distance.\n");
-  //Reconstruct CCPID to unstarve the LVGL task.
-  //No idea why this is necessary. Both me and 7842F have this issue.
-  bot.baseSettings.loadState();
   //Wait for extraTime ms.
   pros::delay(extraTime);
 }
@@ -130,9 +127,6 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     bot.box->base.setMaxVelocity(velLimit * (int)bot.left.getGearing());
     bot.box->base.turnAngle(dTheta * -(180 / PI) * okapi::degree);
     pros::delay(motionObject["t"].get<double>() * 1000);
-    //Reconstruct CCPID to unstarve the LVGL task.
-    //No idea why this is necessary. Both me and 7842F have this issue.
-    bot.baseSettings.loadState();
   }
   if(type == "autoball") {
     trackBall(
