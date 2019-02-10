@@ -46,7 +46,7 @@ int getHorizontalDirection(int flip) {
   auto &ctrl = getRobot().controller;
   int dir = (!!ctrl.get_digital_new_press(DIGITAL_RIGHT) - !!ctrl.get_digital_new_press(DIGITAL_LEFT));
   if(!dir) {
-    dir = 4 * -ctrl.get_analog(ANALOG_LEFT_X)/127.0;
+    dir = 4 * ctrl.get_analog(ANALOG_LEFT_X)/127.0;
     dir = std::clamp(dir, -3, 3);
   }
   return dir * flip;
