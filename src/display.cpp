@@ -353,6 +353,7 @@ RoboPosition offsetFor(const json& auton, int idx) {
       };
     }
   }
+  throw "Undefined GPS Position";
 }
 
 //Can edit a motion object, given its keys.
