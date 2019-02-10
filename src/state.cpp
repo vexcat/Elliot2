@@ -31,7 +31,6 @@ json& getState();
 void saveState() {
     try {
         write_file_contents(filePath, getState().dump());
-        puts(getState().dump().c_str());
     } catch(...) {
         printf("Failed to write data.json. Please check write protection / SD inserted.\n");
     }
@@ -44,7 +43,6 @@ json& getState() {
         curState = new json();
         try {
             *curState = json::parse(get_file_contents(filePath));
-            puts(curState->dump().c_str());
         } catch(...) {
             printf("No SD card data found.\n");
         }

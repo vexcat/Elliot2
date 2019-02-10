@@ -11,7 +11,6 @@ using namespace std;
 bool isBlue;
 void setBlue(bool blue) {
   isBlue = blue;
-  //printf("Blue: %d\n", isBlue);
 }
 
 bool getBlue() {
@@ -37,11 +36,9 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
         break;
       }
     }
-    printf("Object sig was %d\n", object.signature);
     if(object.signature == VISION_OBJECT_ERR_SIG) break;
     int centerThreshold = threshold/2;
     int half = VISION_FOV_WIDTH/2;
-    printf("Ball coords: %d, %d\n", object.left_coord, object.top_coord);
     //If the object is about to go out of view, stop.
     if(VISION_FOV_HEIGHT - object.top_coord < oovThreshold) {
       //break;
@@ -86,12 +83,9 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int ext
     dist *= -1;
   }
   //Turn by dTheta radians CCW
-  printf("Turning by %f degrees, then going %f wheel degrees.\n", dTheta * -(180.0 / PI), dist);
   cha.turnAngle(dTheta * -(180.0 / PI) * okapi::degree);
-  printf("Did turn.\n");
   //Move by dist degrees
   cha.moveDistance(dist);
-  printf("Did distance.\n");
   //Wait for extraTime ms.
   pros::delay(extraTime);
 }
