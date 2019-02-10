@@ -848,7 +848,7 @@ class PIDGainsList: public ControllerMenu {
         gains.kI = editNumber(gains.kI, 12);
       }},
       {"Set kD", [&]() {
-        gains.kD = editNumber(gains.kD, 7);
+        gains.kD = editNumber(gains.kD, 12);
       }}
     });
   }
