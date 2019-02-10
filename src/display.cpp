@@ -349,7 +349,7 @@ RoboPosition offsetFor(const json& auton, int idx) {
       return {
         bot.gps.inchToCounts((*loc)["x"].get<double>()),
         bot.gps.inchToCounts((*loc)["y"].get<double>()),
-        bot.gps.inchToCounts((*loc)["o"].get<double>()),
+        (*loc)["o"].get<double>(),
       };
     }
   }
