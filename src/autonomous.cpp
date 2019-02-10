@@ -119,10 +119,15 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
   }
   if(type == "rotateTo") {
     double dTheta = motionObject["o"].get<double>();
+    printf("dTheta is now %f\n", dTheta);
     dTheta += offset.o;
+    printf("dTheta is now %f\n", dTheta);
     dTheta = isBlue ? PI - dTheta : dTheta;
+    printf("dTheta is now %f\n", dTheta);
     dTheta -= bot.gps.getPosition().o;
+    printf("dTheta is now %f\n", dTheta);
     dTheta = periodicallyEfficient(dTheta);
+    printf("dTheta is now %f, nanidafuq?\n", dTheta);
     double velLimit = motionObject["v"].get<double>();
     bot.box->base.setMaxVelocity(velLimit * (int)bot.left.getGearing());
     bot.box->base.turnAngle(dTheta * -(180 / PI) * okapi::degree);
