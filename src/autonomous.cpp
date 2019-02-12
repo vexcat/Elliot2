@@ -61,7 +61,7 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
   bot.intake.moveVelocity(0);
 }
 
-void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int extraTime) {
+void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int extraTime, int turnExtraTime) {
   auto &bot = getRobot();
   auto &gps = bot.gps;
   auto &cha = bot.box->base;
@@ -84,6 +84,8 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int ext
   }
   //Turn by dTheta radians CCW
   cha.turnAngle(dTheta * -(180.0 / PI) * okapi::degree);
+  //Wait for turnExtraTime ms.
+  pros::delay(turnExtraTime);
   //Move by dist degrees
   cha.moveDistance(dist);
   //Wait for extraTime ms.
@@ -109,7 +111,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
       target.x,
       target.y,
       0
-    }, motionObject["v"].get<double>(), false, motionObject["t"].get<double>() * 1000);
+    }, motionObject["v"].get<double>(), false, motionObject["t"].get<double>() * 1000, motionObject["rT"].get<double>() * 1000);
   }
   if(type == "rotateTo") {
     double dTheta = motionObject["o"].get<double>();

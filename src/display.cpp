@@ -440,7 +440,7 @@ class MotionList: public CRUDMenu {
       {"x", 0.0}, {"y", 0.0}, {"o", 0.0}
     });
     jsonInserter("Position", {
-      {"x", 0}, {"y", 0}, {"t", 0.2}, {"v", 1.0}
+      {"x", 0}, {"y", 0}, {"t", 0.2}, {"rT", 0.2}, {"v", 1.0}
     });
     jsonInserter("Rotation", {
       {"o", 0}, {"t", 0.2}, {"v", 1.0}
@@ -543,7 +543,8 @@ class MotionList: public CRUDMenu {
         {"x", 2, "Set X"},
         {"y", 2, "Set Y"},
         {"v", 2, "Set velocity"},
-        {"t", 3, "Set timing"}
+        {"t", 3, "Set timing"},
+        {"rT", 3, "Set rTiming"}
       }, {
         {"Set to Current", [&motionSelected, idx]() {
           auto delta = offsetFor(motionSelected, idx);
