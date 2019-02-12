@@ -202,6 +202,16 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
       motionObject["o"].get<double>()
     };
   }
+  if(type == "direct") {
+    bot.box->base.stop();
+    bot.left.moveVelocity(motionObject["l"].get<double>());
+    bot.left.moveVelocity(motionObject["r"].get<double>());
+    if(motionObject["t"].get<double>() != 0) {
+      pros::delay(motionObject["t"].get<double>() * 1000);
+      bot.left.moveVelocity(0);
+      bot.right.moveVelocity(0);
+    }
+  }
 }
 
 void runAuton(json::iterator loc, json::iterator end, bool isBlue) {

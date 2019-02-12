@@ -442,6 +442,9 @@ class MotionList: public CRUDMenu {
     jsonInserter("Position", {
       {"x", 0}, {"y", 0}, {"t", 0.2}, {"rT", 0.2}, {"v", 1.0}
     });
+    jsonInserter("Direct", {
+      {"l", 1.0}, {"r", 1.00}, {"t", 1.0}
+    });
     jsonInserter("Rotation", {
       {"o", 0}, {"t", 0.2}, {"v", 1.0}
     }, "rotateTo");
@@ -593,6 +596,12 @@ class MotionList: public CRUDMenu {
         {"c", 0, "Set mid_thres"},
         {"d", 0, "Set bot_thres"},
         {"a", 2, "Set attack"}
+      })();
+    } else if(type == "direct") {
+      MotionEditor(motionData, idx, {
+        {"l", 3, "Set leftvel"},
+        {"r", 3, "Set rightvel"},
+        {"t", 3, "Set timing"}
       })();
     }
     updateItem(idx, nameFor(motionData[idx]));
