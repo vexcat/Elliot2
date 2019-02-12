@@ -417,7 +417,12 @@ class MotionEditor: public ControllerMenu {
 //Can edit an autonomous, given its motion list.
 class MotionList: public CRUDMenu {
   json &motionData;
-  void jsonInserter(std::string name, const json& defaultValue) {
+  void jsonInserter(const std::string& name, json defaultValue = {}, std::string type = "") {
+    if(type == "") {
+      type = name;
+      std::transform(type.begin(), type.end(), type.begin(), ::tolower);
+    }
+    defaultValue["type"] = type;
     addInserter(name, [this, defaultValue](int index) -> std::string {
       motionData.insert(motionData.begin() + index, defaultValue);
       return nameFor(motionData[index]);
@@ -428,51 +433,33 @@ class MotionList: public CRUDMenu {
     //Add inserters here
     auto &bot = getRobot();
     jsonInserter("Origin", {
-      {"type", "origin"}, {"name", "ORIGIN"},
+      {"name", "ORIGIN"},
       {"x", 0.0}, {"y", 0.0}, {"o", 0.0}
     });
     jsonInserter("Delta", {
-      {"type", "delta"},
       {"x", 0.0}, {"y", 0.0}, {"o", 0.0}
     });
     jsonInserter("Position", {
-      {"type", "position"},
       {"x", 0}, {"y", 0}, {"t", 0.2}, {"v", 1.0}
     });
     jsonInserter("Rotation", {
-      {"type", "rotateTo"},
       {"o", 0}, {"t", 0.2}, {"v", 1.0}
-    });
+    }, "rotateTo");
     jsonInserter("Scorer", {
-      {"type", "scorer"},
       {"v", 1.0}, {"t", 0.2}
     });
     jsonInserter("Catapult", {
-      {"type", "catapult"},
       {"v", 1.0}, {"t", 0.2}
     });
     jsonInserter("Intake", {
-      {"type", "intake"},
       {"v", 1.0}, {"t", 0.2}
     });
-    jsonInserter("Shoot", {
-      {"type", "shoot"}
-    });
-    jsonInserter("Delay", {
-      {"type", "delay"},
-      {"t", 0.2}
-    });
-    jsonInserter("BHold", {
-      {"type", "hold"}
-    });
-    jsonInserter("BCoast", {
-      {"type", "coast"}
-    });
-    jsonInserter("BShort", {
-      {"type", "short"}
-    });
+    jsonInserter("Shoot");
+    jsonInserter("Delay");
+    jsonInserter("BHold");
+    jsonInserter("BCoast");
+    jsonInserter("BShort");
     jsonInserter("AutoBall", {
-      {"type", "autoball"},
       {"v", 1.0}, {"c", 50}, {"d", 40}, {"a", 8}, {"t", 0.2}
     });
     //Add existing items
