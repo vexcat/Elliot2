@@ -1014,7 +1014,7 @@ class RootList: public ControllerMenu {
 };
 
 void drawCatOSScreen() {
-  line_set(0, "catOS v1.2");
+  line_set(0, "catOS v1.3");
   line_set(1, "press <-+-> to");
   line_set(2, "activate menu");
 }
