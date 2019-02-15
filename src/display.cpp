@@ -134,6 +134,7 @@ std::string getSelectedAuton() {
 }
 std::vector<std::string> autonNames;
 std::vector<std::pair<lv_obj_t*, lv_obj_t*>> selectors;
+
 //Adds new autons to the screen
 void addAuton(std::string byName) {
   if(std::find(autonNames.begin(), autonNames.end(), byName) != autonNames.end()) {
@@ -293,6 +294,7 @@ void uiExecutor(void*) {
 //  what JSON-based autons can do, take a look at autonomous.cpp and gps.cpp.
 //-----------------------------------------------------------------------------------
 
+//Tests for PID control
 class PIDTestingMenu: public ControllerMenu {
   public:
   PIDTestingMenu() {
@@ -335,6 +337,7 @@ class PIDTestingMenu: public ControllerMenu {
 //Whether a critical battery message has been dismissed
 bool criticalBattIgnored = false;
 
+//Stalls the menu system if the battery is low.
 int checkBattery(pros::Controller& ctrl) {
   if(!criticalBattIgnored && pros::battery::get_capacity() < 15) {
     line_set(0, "Battery is");
@@ -768,6 +771,7 @@ class MotorList: public ControllerMenu {
   }
 };
 
+//Can guide user through setting CPR/CPI GPS values.
 class GPSCalibrator: public ControllerTask {
   double initial_left;
   double initial_right;
@@ -840,6 +844,7 @@ class GPSCalibrator: public ControllerTask {
   }
 };
 
+//Edits the GPS position.
 class GPSPositionList: public ControllerMenu {
   public:
   GPSPositionList() {
@@ -864,6 +869,7 @@ class GPSPositionList: public ControllerMenu {
   }
 };
 
+//Edits a PID gains object.
 class PIDGainsList: public ControllerMenu {
   public:
   PIDGainsList(okapi::IterativePosPIDController::Gains& gains) {
@@ -882,6 +888,7 @@ class PIDGainsList: public ControllerMenu {
   }
 };
 
+//List of gain sets for distance, angle, and turn.
 class GPSGainList: public ControllerMenu {
   public:
   GPSGainList() {
@@ -921,6 +928,7 @@ class MotorGroupOutput: public ControllerOutput<double> {
   }
 };
 
+//Can automatically find correct PID values, using okapi::PIDTuner.
 void tuneGains() { 
   //TODO: Fix the hardcoded ports!
   MotorGroup entireBase{3, 4, -2, -1};
@@ -962,6 +970,7 @@ void tuneGains() {
   settings.setTurnGains(settings.getAngleGains());
 }
 
+//Runs tuneGains() with message on-screen.
 class GainTuner: public ControllerMenu {
   public:
   GainTuner() {}
@@ -984,6 +993,7 @@ class GainTuner: public ControllerMenu {
   }
 };
 
+//Contains GPS menus & cpr/cpi editors.
 class GPSList: public ControllerMenu {
   public:
   GPSList() {
@@ -1003,6 +1013,7 @@ class GPSList: public ControllerMenu {
   }
 };
 
+//Can configure the V5 Vision Sensor
 class CameraList: public ControllerMenu {
   void updateAWB() {
     auto &cam = getRobot().camSettings;
@@ -1032,6 +1043,7 @@ class CameraList: public ControllerMenu {
   }
 };
 
+//Contains all menus on the controller, besides the PID test menu.
 class RootList: public ControllerMenu {
   public:
   RootList() {
@@ -1044,12 +1056,14 @@ class RootList: public ControllerMenu {
   }
 };
 
+//Shows screen that appears before entering RootMenu
 void drawCatOSScreen() {
   line_set(0, "catOS v1.3");
   line_set(1, "press <-+-> to");
   line_set(2, "activate menu");
 }
 
+//The background task that controls controller UI.
 void catOS(void*) {
   pros::Controller ctrl(pros::E_CONTROLLER_MASTER);
   drawCatOSScreen();
@@ -1069,11 +1083,14 @@ void catOS(void*) {
   }
 }
 
+//Runs when the robot is disabled.
 void disabled() { }
 
+//Runs both uiExecutor for the brain screen, and catOS for the controller UI.
 void startupDisplay() {
   pros::Task uiThread(uiExecutor, NULL, LVGL_PRIORITY);
   pros::Task controllerUI(catOS);
 }
 
+//Not used.
 void competition_initialize() {}
