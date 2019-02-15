@@ -100,36 +100,44 @@ std::string editString(std::string text) {
     if(hdir) renderStringEditor(text, cursor);
 
     int vdir = getVerticalDirection();
-    auto &sym = text[cursor] += vdir;
+    for(int i = 0; i < std::abs(vdir); i++) {
+      auto &sym = text[cursor] += vdir > 0 ? 1 : 0;
 
-    if(vdir > 0) {
-      if(sym == ' ' + 1) {
-        sym = 'a';
+      if(vdir > 0) {
+        if(sym == ' ' + 1) {
+          sym = 'a';
+        }
+        if(sym == 'z' + 1) {
+          sym = 'A';
+        }
+        if(sym == 'Z' + 1) {
+          sym = '0';
+        }
+        if(sym == '9' + 1) {
+          sym = ' ';
+        }
       }
-      if(sym == 'z' + 1) {
-        sym = 'A';
-      }
-      if(sym == 'Z' + 1) {
-        sym = '0';
-      }
-      if(sym == '9' + 1) {
-        sym = ' ';
+
+      if(vdir < 0) {
+        if(sym == ' ' - 1) {
+          sym = '9';
+        }
+        if(sym == '0' - 1) {
+          sym = 'Z';
+        }
+        if(sym == 'A' - 1) {
+          sym = 'z';
+        }
+        if(sym == 'a' - 1) {
+          sym = ' ';
+        }
       }
     }
 
-    if(vdir < 0) {
-      if(sym == ' ' - 1) {
-        sym = '9';
-      }
-      if(sym == '0' - 1) {
-        sym = 'Z';
-      }
-      if(sym == 'A' - 1) {
-        sym = 'z';
-      }
-      if(sym == 'a' - 1) {
-        sym = ' ';
-      }
+    //Just in case
+    auto &sym = text[cursor];
+    if(!(('a' <= sym && sym <= 'z') || ('A' <= sym && sym <= 'Z') || ('0' <= sym && sym <= '9') || sym == ' ')) {
+      sym = ' ';
     }
 
     if(vdir) renderStringEditor(text, cursor);
