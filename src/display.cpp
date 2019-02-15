@@ -292,6 +292,45 @@ void uiExecutor(void*) {
 //  what JSON-based autons can do, take a look at autonomous.cpp and gps.cpp.
 //-----------------------------------------------------------------------------------
 
+class PIDTestingMenu: public ControllerMenu {
+  public:
+  PIDTestingMenu() {
+    list.insert(list.begin(), {
+      {"Small Turn", [&]() {
+        auto &gps = getRobot().gps;
+        RoboPosition track = gps.getPosition();
+        runMotion({
+          {"type", "rotateTo"},
+          {"o", PI / 18.0},
+          {"v", 1.0},
+          {"t", 0.2}
+        }, track, false);
+      }},
+      {"90 Turn", [&]() {
+        auto &gps = getRobot().gps;
+        RoboPosition track = gps.getPosition();
+        runMotion({
+          {"type", "rotateTo"},
+          {"o", PI / 2.0},
+          {"v", 1.0},
+          {"t", 0.2}
+        }, track, false);
+      }},
+      {"24in Fwd", [&]() {
+        auto &gps = getRobot().gps;
+        RoboPosition track = gps.getPosition();
+        runMotion({
+          {"type", "position"},
+          {"x", cos(track.o) * 24},
+          {"y", sin(track.o) * 24},
+          {"v", 1.0},
+          {"t", 0.2}
+        }, track, false);
+      }}
+    });
+  }
+};
+
 //Whether a critical battery message has been dismissed
 bool criticalBattIgnored = false;
 
@@ -318,21 +357,26 @@ int checkBattery(pros::Controller& ctrl) {
 int checkTemporaryExit() {
   auto &ctrl = getRobot().controller;
   if(ctrl.get_digital_new_press(DIGITAL_Y)) {
-    line_set(0, "Now driving,");
-    line_set(1, "Press B");
-    line_set(2, "to exit.");
-    auto &bot = getRobot();
-    //Let opcontrol continue.
-    bot.give();
-    while(true) {
-      if(ctrl.get_digital(DIGITAL_B)) {
-        while(ctrl.get_digital(DIGITAL_B)) pros::delay(25);
-        bot.takeStopped();
-        break;
+    if(!ctrl.get_digital(DIGITAL_RIGHT)) {
+      line_set(0, "Now driving,");
+      line_set(1, "Press B");
+      line_set(2, "to exit.");
+      auto &bot = getRobot();
+      //Let opcontrol continue.
+      bot.give();
+      while(true) {
+        if(ctrl.get_digital(DIGITAL_B)) {
+          while(ctrl.get_digital(DIGITAL_B)) pros::delay(25);
+          bot.takeStopped();
+          break;
+        }
+        pros::delay(5);
       }
-      pros::delay(5);
+      return true;
+    } else {
+      PIDTestingMenu()();
+      return true;
     }
-    return true;
   }
   checkBattery(ctrl);
   return false;
