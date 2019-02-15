@@ -167,6 +167,7 @@ void addAuton(std::string byName) {
     }
   }
 }
+
 //Removes autons from the screen
 void removeAuton(std::string byName) {
   auto loc = std::find(autonNames.begin(), autonNames.end(), byName);
@@ -480,40 +481,25 @@ class MotionList: public CRUDMenu {
       {"name", "ORIGIN"},
       {"x", 0.0}, {"y", 0.0}, {"o", 0.0}
     });
-    jsonInserter("Delta", {
-      {"x", 0.0}, {"y", 0.0}, {"o", 0.0}
-    });
-    jsonInserter("Position", {
-      {"x", 0}, {"y", 0}, {"t", 0.2}, {"rT", 0.2}, {"v", 1.0}
-    });
-    jsonInserter("Direct", {
-      {"l", 1.0}, {"r", 1.00}, {"t", 1.0}
-    });
-    jsonInserter("Rotation", {
-      {"o", 0}, {"t", 0.2}, {"v", 1.0}
-    }, "rotateTo");
-    jsonInserter("Scorer", {
-      {"v", 1.0}, {"t", 0.2}
-    });
-    jsonInserter("Catapult", {
-      {"v", 1.0}, {"t", 0.2}
-    });
-    jsonInserter("Intake", {
-      {"v", 1.0}, {"t", 0.2}
-    });
+    jsonInserter("Delta", { {"x", 0.0}, {"y", 0.0}, {"o", 0.0} });
+    jsonInserter("Position", { {"x", 0}, {"y", 0}, {"t", 0.2}, {"rT", 0.2}, {"v", 1.0} });
+    jsonInserter("Direct", { {"l", 1.0}, {"r", 1.00}, {"t", 1.0} });
+    jsonInserter("Rotation", { {"o", 0}, {"t", 0.2}, {"v", 1.0} }, "rotateTo");
+    jsonInserter("Scorer", { {"v", 1.0}, {"t", 0.2} });
+    jsonInserter("Catapult", { {"v", 1.0}, {"t", 0.2} });
+    jsonInserter("Intake", { {"v", 1.0}, {"t", 0.2} });
     jsonInserter("Shoot");
     jsonInserter("Delay");
     jsonInserter("BHold");
     jsonInserter("BCoast");
     jsonInserter("BShort");
-    jsonInserter("AutoBall", {
-      {"v", 1.0}, {"c", 50}, {"d", 40}, {"a", 8}, {"t", 0.2}
-    });
+    jsonInserter("AutoBall", { {"v", 1.0}, {"c", 50}, {"d", 40}, {"a", 8}, {"t", 0.2} });
     //Add existing items
     for(auto &motion: motionData) {
       addItem(nameFor(motion));
     }
   }
+
   void attemptDelete(int idx, const std::string& oldName) override {
     motionData.erase(motionData.begin() + idx);
   }
@@ -527,6 +513,7 @@ class MotionList: public CRUDMenu {
     motionData.insert(motionData.begin() + newIdx, motionData[idx]);
     return nameFor(motionData[newIdx]);
   }
+
   void handleSelect(int idx, const std::string& name) override {
     std::string type = motionData[idx]["type"];
     auto &motionSelected = motionData[idx];
