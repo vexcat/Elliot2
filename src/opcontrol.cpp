@@ -71,12 +71,19 @@ void Elliot::drive(pros::Controller& m) {
 		left .setBrakeMode(AbstractMotor::brakeMode::coast);
 		right.setBrakeMode(AbstractMotor::brakeMode::coast);
 	}
+
+	//30sec warning
+	if(opctrlBegin != -1L && opctrlBegin < pros::millis() - 75000)  {
+		opctrlBegin = -1L;
+		m.rumble(".. ..");
+	}
 }
 
 void opcontrol() {
 	pros::Controller m(pros::E_CONTROLLER_MASTER);
 	auto &bot = getRobot();
   	bot.give();
+	bot.opctrlBegin = pros::millis();
 	while (true) {
 		//takeCoast and giveDirect allow for controller
 		//menus to safely take over the robot.

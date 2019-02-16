@@ -35,6 +35,7 @@ class Elliot {
     friend void createRobot();
     pros::Mutex usageGuard;
     public:
+    long opctrlBegin;
     pros::Controller controller;
     pros::Vision camera;
     CameraSettings camSettings;
