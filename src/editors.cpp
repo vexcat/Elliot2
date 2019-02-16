@@ -101,7 +101,7 @@ std::string editString(std::string text) {
 
     int vdir = getVerticalDirection();
     for(int i = 0; i < std::abs(vdir); i++) {
-      auto &sym = text[cursor] += vdir > 0 ? 1 : 0;
+      auto &sym = text[cursor] += vdir > 0 ? 1 : -1;
 
       if(vdir > 0) {
         if(sym == ' ' + 1) {
