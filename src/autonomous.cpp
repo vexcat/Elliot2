@@ -129,7 +129,8 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
       motionObject["c"].get<double>(),
       motionObject["d"].get<double>(),
       bot.gps.inchToCounts(motionObject["a"].get<double>()),
-      motionObject["t"].get<double>() * 1000);
+      motionObject["t"].get<double>() * 1000
+    );
   }
   if(type == "scorer") {
     double v = motionObject["v"].get<double>() * (int)bot.score.getGearing();
