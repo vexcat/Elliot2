@@ -19,10 +19,15 @@ double dz(double a, double zone) {
 
 void Elliot::drive(pros::Controller& m) {
 	//Base drive
-	double y = m.get_analog(ANALOG_LEFT_Y) * (speedMultiplier / 127.0);
-	double x = m.get_analog(ANALOG_LEFT_X) * (speedMultiplier / 127.0);
+	double y = dz(m.get_analog(ANALOG_LEFT_Y) * (speedMultiplier / 127.0), 32 / 200.0);
+	double x = dz(m.get_analog(ANALOG_LEFT_X) * (speedMultiplier / 127.0), 32 / 200.0);
 
-	box->base.arcade(multiplier * y, x, 32 / 200.0);
+	if(y != 0 || x != 0) {
+		box->base.arcade(multiplier * y, x, 32 / 200.0);
+	} else {
+		left.moveVelocity(0);
+		right.moveVelocity(0);
+	}
 
 	//Scorer drive
 	int scoreVel = 150 * (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
