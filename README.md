@@ -14,6 +14,7 @@ During autonomous, the robot is capable of doing the following motions:
   - Move Mechanism (Scorer, Intake, Catapult)
   - Shoot
   - Delay
+  - Automatic Ball Tracking w/ Vision Sensor
 
 These, when put together in a list of auton motions and a starting position, form a completed auton. Using the included controller menu, you can edit autonomi without having to re-compile.
 
@@ -26,7 +27,7 @@ It is recommended to use a high velocity value on position commands, with a dela
 ## catOS
 The catOS menu system is ~~a confusing mess~~ a glorious and minimalistic UI for robot configuration.
 
-To get started with catOS, press the X and Y buttons together. Use the up/down arrows to view the entries in a list, and the A/B buttons to navigate in and out of menus.
+To get started with catOS, press the <- and -> buttons together. Use the up/down arrows to view the entries in a list, and the A/B buttons to navigate in and out of menus.
 
 The autonomous & auton editor lists are special in that they have an extra menu to create/move/duplicate/delete items. To access this menu, press X. Most of the options will not prompt you for anything, but they have happened.
 
