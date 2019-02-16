@@ -93,7 +93,6 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int ext
 }
 
 void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
-  //set the brake mode in case it wasn't set before
   auto &bot = getRobot();
   //get the type of motion
   auto type = motionObject["type"].get<std::string>();
