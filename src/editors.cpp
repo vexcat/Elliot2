@@ -51,6 +51,7 @@ double editNumber(double number, int fix) {
     int vdir = getVerticalDirection();
     if(vdir && cursor == 0) {
       number *= -1;
+      renderNumberEditor(number, fix, cursor);
     } else if(vdir) {
       int place;
       if(fix == 0) {
