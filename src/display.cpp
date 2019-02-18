@@ -327,7 +327,8 @@ class PIDTestingMenu: public ControllerMenu {
           {"x", cos(track.o) * 24},
           {"y", sin(track.o) * 24},
           {"v", 1.0},
-          {"t", 0.2}
+          {"t", 0.2},
+          {"r", false}
         }, track, false);
       }}
     });
@@ -485,7 +486,7 @@ class MotionList: public CRUDMenu {
       {"x", 0.0}, {"y", 0.0}, {"o", 0.0}
     });
     jsonInserter("Delta", { {"x", 0.0}, {"y", 0.0}, {"o", 0.0} });
-    jsonInserter("Position", { {"x", 0}, {"y", 0}, {"t", 0.2}, {"rT", 0.2}, {"v", 1.0} });
+    jsonInserter("Position", { {"x", 0}, {"y", 0}, {"t", 0.2}, {"rT", 0.2}, {"v", 1.0}, {"r", false} });
     jsonInserter("Direct", { {"l", 1.0}, {"r", 1.00}, {"t", 1.0} });
     jsonInserter("Rotation", { {"o", 0}, {"t", 0.2}, {"v", 1.0} }, "rotateTo");
     jsonInserter("Scorer", { {"v", 1.0}, {"t", 0.2} });
@@ -583,6 +584,9 @@ class MotionList: public CRUDMenu {
         {"t", 3, "Set timing"},
         {"rT", 3, "Set rTiming"}
       }, {
+        {"Set Side", [&motionSelected, idx]() {
+          motionSelected["r"] = !!selectOption({"Catapult", "Intake"}, motionSelected["r"].get<bool>() ? 1 : 0);
+        }},
         {"Set to Current", [&motionSelected, idx]() {
           auto delta = offsetFor(motionSelected, idx);
           auto &gps = getRobot().gps;

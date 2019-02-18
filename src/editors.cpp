@@ -148,3 +148,17 @@ std::string editString(std::string text) {
   unrightPad(text);
   return text;
 }
+
+//Select an option out of a list
+int selectOption(std::initializer_list<std::string> list, int idx) {
+  auto &ctrl = getRobot().controller;
+  renderEditorArrows(0);
+  line_set(1, list.begin()[idx]);
+  while(true) {
+    int vdir = getVerticalDirection();
+    idx += vdir;
+    bound(idx, list.size());
+    if(vdir) line_set(1, list.begin()[idx]);
+  }
+  return idx;
+}

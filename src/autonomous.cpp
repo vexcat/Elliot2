@@ -61,7 +61,7 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
   bot.intake.moveVelocity(0);
 }
 
-void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int extraTime, int turnExtraTime) {
+void moveToSetpoint(RoboPosition pt, double velLimit, bool reverse, int extraTime, int turnExtraTime) {
   auto &bot = getRobot();
   auto &gps = bot.gps;
   auto &cha = bot.box->base;
@@ -78,7 +78,7 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool stayStraight, int ext
   //Calculate change in angle
   double dTheta = periodicallyEfficient(atan2(dy, dx) - curPos.o);
   //If it's behind the robot, flip and generate a negative distance.
-  if(-PI/2 > dTheta || dTheta > PI/2) {
+  if(reverse) {
     dTheta = periodicallyEfficient(dTheta + PI);
     dist *= -1;
   }
@@ -110,7 +110,11 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
       target.x,
       target.y,
       0
-    }, motionObject["v"].get<double>(), false, motionObject["t"].get<double>() * 1000, motionObject["rT"].get<double>() * 1000);
+    },
+    motionObject["v"].get<double>(),         //Max velocity
+    motionObject["r"].get<bool>(),           //Reverse? 
+    motionObject["t"].get<double>() * 1000,  //Extra straight time
+    motionObject["rT"].get<double>() * 1000);//Extra turn time
   }
   if(type == "rotateTo") {
     double dTheta = motionObject["o"].get<double>();
