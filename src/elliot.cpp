@@ -153,7 +153,6 @@ void Elliot::beginTasks() {
 
 Elliot* elliot;
 void createRobot() {
-    if(!elliot) {
-        elliot = new Elliot();
-    }
+    if(elliot) delete elliot;
+    elliot = new Elliot();
 }
