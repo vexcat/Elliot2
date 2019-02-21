@@ -17,14 +17,10 @@ double dz(double a, double zone) {
 	return a;
 }
 
-double cube(double n) {
-	return n*n*n;
-}
-
 void Elliot::drive(pros::Controller& m) {
 	//Base drive
-	double y = cube(dz(m.get_analog(ANALOG_LEFT_Y), 32) * (speedMultiplier / 127.0));
-	double x = cube(dz(m.get_analog(ANALOG_LEFT_X), 32) * (speedMultiplier / 127.0));
+	double y = dz(m.get_analog(ANALOG_LEFT_Y) * (speedMultiplier / 127.0), 32 / 200.0);
+	double x = dz(m.get_analog(ANALOG_LEFT_X) * (speedMultiplier / 127.0), 32 / 200.0);
 
 	if(y != 0 || x != 0) {
 		box->base.arcade(multiplier * y, x);
