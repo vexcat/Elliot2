@@ -49,7 +49,7 @@ void Elliot::drive(pros::Controller& m) {
 	intake.moveVelocity(intakeVel);
 
 	//Arm drive
-	int armVel = (m.get_digital(DIGITAL_UP) - m.get_digital(DIGITAL_DOWN)) * 200;
+	int armVel = (m.get_digital(DIGITAL_UP) - m.get_digital(DIGITAL_DOWN)) * 100;
 	arm.moveVelocity(armVel);
 
 	//Reverse button
