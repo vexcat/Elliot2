@@ -69,8 +69,8 @@ int ControllerMenu::checkController() {
 }
 
 void bound(int& index, int size) {
-  if(index < 0) index = size - 1;
-  if(index > size - 1) index = 0;
+  while(index < 0) index += size;
+  while(index > size - 1) index -= size;
 }
 
 CRUDMenu::CRUDMenu() {
