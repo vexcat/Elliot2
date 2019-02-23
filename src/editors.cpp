@@ -159,6 +159,9 @@ int selectOption(std::initializer_list<std::string> list, int idx) {
     idx += vdir;
     bound(idx, list.size());
     if(vdir) line_set(1, list.begin()[idx]);
+    if(ctrl.get_digital_new_press(DIGITAL_B) || ctrl.get_digital_new_press(DIGITAL_A)) {
+      break;
+    }
   }
   return idx;
 }
