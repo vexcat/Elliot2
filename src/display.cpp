@@ -379,7 +379,7 @@ int checkTemporaryExit() {
       }
       return true;
     } else {
-      PIDTestingMenu()();
+      taskOption<PIDTestingMenu>();
       return true;
     }
   }
@@ -726,8 +726,7 @@ class AutonList: public CRUDMenu {
   }
 
   void handleSelect(int idx, const std::string& name) override {
-    MotionList auton(name);
-    auton();
+    taskOption<MotionList>(name);
   };
 
   void finalizeData() override {
@@ -1075,7 +1074,7 @@ void catOS(void*) {
     if(ctrl.get_digital(DIGITAL_LEFT) && ctrl.get_digital(DIGITAL_RIGHT)) {
       getRobot().takeStopped();
       menuWasEntered = true;
-      RootList()();
+      taskOption<RootList>();
       drawCatOSScreen();
       getRobot().give();
       menuWasEntered = false;
