@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "state.hpp"
+#include "display.hpp"
 using json = nlohmann::json;
 using namespace std;
 
@@ -33,6 +34,10 @@ void saveState() {
         write_file_contents(filePath, getState().dump());
     } catch(...) {
         printf("Failed to write data.json. Please check write protection / SD inserted.\n");
+        line_set(0, "SD CARD FAILURE");
+        line_set(1, "CHECK TERMINAL");
+        line_set(2, "FOR DATA");
+        puts((getState().dump() + "\n").c_str());
     }
 }
 
