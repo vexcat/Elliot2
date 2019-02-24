@@ -485,13 +485,13 @@ class MotionList: public CRUDMenu {
       {"name", "ORIGIN"},
       {"x", 0.0}, {"y", 0.0}, {"o", 0.0}
     });
-    jsonInserter("Delta", { {"x", 0.0}, {"y", 0.0}, {"o", 0.0} });
-    jsonInserter("Position", { {"x", 0}, {"y", 0}, {"t", 0.2}, {"rT", 0.2}, {"v", 1.0}, {"r", false} });
-    jsonInserter("Direct", { {"l", 1.0}, {"r", 1.00}, {"t", 1.0} });
-    jsonInserter("Rotation", { {"o", 0}, {"t", 0.2}, {"v", 1.0} }, "rotateTo");
-    jsonInserter("Scorer", { {"v", 1.0}, {"t", 0.2} });
+    jsonInserter("Delta"   , { {"x", 0.0}, {"y", 0.0}, {"o", 0.0} });
+    jsonInserter("Position", { {"x", 0.0}, {"y", 0.0}, {"t", 0.2}, {"rT", 0.2}, {"v", 1.0}, {"r", false} });
+    jsonInserter("Direct"  , { {"l", 1.0}, {"r", 1.0}, {"t", 1.0} });
+    jsonInserter("Rotation", { {"o", 0.0}, {"t", 0.2}, {"v", 1.0} }, "rotateTo");
+    jsonInserter("Scorer"  , { {"v", 1.0}, {"t", 0.2} });
     jsonInserter("Catapult", { {"v", 1.0}, {"t", 0.2} });
-    jsonInserter("Intake", { {"v", 1.0}, {"t", 0.2} });
+    jsonInserter("Intake"  , { {"v", 1.0}, {"t", 0.2} });
     jsonInserter("Shoot");
     jsonInserter("Delay");
     jsonInserter("BHold");
