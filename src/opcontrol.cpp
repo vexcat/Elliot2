@@ -30,11 +30,16 @@ void Elliot::drive(pros::Controller& m) {
 	}
 
 	//Scorer/Arm drive
-	int scoreVel = 150 * (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
+	int scoreVel = (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
 	if(controllingArm) {
-		arm.moveVelocity(scoreVel);
+		arm.moveVelocity(100 * scoreVel);
 	} else {
-		score.moveVelocity(scoreVel);
+		score.moveVelocity(150 * scoreVel);
+	}
+
+	//Scorer/Arm switch
+	if(m.get_digital_new_press(DIGITAL_B)) {
+		controllingArm = !controllingArm;
 	}
 
 	//Catapult drive
