@@ -43,12 +43,12 @@ void Elliot::drive(pros::Controller& m) {
 	}
 
 	//Catapult drive
-	if(m.get_digital_new_press(DIGITAL_R1)) {
-		catapult.goShoot();
-	} else if(!lastR1 && m.get_digital(DIGITAL_L1)){
+	if(m.get_digital_new_press(DIGITAL_L1)) {
+		catapult.goToSwitch();
+	} else if(!lastR1 && m.get_digital(DIGITAL_R1)){
 		catapult.setVelocity(100);
 		lastR1 = true;
-	} else if(lastR1 && !m.get_digital(DIGITAL_L1)) {
+	} else if(lastR1 && !m.get_digital(DIGITAL_R1)) {
 		catapult.setVelocity(0);
 		lastR1 = false;
 	}
