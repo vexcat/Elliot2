@@ -34,6 +34,7 @@ class Elliot {
 	int multiplier = 1;
 	double speedMultiplier = 1.0;
 	int lastR1 = 0;
+    int controllingArm = false;
     friend void createRobot();
     pros::Mutex usageGuard;
     public:

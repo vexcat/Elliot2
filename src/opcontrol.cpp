@@ -29,9 +29,13 @@ void Elliot::drive(pros::Controller& m) {
 		right.moveVelocity(0);
 	}
 
-	//Scorer drive
+	//Scorer/Arm drive
 	int scoreVel = 150 * (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
-	score.moveVelocity(scoreVel);
+	if(controllingArm) {
+		arm.moveVelocity(scoreVel);
+	} else {
+		score.moveVelocity(scoreVel);
+	}
 
 	//Catapult drive
 	if(m.get_digital_new_press(DIGITAL_R1)) {
@@ -48,9 +52,13 @@ void Elliot::drive(pros::Controller& m) {
 	int intakeVel = -m.get_analog(ANALOG_RIGHT_Y) * (200.0 / 127.0);
 	intake.moveVelocity(intakeVel);
 
-	//Arm drive
+	//Arm/Scorer drive
 	int armVel = (m.get_digital(DIGITAL_UP) - m.get_digital(DIGITAL_DOWN)) * 100;
-	arm.moveVelocity(armVel);
+	if(controllingArm) {
+		score.moveVelocity(armVel);
+	} else {
+		arm.moveVelocity(armVel);
+	}
 
 	//Reverse button
 	if(m.get_digital_new_press(DIGITAL_A)) {
