@@ -117,6 +117,7 @@ baseSettings{gps, box, getBaseState()} {
     catapultMtr.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
     score.setGearing(AbstractMotor::gearset::green);
     intake.setGearing(AbstractMotor::gearset::blue);
+    arm.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
 }
 
 void Elliot::takeCoast() {

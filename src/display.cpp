@@ -498,6 +498,7 @@ class MotionList: public CRUDMenu {
     jsonInserter("BCoast");
     jsonInserter("BShort");
     jsonInserter("AutoBall", { {"v", 1.0}, {"c", 50}, {"d", 40}, {"a", 8}, {"t", 0.2} });
+    jsonInserter("Arm", { {"p", 10}, {"t", 0.6} });
     //Add existing items
     for(auto &motion: motionData) {
       addItem(nameFor(motion));
@@ -639,6 +640,11 @@ class MotionList: public CRUDMenu {
       MotionEditor(motionData, idx, {
         {"l", 3, "Set leftvel"},
         {"r", 3, "Set rightvel"},
+        {"t", 3, "Set timing"}
+      })();
+    } else if(type == "arm") {
+      MotionEditor(motionData, idx, {
+        {"p", 1, "Set position"},
         {"t", 3, "Set timing"}
       })();
     }

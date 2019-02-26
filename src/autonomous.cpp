@@ -216,10 +216,16 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
       bot.right.moveVelocity(0);
     }
   }
+  if(type == "arm") {
+    double position = motionObject["p"].get<double>();
+    bot.arm.moveAbsolute(position, 100);
+    pros::delay(motionObject["t"].get<double>() * 1000);
+  }
 }
 
 void runAuton(json::iterator loc, json::iterator end, bool isBlue) {
   auto &bot = getRobot();
+  bot.arm.tarePosition();
   auto oldBrake = bot.left.getBrakeMode();
   bot. left.setBrakeMode(AbstractMotor::brakeMode::coast);
   bot.right.setBrakeMode(AbstractMotor::brakeMode::coast);
