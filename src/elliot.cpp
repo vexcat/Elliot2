@@ -20,6 +20,10 @@ void Catapult::catapultTask() {
             headingToSwitch = false;
             cata.moveVelocity(0);
         }
+        if(shooting) {
+            pros::delay(400);
+            if(shooting) headingToSwitch = true;
+        }
         pros::delay(1);
     }
 }
@@ -29,8 +33,14 @@ void Catapult::goToSwitch() {
     cata.moveVelocity(100);
 }
 
+void Catapult::goShoot() {
+    shooting = true;
+    cata.moveVelocity(200);
+}
+
 void Catapult::setVelocity(double vel) {
     headingToSwitch = false;
+    shooting = false;
     cata.moveVelocity(vel);
 }
 

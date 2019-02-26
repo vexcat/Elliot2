@@ -11,12 +11,14 @@ using namespace okapi;
 
 class Catapult {
     volatile bool headingToSwitch = false;
+    volatile bool shooting = false;
     okapi::MotorGroup &cata;
     pros::ADIDigitalIn &sensor;
     public:
     Catapult(okapi::MotorGroup& cata, pros::ADIDigitalIn& sensor);
     void catapultTask();
     void goToSwitch();
+    void goShoot();
     void setVelocity(double vel);
     bool isGoingToSwitch();
     void beginTask();
