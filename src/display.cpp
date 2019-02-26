@@ -1081,7 +1081,7 @@ void catOS(void*) {
     if(ctrl.get_digital(DIGITAL_LEFT) && ctrl.get_digital(DIGITAL_RIGHT)) {
       getRobot().takeStopped();
       menuWasEntered = true;
-      taskOption<RootList>();
+      RootList()();
       drawCatOSScreen();
       getRobot().give();
       menuWasEntered = false;
