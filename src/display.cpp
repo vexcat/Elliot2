@@ -481,7 +481,7 @@ class MotionList: public CRUDMenu {
   MotionList(std::string autonName): CRUDMenu(), motionData(getState()["autons"][autonName]) {
     //Add inserters here
     auto &bot = getRobot();
-    jsonInserter("SLine", { {"d", 0}, {"t", 0.2} });
+    jsonInserter("SLine"   , { {"d", 0}, {"t", 0.2} });
     jsonInserter("Position", { {"x", 0.0}, {"y", 0.0}, {"t", 0.2}, {"rT", 0.2}, {"v", 1.0}, {"r", false} });
     jsonInserter("Rotation", { {"o", 0.0}, {"t", 0.2}, {"v", 1.0} }, "rotateTo");
     jsonInserter("Direct"  , { {"l", 1.0}, {"r", 1.0}, {"t", 1.0} });
