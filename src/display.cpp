@@ -481,25 +481,25 @@ class MotionList: public CRUDMenu {
   MotionList(std::string autonName): CRUDMenu(), motionData(getState()["autons"][autonName]) {
     //Add inserters here
     auto &bot = getRobot();
-    jsonInserter("Origin", {
-      {"name", "ORIGIN"},
-      {"x", 0.0}, {"y", 0.0}, {"o", 0.0}
-    });
-    jsonInserter("Delta"   , { {"x", 0.0}, {"y", 0.0}, {"o", 0.0} });
+    jsonInserter("SLine", { {"d", 0}, {"t", 0.2} });
     jsonInserter("Position", { {"x", 0.0}, {"y", 0.0}, {"t", 0.2}, {"rT", 0.2}, {"v", 1.0}, {"r", false} });
-    jsonInserter("Direct"  , { {"l", 1.0}, {"r", 1.0}, {"t", 1.0} });
     jsonInserter("Rotation", { {"o", 0.0}, {"t", 0.2}, {"v", 1.0} }, "rotateTo");
+    jsonInserter("Direct"  , { {"l", 1.0}, {"r", 1.0}, {"t", 1.0} });
     jsonInserter("Scorer"  , { {"v", 1.0}, {"t", 0.2} });
     jsonInserter("Catapult", { {"v", 1.0}, {"t", 0.2} });
     jsonInserter("Intake"  , { {"v", 1.0}, {"t", 0.2} });
+    jsonInserter("Arm"     , { {"p", 10 }, {"t", 0.6} });
     jsonInserter("Shoot");
-    jsonInserter("Delay");
+    jsonInserter("Delta"   , { {"x", 0.0}, {"y", 0.0}, {"o", 0.0} });
+    jsonInserter("Delay"   , { {"t", 0} });
     jsonInserter("BHold");
     jsonInserter("BCoast");
     jsonInserter("BShort");
     jsonInserter("AutoBall", { {"v", 1.0}, {"c", 50}, {"d", 40}, {"a", 8}, {"t", 0.2} });
-    jsonInserter("Arm", { {"p", 10}, {"t", 0.6} });
-    jsonInserter("SLine", { {"d", 0}, {"t", 0.2} });
+    jsonInserter("Origin", {
+      {"name", "ORIGIN"},
+      {"x", 0.0}, {"y", 0.0}, {"o", 0.0}
+    });
     //Add existing items
     for(auto &motion: motionData) {
       addItem(nameFor(motion));
