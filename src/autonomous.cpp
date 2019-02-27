@@ -222,7 +222,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     pros::delay(motionObject["t"].get<double>() * 1000);
   }
   if(type == "sline") {
-    double distance = motionObject["d"].get<double>();
+    double distance = bot.gps.inchToCounts(motionObject["d"].get<double>());
     bot.box->base.moveDistance(distance);
     pros::delay(motionObject["t"].get<double>() * 1000);
   }
