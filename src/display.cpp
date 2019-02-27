@@ -455,7 +455,6 @@ class MotionEditor: public ControllerMenu {
           pros::delay(5);
         }
         getRobot().box->base.stop();
-        getRobot().baseSettings.loadState();
         //Task is gone. Render, and close the scope.
         render();
       }}
@@ -546,7 +545,6 @@ class MotionList: public CRUDMenu {
             {"v", 1.0},
             {"t", 2.0}
           }, tracking, getBlue());
-          getRobot().baseSettings.loadState();
         }},
         //Shows up as "*Set Orientatio" due to character limit
         {"Set Orientation", [&motionSelected]() {

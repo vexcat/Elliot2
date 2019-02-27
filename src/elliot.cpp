@@ -136,7 +136,6 @@ void Elliot::takeCoast() {
 
 void Elliot::stop() {
     box->base.stop();
-    getRobot().baseSettings.loadState();
     catapult.setVelocity(0);
     score.moveVelocity(0);
     intake.moveVelocity(0);
