@@ -221,6 +221,11 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     bot.arm.moveAbsolute(position, 100);
     pros::delay(motionObject["t"].get<double>() * 1000);
   }
+  if(type == "sline") {
+    double distance = motionObject["d"].get<double>();
+    bot.box->base.moveDistance(distance);
+    pros::delay(motionObject["t"].get<double>() * 1000);
+  }
 }
 
 void runAuton(json::iterator loc, json::iterator end, bool isBlue) {
