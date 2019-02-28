@@ -650,7 +650,7 @@ class MotionList: public CRUDMenu {
       MotionEditor(motionData, idx, {
         {"d", 2, "Set distance"},
         {"t", 3, "Set timing"}
-      });
+      })();
     }
     updateItem(idx, nameFor(motionData[idx]));
     finalizeData();
