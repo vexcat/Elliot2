@@ -146,6 +146,9 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     }
   }
   if(type == "catapult") {
+    while(bot.catapult.isGoingToSwitch()) {
+      pros::delay(5);
+    }
     bot.catapult.setVelocity(motionObject["v"].get<double>() * (int)bot.catapultMtr.getGearing());
     double timing = motionObject["t"].get<double>();
     if(timing != 0) {
@@ -164,9 +167,6 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
   }
   if(type == "shoot") {
     bot.catapult.goToSwitch();
-    while(bot.catapult.isGoingToSwitch()) {
-      pros::delay(5);
-    }
   }
   if(type == "delay") {
     pros::delay((int)(1000 * motionObject["t"].get<double>()));
