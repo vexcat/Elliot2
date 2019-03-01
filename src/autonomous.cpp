@@ -208,8 +208,8 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
   }
   if(type == "direct") {
     bot.box->base.stop();
-    bot.left.moveVelocity(motionObject["l"].get<double>());
-    bot.right.moveVelocity(motionObject["r"].get<double>());
+    bot.left.moveVelocity(motionObject["l"].get<double>() * (int)bot.left.getGearing());
+    bot.right.moveVelocity(motionObject["r"].get<double>() * (int)bot.left.getGearing());
     if(motionObject["t"].get<double>() != 0) {
       pros::delay(motionObject["t"].get<double>() * 1000);
       bot.left.moveVelocity(0);
