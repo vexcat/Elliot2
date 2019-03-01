@@ -491,9 +491,9 @@ class MotionList: public CRUDMenu {
     jsonInserter("Shoot");
     jsonInserter("Delta"   , { {"x", 0.0}, {"y", 0.0}, {"o", 0.0} });
     jsonInserter("Delay"   , { {"t", 0} });
-    jsonInserter("BHold");
-    jsonInserter("BCoast");
-    jsonInserter("BShort");
+    jsonInserter("BHold", {}, "hold");
+    jsonInserter("BCoast", {}, "coast");
+    jsonInserter("BShort", {}, "short");
     jsonInserter("AutoBall", { {"v", 1.0}, {"c", 50 }, {"d", 40 }, {"a", 8}, {"t", 0.2} });
     jsonInserter("Origin", {
       {"name", "ORIGIN"},
