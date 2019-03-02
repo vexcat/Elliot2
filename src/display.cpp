@@ -379,7 +379,7 @@ int checkTemporaryExit() {
       }
       return true;
     } else {
-      taskOption<PIDTestingMenu>();
+      PIDTestingMenu()();
       return true;
     }
   }
