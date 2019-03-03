@@ -323,12 +323,10 @@ class PIDTestingMenu: public ControllerMenu {
         auto &gps = getRobot().gps;
         RoboPosition track = gps.getPosition();
         runMotion({
-          {"type", "position"},
-          {"x", cos(track.o) * 24},
-          {"y", sin(track.o) * 24},
+          {"type", "sline"},
+          {"d", 24},
           {"v", 1.0},
           {"t", 0.2},
-          {"r", false}
         }, track, false);
       }}
     });
@@ -444,6 +442,8 @@ class MotionEditor: public ControllerMenu {
         line_set(0, "Running auton,");
         line_set(1, "Press B");
         line_set(2, "to stop.");
+        //Measure starting time
+        long autonStartTime = pros::millis();
         //Take care of task
         auto &ctrl = getRobot().controller;
         while(autonRunner.get_state() != pros::E_TASK_STATE_DELETED) {
@@ -454,7 +454,16 @@ class MotionEditor: public ControllerMenu {
           }
           pros::delay(5);
         }
+        //Measure finish time
+        long finishedIn = pros::millis() - autonStartTime;
+        //Stop robot
         getRobot().box->base.stop();
+        //Display finish time
+        line_set(0, "Auton done in");
+        line_set(1, std::to_string(finishedIn) + "ms.");
+        line_set(2, "A to dismiss");
+        //Wait for A to be pressed again
+        while(!ctrl.get_digital_new_press(DIGITAL_A)) pros::delay(5);
         //Task is gone. Render, and close the scope.
         render();
       }}
