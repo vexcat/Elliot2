@@ -103,6 +103,7 @@ void opcontrol() {
 	auto &bot = getRobot();
   	bot.give();
 	bot.opctrlBegin = pros::millis();
+	bot.arm.setBrakeMode(AbstractMotor::brakeMode::brake);
 	while (true) {
 		//takeCoast and giveDirect allow for controller
 		//menus to safely take over the robot.

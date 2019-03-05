@@ -454,6 +454,7 @@ class MotionEditor: public ControllerMenu {
           }
           pros::delay(5);
         }
+        getRobot().arm.moveVelocity(0);
         //Measure finish time
         long finishedIn = pros::millis() - autonStartTime;
         //Stop robot

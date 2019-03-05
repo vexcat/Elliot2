@@ -235,6 +235,7 @@ void runAuton(json::iterator loc, json::iterator end, bool isBlue) {
   auto oldBrake = bot.left.getBrakeMode();
   bot. left.setBrakeMode(AbstractMotor::brakeMode::coast);
   bot.right.setBrakeMode(AbstractMotor::brakeMode::coast);
+  bot.arm.setBrakeMode(AbstractMotor::brakeMode::coast);
   RoboPosition tracking = {0, 0, 0};
   for(; loc != end; loc++) {
     runMotion(*loc, tracking, isBlue);
