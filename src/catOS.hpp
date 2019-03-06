@@ -24,7 +24,7 @@ using MenuEntry = std::pair<std::string, MenuAction>;
 //The strange syntax is to be able to work on any class T,
 //and to perfectly forward the constructor arguments.
 template <typename T, typename ...Args>
-MenuAction taskOption(Args&&... args) {
+void taskOption(Args&&... args) {
   auto ptr = std::make_unique<T>(std::forward<Args>(args)...);
   (*ptr)();
 }
