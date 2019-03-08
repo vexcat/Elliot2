@@ -69,6 +69,7 @@ int ControllerMenu::checkController() {
 }
 
 void bound(int& index, int size) {
+  if(!size) { index = 0; return; }
   while(index < 0) index += size;
   while(index > size - 1) index -= size;
 }
@@ -114,10 +115,9 @@ CRUDMenu::CRUDMenu() {
     {"rename", [this](){
       try {
         std::string newName = editString(items[idx]);
-        selectedVector = ITEM_NAME_LIST;
-        render();
         attemptRename(idx, newName, items[idx]);
         items[idx] = newName;
+        selectedVector = ITEM_NAME_LIST;
         render();
       } catch(...) {}
     }}
