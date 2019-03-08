@@ -14,7 +14,7 @@ INCDIR=$(ROOT)/include
 
 WARNFLAGS+=
 EXTRA_CFLAGS=
-EXTRA_CXXFLAGS= -Wno-psabi
+EXTRA_CXXFLAGS= -Wall -Wno-psabi -Wno-reorder -Wno-sign-compare -Wno-unused-variable
 
 # Set this to 1 to add additional rules to compile your project as a PROS library template
 IS_LIBRARY:=0
