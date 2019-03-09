@@ -396,7 +396,7 @@ RoboPosition offsetFor(const json& auton, int idx) {
       return {
         bot.gps.inchToCounts((*loc)["x"].get<double>()),
         bot.gps.inchToCounts((*loc)["y"].get<double>()),
-        (*loc)["o"].get<double>(),
+        type == "origin" ? 0 : (*loc)["o"].get<double>(),
       };
     }
   }
