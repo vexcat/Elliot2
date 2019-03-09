@@ -54,8 +54,8 @@ void GPS::setPosition(RoboPosition pos) {
 void GPS::gpsDaemon() {
     uint32_t lastTime = pros::c::millis();
     //These two change how encoder smoothing happens.
-    const int sampleCount = 2;
-    const int dT = 5;
+    const int sampleCount = 1;
+    const int dT = 10;
     pair<double, double> lastMeasurement;
     deque<pair<double, double>> samples; 
     for(int i = 0; i < sampleCount; i++) {
