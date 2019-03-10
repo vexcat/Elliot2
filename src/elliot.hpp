@@ -26,8 +26,15 @@ class Catapult {
 
 struct BaseBox {
     okapi::ChassisControllerPID base;
-    BaseBox(okapi::MotorGroup &l, okapi::MotorGroup &r, okapi::IterativePosPIDController::Gains d, okapi::IterativePosPIDController::Gains a, okapi::IterativePosPIDController::Gains t, okapi::AbstractMotor::GearsetRatioPair gear, okapi::ChassisScales s):
-    base(okapi::ChassisControllerFactory::create(l, r, d, a, t, gear, s)) {}
+    BaseBox(
+  const TimeUtil &itimeUtil,
+  const std::shared_ptr<ChassisModel> &imodel,
+  std::unique_ptr<IterativePosPIDController> idistanceController,
+  std::unique_ptr<IterativePosPIDController> iangleController,
+  std::unique_ptr<IterativePosPIDController> iturnController,
+  const AbstractMotor::GearsetRatioPair igearset,
+  const ChassisScales &iscales):
+    base(itimeUtil, imodel, std::move(idistanceController), std::move(iangleController), std::move(iturnController), igearset, iscales) {}
 };
 
 class Elliot {
