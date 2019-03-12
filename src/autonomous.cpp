@@ -137,7 +137,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     );
   }
   if(type == "scorer") {
-    double v = motionObject["v"].get<double>() * (int)bot.score.getGearing();
+    double v = motionObject["v"].get<double>();
     bot.score.controllerSet(v);
     double timing = motionObject["t"].get<double>();
     if(timing != 0) {
@@ -157,7 +157,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     }
   }
   if(type == "intake") {
-    double v = motionObject["v"].get<double>() * (int)bot.intake.getGearing();
+    double v = motionObject["v"].get<double>();
     bot.intake.controllerSet(v);
     double timing = motionObject["t"].get<double>();
     if(timing != 0) {
