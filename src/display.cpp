@@ -381,8 +381,7 @@ int checkTemporaryExit() {
       return true;
     }
   }
-  checkBattery(ctrl);
-  return false;
+  return checkBattery(ctrl);
 }
 
 //Gives the current position offset for an auton position.
