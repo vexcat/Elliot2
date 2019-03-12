@@ -22,7 +22,7 @@ void renderEditorArrows(int cursor) {
 //Render a number to a certain amount of decimals, and the cursor
 void renderNumberEditor(double number, int fix, int cursor) {
   char textData[16];
-  snprintf(textData, 16, "%+015.*f\n", fix, number);
+  snprintf(textData, 16, "%+014.*f\n", fix, number);
   line_set(1, std::string(textData));
   renderEditorArrows(cursor);
 }
