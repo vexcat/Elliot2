@@ -251,7 +251,7 @@ void runAutonNamed(std::string name, bool isBlue) {
     runAuton(autonWithName->begin(), autonWithName->end(), isBlue);
     return;
   }
-  printf("%s does not name an autonomous. Will stall.\n", name);
+  printf("%s does not name an autonomous. Will stall.\n", name.c_str());
 }
 
 void autonomous() {
