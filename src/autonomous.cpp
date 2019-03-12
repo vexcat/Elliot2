@@ -41,7 +41,7 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
     int half = VISION_FOV_WIDTH/2;
     //If the object is about to go out of view, stop.
     if(VISION_FOV_HEIGHT - object.top_coord < oovThreshold) {
-      //break;
+      break;
     }
     //Too left
     if(object.left_coord < half-centerThreshold) {
