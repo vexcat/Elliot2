@@ -70,10 +70,10 @@ class CRUDMenu: public ControllerTask {
   void updateItem(int idx, std::string newName);
 
   //Passing no-ops means the only state held will be in this class. Generally not that useful.
-  virtual void attemptDelete(int idx, const std::string& oldName) {}
-  virtual void attemptMove(int idx, int newIdx, const std::string& oldName) {}
-  virtual void attemptRename(int idx, std::string newName, const std::string& oldName) {}
-  virtual std::string attemptDuplicate(int idx, int newIdx, const std::string& oldName) {}
+  virtual void attemptDelete(int idx, const std::string& oldName) { throw 0; }
+  virtual void attemptMove(int idx, int newIdx, const std::string& oldName) { throw 0; }
+  virtual void attemptRename(int idx, std::string newName, const std::string& oldName) { throw 0; }
+  virtual std::string attemptDuplicate(int idx, int newIdx, const std::string& oldName) { throw 0; }
   virtual void handleSelect(int idx, const std::string& name) = 0;
   virtual void finalizeData() = 0;
 
