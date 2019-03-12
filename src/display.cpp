@@ -162,6 +162,8 @@ void addAuton(std::string byName) {
             lv_btn_set_state(pair.first, LV_BTN_STATE_REL);
           }
           j++;
+
+          return LV_RES_OK;
         }
       });
       selectors.push_back({button, label});
