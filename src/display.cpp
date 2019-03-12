@@ -233,6 +233,8 @@ void autoSelector() {
       setBlue(true);
       lv_label_set_text(colorLabel, "BLUE");
     }
+    
+    return LV_RES_OK;
   });
   addAuton("#No Auton");
   //Load existing autons
