@@ -15,7 +15,7 @@ void BaseSettings::loadState() {
             Supplier<std::unique_ptr<AbstractRate >>([]() { return std::make_unique<Rate >(); }),
             Supplier<std::unique_ptr<SettledUtil  >>([]() { return std::make_unique<SettledUtil>(std::make_unique<Timer>(), 0.0, 10.0, 325_ms); })
         ),
-        std::make_shared<SkidSteerModel>(std::make_shared<MotorGroup>(std::initializer_list<Motor>{3, 4}), std::make_shared<MotorGroup>(std::initializer_list<Motor>{-2, -1}), gps.left.getEncoder(), gps.right.getEncoder(), 200, 12000),
+        std::make_shared<SkidSteerModel>(std::make_shared<MotorGroup>(gps.left), std::make_shared<MotorGroup>(gps.right), gps.left.getEncoder(), gps.right.getEncoder(), 200, 12000),
         std::make_unique<IterativePosPIDController>(dist, TimeUtilFactory::create()),
         std::make_unique<IterativePosPIDController>(angle, TimeUtilFactory::create()),
         std::make_unique<IterativePosPIDController>(turn, TimeUtilFactory::create()),

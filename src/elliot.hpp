@@ -6,6 +6,7 @@
 #include "camera.hpp"
 #include "base.hpp"
 #include "debugging.hpp"
+#include "ccpid_mod.hpp"
 #include <deque>
 using namespace okapi;
 
@@ -25,7 +26,7 @@ class Catapult {
 };
 
 struct BaseBox {
-    okapi::ChassisControllerPID base;
+    okapi::Elliot2CCPID base;
     BaseBox(
   const TimeUtil &itimeUtil,
   const std::shared_ptr<ChassisModel> &imodel,
