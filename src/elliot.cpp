@@ -117,7 +117,10 @@ rightSonic{'E', 'F'},
 catapult{catapultMtr, catapultLimit},
 gps{left, right, getGPSState()},
 box{nullptr},
-baseSettings{gps, box, getBaseState()} {
+baseSettings{left, right,
+[&]() { return gps.inchToCounts(1); },
+[&]() { return gps.radiansToCounts(1); },
+box, getBaseState()} {
     score.setBrakeMode(AbstractMotor::brakeMode::hold);
     left.setGearing(AbstractMotor::gearset::green);
     right.setGearing(AbstractMotor::gearset::green);

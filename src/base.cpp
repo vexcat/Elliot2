@@ -15,12 +15,12 @@ void BaseSettings::loadState() {
             Supplier<std::unique_ptr<AbstractRate >>([]() { return std::make_unique<Rate >(); }),
             Supplier<std::unique_ptr<SettledUtil  >>([]() { return std::make_unique<SettledUtil>(std::make_unique<Timer>(), 0.0, 10.0, 325_ms); })
         ),
-        std::make_shared<SkidSteerModel>(std::make_shared<MotorGroup>(gps.left), std::make_shared<MotorGroup>(gps.right), gps.left.getEncoder(), gps.right.getEncoder(), 200, 12000),
+        std::make_shared<SkidSteerModel>(std::make_shared<MotorGroup>(left), std::make_shared<MotorGroup>(right), left.getEncoder(), right.getEncoder(), 200, 12000),
         std::make_unique<IterativePosPIDController>(dist, TimeUtilFactory::create()),
         std::make_unique<IterativePosPIDController>(angle, TimeUtilFactory::create()),
         std::make_unique<IterativePosPIDController>(turn, TimeUtilFactory::create()),
         AbstractMotor::gearset::green, {
-            (gps.countsToInch(360) / PI) * okapi::inch, gps.countsToInch(gps.radiansToCounts(2)) * okapi::inch
+            (360 / (PI * cpiGetter())) * okapi::inch, ((cprGetter() * 2) / cpiGetter()) * okapi::inch
         }
     );
     base->base.startThread();

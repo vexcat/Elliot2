@@ -6,12 +6,16 @@
 #include "elliot.hpp"
 #include "debugging.hpp"
 #include <utility>
+#include <functional>
 using json = nlohmann::json;
 struct BaseBox;
 class BaseSettings {
     json &data;
     BaseBox* &base;
-    GPS &gps;
+    MotorGroup& left;
+    MotorGroup& right;
+    std::function<double()> cpiGetter;
+    std::function<double()> cprGetter;
     okapi::IterativePosPIDController::Gains loadGains(const char* name) {
         return {
             data[name]["kP"].get<double>(),
@@ -48,7 +52,10 @@ class BaseSettings {
     void setTurnGains(okapi::IterativePosPIDController::Gains newGains) {
         modGains("turn", newGains);
     }
-    BaseSettings(GPS &igps, BaseBox* & ibase, json& settingsLocation): base(ibase), data(settingsLocation), gps(igps) {
+    BaseSettings(MotorGroup& ileft, MotorGroup& iright, 
+    std::function<double()> iCPIGetter,
+    std::function<double()> iCPRGetter,
+    BaseBox* & ibase, json& settingsLocation): base(ibase), left(ileft), right(iright), cpiGetter(iCPIGetter), cprGetter(iCPRGetter), data(settingsLocation) {
         loadState();
     }
 };
