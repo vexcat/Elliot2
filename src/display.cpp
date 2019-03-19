@@ -497,16 +497,16 @@ class MotionList: public CRUDMenu {
     jsonInserter("Position", { {"x", 0.0}, {"y", 0.0}, {"t", 0.2}, {"rT", 0.2}, {"v", 1.0}, {"r", false} });
     jsonInserter("Rotation", { {"o", 0.0}, {"t", 0.2}, {"v", 1.0} }, "rotateTo");
     jsonInserter("Direct"  , { {"l", 1.0}, {"r", 1.0}, {"t", 1.0} });
-    jsonInserter("Scorer"  , { {"v", 1.0}, {"t", 0.2} });
-    jsonInserter("Catapult", { {"v", 1.0}, {"t", 0.2} });
+    jsonInserter("Low");
+    jsonInserter("High");
+    jsonInserter("Punch");
     jsonInserter("Intake"  , { {"v", 1.0}, {"t", 0.2} });
     jsonInserter("Arm"     , { {"p", 10 }, {"t", 0.6} });
-    jsonInserter("Shoot");
     jsonInserter("Delta"   , { {"x", 0.0}, {"y", 0.0}, {"o", 0.0} });
     jsonInserter("Delay"   , { {"t", 0} });
-    jsonInserter("BHold", {}, "hold");
-    jsonInserter("BCoast", {}, "coast");
-    jsonInserter("BShort", {}, "short");
+    jsonInserter("Hold");
+    jsonInserter("Coast");
+    jsonInserter("Short");
     jsonInserter("AutoBall", { {"v", 1.0}, {"c", 50 }, {"d", 40 }, {"a", 8}, {"t", 0.2} });
     jsonInserter("Origin", {
       {"name", "ORIGIN"},

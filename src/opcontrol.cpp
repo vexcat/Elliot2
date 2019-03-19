@@ -19,8 +19,8 @@ double dz(double a, double zone) {
 
 void Elliot::drive(pros::Controller& m) {
 	//Base drive
-	double y = dz(m.get_analog(ANALOG_LEFT_Y) * (speedMultiplier / 127.0), 32 / 200.0);
-	double x = dz(m.get_analog(ANALOG_LEFT_X) * (speedMultiplier / 127.0), 32 / 200.0);
+	double y = dz(m.get_analog(ANALOG_LEFT_Y) * (1 / 127.0), 0.16);
+	double x = dz(m.get_analog(ANALOG_LEFT_X) * (1 / 127.0), 0.16);
 
 	if(y != 0 || x != 0) {
 		box->base.arcade(multiplier * y, x);
@@ -29,57 +29,28 @@ void Elliot::drive(pros::Controller& m) {
 		right.moveVelocity(0);
 	}
 
-	//Scorer/Arm drive
-	int scoreVel = (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
-	if(controllingArm) {
-		arm.moveVelocity(100 * scoreVel);
-	} else {
-		score.moveVelocity(150 * scoreVel);
-	}
+	//Arm drive
+	int armVel = (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
+	arm.moveVelocity(100 * armVel);
 
-	//Scorer/Arm switch
-	if(m.get_digital_new_press(DIGITAL_B)) {
-		controllingArm = !controllingArm;
+	//Puncher drive
+	if(m.get_digital_new_press(DIGITAL_R1)) {
+		puncher.shoot();
 	}
-
-	//Catapult drive
+	
+	//Angler drive
 	if(m.get_digital_new_press(DIGITAL_L1)) {
-		catapult.goToSwitch();
-	} else if(!lastR1 && m.get_digital(DIGITAL_R1)){
-		catapult.setVelocity(100);
-		lastR1 = true;
-	} else if(lastR1 && !m.get_digital(DIGITAL_R1)) {
-		catapult.setVelocity(0);
-		lastR1 = false;
+		puncher.toggleTarget();
 	}
 
 	//Intake drive
 	int intakeVel = -m.get_analog(ANALOG_RIGHT_Y) * (200.0 / 127.0);
 	intake.moveVelocity(intakeVel);
 
-	//Arm/Scorer drive
-	int armVel = (m.get_digital(DIGITAL_UP) - m.get_digital(DIGITAL_DOWN));
-	if(controllingArm) {
-		score.moveVelocity(armVel * 150);
-	} else {
-		arm.moveVelocity(armVel * 100);
-	}
-
 	//Reverse button
 	if(m.get_digital_new_press(DIGITAL_A)) {
 		multiplier *= -1;
 	}
-
-	//Slow button
-	/*
-	if(m.get_digital_new_press(DIGITAL_DOWN)) {
-		if(speedMultiplier == 1.0) {
-			speedMultiplier = 0.75;
-		} else {
-			speedMultiplier = 1.0;
-		}
-	}
-	*/
 
 	//Brake buttons
 	if(m.get_digital_new_press(DIGITAL_X)) {

@@ -10,19 +10,29 @@
 #include <deque>
 using namespace okapi;
 
-class Catapult {
-    volatile bool headingToSwitch = false;
+class Puncher {
     volatile bool shooting = false;
-    okapi::MotorGroup &cata;
-    pros::ADIDigitalIn &sensor;
+    const int lowTargetPosition = 800;
+    const int highTargetPosition = 1200;
+    int lastPuncherPosition;
+    okapi::MotorGroup &puncher;
+    okapi::MotorGroup &angler;
+    okapi::Potentiometer &angleSense;
+    pros::Mutex reconstructionMutex;
+    json& puncherData;
+    std::shared_ptr<okapi::AsyncPosPIDController> controllerPtr;
+    void loadState();
     public:
-    Catapult(okapi::MotorGroup& cata, pros::ADIDigitalIn& sensor);
-    void catapultTask();
-    void goToSwitch();
-    void goShoot();
-    void setVelocity(double vel);
-    bool isGoingToSwitch();
-    void beginTask();
+    Puncher(okapi::MotorGroup& puncher, okapi::MotorGroup& angler, okapi::Potentiometer& angleSense, json& puncherData);
+    void lowTarget();
+    void highTarget();
+    void stopAutoControl();
+    void shoot();                 // Move motor 1 revolution
+    void setVelocity(double vel); // Manually move puncher, implicitly call stopAutoControl()
+    int targetError();            // Angler's error to its target
+    void toggleTarget();
+    okapi::IterativePosPIDController::Gains getGains();
+    void setGains(okapi::IterativePosPIDController::Gains gains);
 };
 
 struct BaseBox {
@@ -40,9 +50,6 @@ struct BaseBox {
 
 class Elliot {
 	int multiplier = 1;
-	double speedMultiplier = 1.0;
-	int lastR1 = 0;
-    int controllingArm = false;
     friend void createRobot();
     pros::Mutex usageGuard;
     public:
@@ -52,14 +59,14 @@ class Elliot {
     CameraSettings camSettings;
 	MotorGroup left;
 	MotorGroup right;
-	MotorGroup catapultMtr;
-	MotorGroup score;
+	MotorGroup puncherMtr;
+	MotorGroup angler;
 	MotorGroup intake;
     MotorGroup arm;
-    pros::ADIDigitalIn catapultLimit;
+    okapi::Potentiometer angleSense;
     pros::ADIUltrasonic leftSonic;
     pros::ADIUltrasonic rightSonic;
-    Catapult catapult;
+    Puncher puncher;
     GPS gps;
     BaseBox* box;
     BaseSettings baseSettings;

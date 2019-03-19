@@ -8,44 +8,76 @@
 #include <deque>
 using namespace okapi;
 
-Catapult::Catapult(MotorGroup& cata, pros::ADIDigitalIn& sensor): cata(cata), sensor(sensor) {}
-
-void Catapult::beginTask() {
-    pros::Task cataTask([](void* obj){((Catapult*)obj)->catapultTask();}, this);
+void Puncher::loadState() {
+    reconstructionMutex.take(TIMEOUT_MAX);
+    double oldTarget = 0;
+    bool oldDisabled = true;
+    if(controllerPtr) {
+        oldTarget = controllerPtr->getTarget();
+        oldDisabled = controllerPtr->isDisabled();
+    }
+    controllerPtr = std::make_shared<okapi::AsyncPosPIDController>(
+        std::make_shared<Potentiometer>(angleSense),
+        std::make_shared<MotorGroup>(angler),
+        okapi::TimeUtilFactory::create(),
+        puncherData["kP"].get<double>(),
+        puncherData["kI"].get<double>(),
+        puncherData["kD"].get<double>()
+    );
+    controllerPtr->flipDisable(oldDisabled);
+    controllerPtr->setTarget(oldTarget);
+    controllerPtr->startThread();
+    reconstructionMutex.give();
 }
 
-void Catapult::catapultTask() {
-    while(true) {
-        if(headingToSwitch && sensor.get_value()) {
-            headingToSwitch = false;
-            cata.moveVelocity(0);
-        }
-        if(shooting) {
-            pros::delay(400);
-            if(shooting) headingToSwitch = true;
-        }
-        pros::delay(1);
+Puncher::Puncher(MotorGroup& ipuncher, MotorGroup& iangler, okapi::Potentiometer& iangleSense, json& ipuncherData):
+puncher(ipuncher), angler(iangler), angleSense(iangleSense), puncherData(ipuncherData) {
+    lastPuncherPosition = ipuncher.getPosition();
+    loadState();
+}
+
+void Puncher::lowTarget() {
+    controllerPtr->setTarget(lowTargetPosition);
+    controllerPtr->flipDisable(false);
+}
+void Puncher::highTarget() {
+    controllerPtr->setTarget(highTargetPosition);
+    controllerPtr->flipDisable(false);
+}
+void Puncher::stopAutoControl() {
+    controllerPtr->flipDisable(true);
+}
+void Puncher::shoot() {
+    lastPuncherPosition += 360;
+    puncher.moveAbsolute(lastPuncherPosition, 200);
+}
+void Puncher::setVelocity(double vel) {
+    puncher.moveVelocity(vel);
+}
+int Puncher::targetError() {
+    return controllerPtr->getError();
+}
+void Puncher::toggleTarget() {
+    if(controllerPtr->getTarget() == lowTargetPosition) {
+        highTarget();
+    } else {
+        lowTarget();
     }
 }
-
-void Catapult::goToSwitch() {
-    headingToSwitch = true;
-    cata.moveVelocity(100);
+okapi::IterativePosPIDController::Gains Puncher::getGains() {   
+    return {
+        puncherData["kP"].get<double>(),
+        puncherData["kI"].get<double>(),
+        puncherData["kD"].get<double>(),
+        0
+    };
 }
-
-void Catapult::goShoot() {
-    shooting = true;
-    cata.moveVelocity(200);
-}
-
-void Catapult::setVelocity(double vel) {
-    headingToSwitch = false;
-    shooting = false;
-    cata.moveVelocity(vel);
-}
-
-bool Catapult::isGoingToSwitch() {
-    return headingToSwitch;
+void Puncher::setGains(okapi::IterativePosPIDController::Gains gains) {
+    puncherData["kP"] = gains.kP;
+    puncherData["kI"] = gains.kP;
+    puncherData["kD"] = gains.kP;
+    loadState();
+    saveState();
 }
 
 json& getGPSState() {
@@ -87,6 +119,20 @@ json& getBaseState() {
     return state["base"];
 }
 
+json& getPuncherState() {
+    auto &state = getState();
+    if(state.find("puncher") == state.end()) {
+        printf("Defaults were applied for the puncher. Please change puncher PID.\n");
+        state["puncher"] = {
+            {"kP", 0.001},
+            {"kI", 0.001},
+            {"kD", 0.001}
+        };
+        saveState();
+    }
+    return state["puncher"];
+}
+
 json& getCameraState(pros::Vision& def) {
     auto &state = getState();
     if(state.find("cam") == state.end()) {
@@ -107,28 +153,28 @@ camera{15},
 camSettings{camera, getCameraState(camera)},
 left{3, 4},
 right{-2, -1},
-catapultMtr{5},
-score{7},
+puncherMtr{5},
+angler{7},
 intake{10},
 arm{6},
-catapultLimit{2},
+angleSense{'B'},
 leftSonic{'C', 'D'},
 rightSonic{'E', 'F'},
-catapult{catapultMtr, catapultLimit},
+puncher{puncherMtr, angler, angleSense, getPuncherState()},
 gps{left, right, getGPSState()},
 box{nullptr},
 baseSettings{left, right,
 [&]() { return gps.inchToCounts(1); },
 [&]() { return gps.radiansToCounts(1); },
 box, getBaseState()} {
-    score.setBrakeMode(AbstractMotor::brakeMode::hold);
+    angler.setBrakeMode(AbstractMotor::brakeMode::hold);
+    angler.setGearing(AbstractMotor::gearset::green);
     left.setGearing(AbstractMotor::gearset::green);
     right.setGearing(AbstractMotor::gearset::green);
     left .setEncoderUnits(AbstractMotor::encoderUnits::degrees);
     right.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
-    catapultMtr.setGearing(AbstractMotor::gearset::red);
-    catapultMtr.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
-    score.setGearing(AbstractMotor::gearset::green);
+    puncherMtr.setGearing(AbstractMotor::gearset::red);
+    puncherMtr.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
     intake.setGearing(AbstractMotor::gearset::green);
     arm.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
 }
@@ -139,8 +185,8 @@ void Elliot::takeCoast() {
 
 void Elliot::stop() {
     box->base.stop();
-    catapult.setVelocity(0);
-    score.moveVelocity(0);
+    puncher.setVelocity(0);
+    angler.moveVelocity(0);
     intake.moveVelocity(0);
 }
 
@@ -161,7 +207,6 @@ void Elliot::give() {
 }
 
 void Elliot::beginTasks() {
-    catapult.beginTask();
     gps.beginTask();
 }
 

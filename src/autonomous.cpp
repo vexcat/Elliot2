@@ -136,25 +136,17 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
       motionObject["t"].get<double>() * 1000
     );
   }
-  if(type == "scorer") {
-    double v = motionObject["v"].get<double>();
-    bot.score.controllerSet(v);
-    double timing = motionObject["t"].get<double>();
-    if(timing != 0) {
-      pros::delay((int)(timing * 1000));
-      bot.score.controllerSet(0);
-    }
+  if(type == "low") {
+    bot.puncher.lowTarget();
+    pros::delay(1000 * motionObject["t"].get<double>());
   }
-  if(type == "catapult") {
-    while(bot.catapult.isGoingToSwitch()) {
-      pros::delay(5);
-    }
-    bot.catapult.setVelocity(motionObject["v"].get<double>() * (int)bot.catapultMtr.getGearing());
-    double timing = motionObject["t"].get<double>();
-    if(timing != 0) {
-      pros::delay((int)(timing * 1000));
-      bot.catapult.setVelocity(0);
-    }
+  if(type == "high") {
+    bot.puncher.highTarget();
+    pros::delay(1000 * motionObject["t"].get<double>());
+  }
+  if(type == "punch") {
+    bot.puncher.shoot();
+    pros::delay(1000 * motionObject["t"].get<double>());
   }
   if(type == "intake") {
     double v = motionObject["v"].get<double>();
@@ -164,9 +156,6 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
       pros::delay((int)(timing * 1000));
       bot.intake.controllerSet(0);
     }
-  }
-  if(type == "shoot") {
-    bot.catapult.goToSwitch();
   }
   if(type == "delay") {
     pros::delay((int)(1000 * motionObject["t"].get<double>()));
