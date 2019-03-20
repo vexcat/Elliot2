@@ -1,2 +1,3 @@
 bin/
 *.gch
+.vscode/ipch/
