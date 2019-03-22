@@ -1071,15 +1071,30 @@ class CameraList: public ControllerMenu {
   }
 };
 
+class PunchList: public ControllerMenu {
+  public:
+  PunchList() {
+    list.insert(list.end(), {
+      {"Puncher Gains", [&]() {
+        auto &bot = getRobot();
+        auto punchGains = bot.puncher.getGains();
+        PIDGainsList(punchGains)();
+        bot.puncher.setGains(punchGains);
+      }}
+    });
+  }
+}
+
 //Contains all menus on the controller, besides the PID test menu.
 class RootList: public ControllerMenu {
   public:
   RootList() {
     list.insert(list.end(), {
-      {"Autonomous"   , taskOption<AutonList>},
-      {"Motors"       , taskOption<MotorList>},
-      {"GPS Settings" , taskOption<  GPSList>},
-      {"Camera Tuning", taskOption<CameraList>}
+      {"Autonomous"    , taskOption<AutonList>},
+      {"Motors"        , taskOption<MotorList>},
+      {"GPS Settings"  , taskOption<  GPSList>},
+      {"Punch Settings", taskOption<PunchList>},
+      {"Camera Tuning" , taskOption<CameraList>}
     });
   }
 };
