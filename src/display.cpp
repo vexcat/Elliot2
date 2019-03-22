@@ -1083,7 +1083,7 @@ class PunchList: public ControllerMenu {
       }}
     });
   }
-}
+};
 
 //Contains all menus on the controller, besides the PID test menu.
 class RootList: public ControllerMenu {
