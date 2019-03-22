@@ -1078,7 +1078,8 @@ class PunchList: public ControllerMenu {
       {"Puncher Gains", [&]() {
         auto &puncher = getRobot().puncher;
         auto punchGains = puncher.getGains();
-        PIDGainsList(punchGains)();
+        PIDGainsList menu(punchGains);
+        menu();
         puncher.setGains(punchGains);
       }},
       {"Low Target", [&]() {
