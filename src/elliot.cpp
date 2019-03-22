@@ -64,6 +64,18 @@ void Puncher::toggleTarget() {
         lowTarget();
     }
 }
+void Puncher::setLowTarget(int target) {
+    if(controllerPtr->getTarget() == lowTargetPosition) {
+        controllerPtr->setTarget(target);
+    }
+    lowTargetPosition = target;
+}
+void Puncher::setHighTarget(int target) {
+    if(controllerPtr->getTarget() == highTargetPosition) {
+        controllerPtr->setTarget(target);
+    }
+    highTargetPosition = target;
+}
 okapi::IterativePosPIDController::Gains Puncher::getGains() {   
     return {
         puncherData["kP"].get<double>(),

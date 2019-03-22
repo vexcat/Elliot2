@@ -12,8 +12,8 @@ using namespace okapi;
 
 class Puncher {
     volatile bool shooting = false;
-    const int lowTargetPosition = 800;
-    const int highTargetPosition = 1200;
+    int lowTargetPosition = 800;
+    int highTargetPosition = 1200;
     int lastPuncherPosition;
     okapi::MotorGroup &puncher;
     okapi::MotorGroup &angler;
@@ -33,6 +33,10 @@ class Puncher {
     void toggleTarget();
     okapi::IterativePosPIDController::Gains getGains();
     void setGains(okapi::IterativePosPIDController::Gains gains);
+    void setLowTarget(int target);
+    void setHighTarget(int target);
+    int getLowTarget() { return lowTargetPosition; }
+    int getHighTarget() { return highTargetPosition; }
 };
 
 struct BaseBox {
