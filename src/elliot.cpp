@@ -48,7 +48,7 @@ void Puncher::stopAutoControl() {
     controllerPtr->flipDisable(true);
 }
 void Puncher::shoot() {
-    lastPuncherPosition += 360;
+    lastPuncherPosition -= 360;
     puncher.moveAbsolute(lastPuncherPosition, 200);
 }
 void Puncher::setVelocity(double vel) {
