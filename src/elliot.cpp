@@ -36,6 +36,14 @@ puncher(ipuncher), angler(iangler), angleSense(iangleSense), puncherData(ipunche
     loadState();
 }
 
+void Puncher::puncherTask() {
+    while(true) {
+        if(abs(puncher.getPosition() - puncher.getTargetPosition()) < 20 && puncher.getActualVelocity() < 5) {
+            puncher.moveVoltage(0);
+        }
+        pros::delay(5);
+    }
+}
 void Puncher::lowTarget() {
     controllerPtr->setTarget(lowTargetPosition);
     controllerPtr->flipDisable(false);
@@ -220,6 +228,7 @@ void Elliot::give() {
 
 void Elliot::beginTasks() {
     gps.beginTask();
+    puncher.beginTask();
 }
 
 Elliot* elliot;

@@ -22,8 +22,12 @@ class Puncher {
     json& puncherData;
     std::shared_ptr<okapi::AsyncPosPIDController> controllerPtr;
     void loadState();
+    void puncherTask();
     public:
     Puncher(okapi::MotorGroup& puncher, okapi::MotorGroup& angler, okapi::Potentiometer& angleSense, json& puncherData);
+    void beginTask() {
+        pros::Task([](void* me) {((Puncher*)me)->puncherTask();}, (void*)this);
+    }
     void lowTarget();
     void highTarget();
     void stopAutoControl();
