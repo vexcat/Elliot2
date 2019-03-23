@@ -11,7 +11,7 @@ During autonomous, the robot is capable of doing the following motions:
   - Move to Position
   - Rotate
   - Move in a Straight Line (SLine)
-  - Move Mechanism (Scorer, Intake, Catapult)
+  - Move Mechanism (Intake, Puncher, Angler)
   - Shoot
   - Delay
   - Automatic Ball Tracking w/ Vision Sensor
@@ -25,7 +25,7 @@ This program also features odometry using tank kinematics. This makes it possibl
 It is recommended to use a high velocity value on position commands, with a delay to match. This allows for quick motion, while a delay makes sure the brake mode hold has time to properly stop the robot.
 
 ## catOS
-The catOS menu system is ~~a confusing mess~~ a glorious and minimalistic UI for robot configuration.
+The catOS menu system is <s>a confusing mess</s> a glorious and minimalistic UI for robot configuration.
 
 To get started with catOS, press the <- and -> buttons together. Use the up/down arrows to view the entries in a list, and the A/B buttons to navigate in and out of menus.
 
