@@ -8,7 +8,7 @@
 #include <utility>
 #include <functional>
 using json = nlohmann::json;
-struct BaseBox;
+
 class BaseSettings {
     json &data;
     std::unique_ptr<ChassisControllerPID> &base;
