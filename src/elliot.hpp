@@ -12,8 +12,8 @@ using namespace okapi;
 
 class Puncher {
     volatile bool shooting = false;
-    int lowTargetPosition = 800;
-    int highTargetPosition = 1200;
+    int lowTargetPosition;
+    int highTargetPosition;
     int lastPuncherPosition;
     okapi::MotorGroup &puncher;
     okapi::MotorGroup &angler;

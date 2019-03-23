@@ -28,6 +28,8 @@ void Puncher::loadState() {
     controllerPtr->setTarget(oldTarget);
     controllerPtr->startThread();
     reconstructionMutex.give();
+     lowTargetPosition = puncherData["low" ].get<double>();
+    highTargetPosition = puncherData["high"].get<double>();
 }
 
 Puncher::Puncher(MotorGroup& ipuncher, MotorGroup& iangler, okapi::Potentiometer& iangleSense, json& ipuncherData):
@@ -77,12 +79,14 @@ void Puncher::setLowTarget(int target) {
         controllerPtr->setTarget(target);
     }
     lowTargetPosition = target;
+    puncherData["low"] = target;
 }
 void Puncher::setHighTarget(int target) {
     if(controllerPtr->getTarget() == highTargetPosition) {
         controllerPtr->setTarget(target);
     }
     highTargetPosition = target;
+    puncherData["high"] = target;
 }
 okapi::IterativePosPIDController::Gains Puncher::getGains() {   
     return {
@@ -146,7 +150,9 @@ json& getPuncherState() {
         state["puncher"] = {
             {"kP", 0.001},
             {"kI", 0.001},
-            {"kD", 0.001}
+            {"kD", 0.001},
+            {"low", 800},
+            {"high", 1200}
         };
         saveState();
     }
