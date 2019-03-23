@@ -36,7 +36,7 @@ bool getBlue() {
  */
 void trackBall(double maxVel, double threshold, double oovThreshold, double attack, int extraTime) {
   auto &bot = getRobot();
-  auto &cha = bot.box->base;
+  auto &cha = *bot.base;
   cha.setMaxVelocity(maxVel * (int)bot.left.getGearing());
   //Enable intake
   bot.intake.moveVelocity(200);
@@ -81,7 +81,7 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
 void moveToSetpoint(RoboPosition pt, double velLimit, bool reverse, int extraTime, int turnExtraTime) {
   auto &bot = getRobot();
   auto &gps = bot.gps;
-  auto &cha = bot.box->base;
+  auto &cha = *bot.base;
   //Stick to the speed limit
   cha.setMaxVelocity(velLimit * (int)bot.left.getGearing());
   //Get current position
@@ -150,9 +150,9 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     dTheta = periodicallyEfficient(dTheta);
     //"v": Velocity limit in [0, 1]
     double velLimit = motionObject["v"].get<double>();
-    bot.box->base.setMaxVelocity(velLimit * (int)bot.left.getGearing());
+    bot.base->setMaxVelocity(velLimit * (int)bot.left.getGearing());
     //Turn by dTheta radians
-    bot.box->base.turnAngle(dTheta * -(180 / PI) * okapi::degree);
+    bot.base->turnAngle(dTheta * -(180 / PI) * okapi::degree);
     //Wait extra "t" seconds
     pros::delay(motionObject["t"].get<double>() * 1000);
   }
@@ -242,7 +242,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
   }
   //Directly control base motors, without PID.
   if(type == "direct") {
-    bot.box->base.stop();
+    bot.base->stop();
     //"l"/"r": Left & right velocities in [-1, 1]
     double l = motionObject["l"].get<double>() * (int)bot.left.getGearing();
     double r = motionObject["r"].get<double>() * (int)bot.right.getGearing();
@@ -269,9 +269,9 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     //"d": Distance to travel in inches
     double distance = bot.gps.inchToCounts(motionObject["d"].get<double>());
     //"v": Velocity limit in [0, 1]
-    bot.box->base.setMaxVelocity(motionObject["v"].get<double>() * (int)bot.left.getGearing());
+    bot.base->setMaxVelocity(motionObject["v"].get<double>() * (int)bot.left.getGearing());
     //Move distance
-    bot.box->base.moveDistance(distance);
+    bot.base->moveDistance(distance);
     //"t": Extra time to wait after moving
     pros::delay(motionObject["t"].get<double>() * 1000);
   }

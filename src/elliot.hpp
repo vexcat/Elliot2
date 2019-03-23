@@ -43,19 +43,6 @@ class Puncher {
     int getHighTarget() { return highTargetPosition; }
 };
 
-struct BaseBox {
-    okapi::Elliot2CCPID base;
-    BaseBox(
-  const TimeUtil &itimeUtil,
-  const std::shared_ptr<ChassisModel> &imodel,
-  std::unique_ptr<IterativePosPIDController> idistanceController,
-  std::unique_ptr<IterativePosPIDController> iangleController,
-  std::unique_ptr<IterativePosPIDController> iturnController,
-  const AbstractMotor::GearsetRatioPair igearset,
-  const ChassisScales &iscales):
-    base(itimeUtil, imodel, std::move(idistanceController), std::move(iangleController), std::move(iturnController), igearset, iscales) {}
-};
-
 class Elliot {
 	int multiplier = 1;
     friend void createRobot();
@@ -76,7 +63,7 @@ class Elliot {
     pros::ADIUltrasonic rightSonic;
     Puncher puncher;
     GPS gps;
-    BaseBox* box;
+    std::unique_ptr<ChassisControllerPID> base;
     BaseSettings baseSettings;
     Elliot();
     Elliot(const Elliot&) = delete;

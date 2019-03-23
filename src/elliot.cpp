@@ -182,11 +182,11 @@ leftSonic{'C', 'D'},
 rightSonic{'E', 'F'},
 puncher{puncherMtr, angler, angleSense, getPuncherState()},
 gps{left, right, getGPSState()},
-box{nullptr},
+base{nullptr},
 baseSettings{left, right,
 [&]() { return gps.inchToCounts(1); },
 [&]() { return gps.radiansToCounts(1); },
-box, getBaseState()} {
+base, getBaseState()} {
     angler.setBrakeMode(AbstractMotor::brakeMode::hold);
     angler.setGearing(AbstractMotor::gearset::green);
     left.setGearing(AbstractMotor::gearset::green);
@@ -204,7 +204,7 @@ void Elliot::takeCoast() {
 }
 
 void Elliot::stop() {
-    box->base.stop();
+    base->stop();
     puncher.setVelocity(0);
     angler.moveVelocity(0);
     intake.moveVelocity(0);

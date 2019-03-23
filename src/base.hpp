@@ -11,7 +11,7 @@ using json = nlohmann::json;
 struct BaseBox;
 class BaseSettings {
     json &data;
-    BaseBox* &base;
+    std::unique_ptr<ChassisControllerPID> &base;
     MotorGroup& left;
     MotorGroup& right;
     std::function<double()> cpiGetter;
@@ -55,7 +55,8 @@ class BaseSettings {
     BaseSettings(MotorGroup& ileft, MotorGroup& iright, 
     std::function<double()> iCPIGetter,
     std::function<double()> iCPRGetter,
-    BaseBox* & ibase, json& settingsLocation): base(ibase), left(ileft), right(iright), cpiGetter(iCPIGetter), cprGetter(iCPRGetter), data(settingsLocation) {
+    std::unique_ptr<ChassisControllerPID> & ibase, json& settingsLocation):
+    base(ibase), left(ileft), right(iright), cpiGetter(iCPIGetter), cprGetter(iCPRGetter), data(settingsLocation) {
         loadState();
     }
 };

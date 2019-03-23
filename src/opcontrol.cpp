@@ -23,7 +23,7 @@ void Elliot::drive(pros::Controller& m) {
 	double x = dz(m.get_analog(ANALOG_LEFT_X) * (1 / 127.0), 0.16);
 
 	if(y != 0 || x != 0) {
-		box->base.arcade(multiplier * y, x);
+		base->arcade(multiplier * y, x);
 	} else {
 		left.moveVelocity(0);
 		right.moveVelocity(0);

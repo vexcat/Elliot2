@@ -430,7 +430,7 @@ class MotionEditor: public ControllerMenu {
         //Track with current offset
         auto tracking = offsetFor(auton, idx);
         runMotion(object, tracking, getBlue());
-        bot.box->base.stop();
+        bot.base->stop();
       }},
       {"Run to here", [&auton, idx, this]() {
         //Okay to use a lambda, as long as it isn't destructed in the task's lifetime.
@@ -461,7 +461,7 @@ class MotionEditor: public ControllerMenu {
         //Measure finish time
         long finishedIn = pros::millis() - autonStartTime;
         //Stop robot
-        getRobot().box->base.stop();
+        getRobot().base->stop();
         //Display finish time
         line_set(0, "Auton done in");
         line_set(1, std::to_string(finishedIn) + "ms.");
