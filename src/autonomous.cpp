@@ -22,8 +22,7 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
   auto &bot = getRobot();
   auto &cha = bot.box->base;
   cha.setMaxVelocity(maxVel * (int)bot.left.getGearing());
-  //"Green card" signature
-  bot.camera.print_signature(bot.camera.get_signature(1));
+  //Enable intake
   bot.intake.moveVelocity(200);
   while(true) {
     //Where's the ball?
@@ -58,6 +57,7 @@ void trackBall(double maxVel, double threshold, double oovThreshold, double atta
   }
   //Go forward, intake off.
   cha.moveDistance(attack);
+  pros::delay(extraTime);
   bot.intake.moveVelocity(0);
 }
 
