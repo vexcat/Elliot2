@@ -1,11 +1,11 @@
-#pragma once
+/**
+ * @file editors.hpp
+ * 
+ * This file declares the functions for editing numbers & text on the V5 Controller's
+ * screen. It is used throughout display.cpp to edit robot configuration & auton.
+ */
 
-//------------------------------------------------------------------------------------
-//  Controller Editors
-//  ------------------
-//  This file declares the functions for editing numbers & text on the V5 Controller's
-//  screen. It is used throughout display.cpp to edit robot configuration & auton.
-//------------------------------------------------------------------------------------
+#pragma once
 
 /**
  * Edits a number using the controller LCD.

@@ -1,14 +1,14 @@
+/**
+ * @file editors.cpp
+ * 
+ * This file defines the functions for editing numbers & text on the V5 Controller's
+ * screen. It is used throughout display.cpp to edit robot configuration & auton.
+ */
+
 #include "main.h"
 #include "display.hpp"
 #include "elliot.hpp"
 #include "catOS.hpp"
-
-//------------------------------------------------------------------------------------
-//  Controller Editors
-//  ------------------
-//  This file defines the functions for editing numbers & text on the V5 Controller's
-//  screen. It is used throughout display.cpp to edit robot configuration & auton.
-//------------------------------------------------------------------------------------
 
 /**
  * Render cursor arrows to display place being edited.
