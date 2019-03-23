@@ -8,7 +8,7 @@ void BaseSettings::loadState() {
     auto dist = loadGains("dist");
     auto angle = loadGains("angle");
     auto turn = loadGains("turn");
-    base = std::unique_ptr<ChassisControllerPID>( new ChassisControllerPID(
+    base = std::unique_ptr<Elliot2CCPID>( new Elliot2CCPID(
         TimeUtil(
             Supplier<std::unique_ptr<AbstractTimer>>([]() { return std::make_unique<Timer>(); }),
             Supplier<std::unique_ptr<AbstractRate >>([]() { return std::make_unique<Rate >(); }),

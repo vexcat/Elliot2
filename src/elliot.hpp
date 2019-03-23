@@ -63,7 +63,7 @@ class Elliot {
     pros::ADIUltrasonic rightSonic;
     Puncher puncher;
     GPS gps;
-    std::unique_ptr<ChassisControllerPID> base;
+    std::unique_ptr<Elliot2CCPID> base;
     BaseSettings baseSettings;
     Elliot();
     Elliot(const Elliot&) = delete;

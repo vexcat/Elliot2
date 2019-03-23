@@ -5,13 +5,14 @@
 #include "okapi/api.hpp"
 #include "elliot.hpp"
 #include "debugging.hpp"
+#include "ccpid_mod.hpp"
 #include <utility>
 #include <functional>
 using json = nlohmann::json;
 
 class BaseSettings {
     json &data;
-    std::unique_ptr<ChassisControllerPID> &base;
+    std::unique_ptr<Elliot2CCPID> &base;
     MotorGroup& left;
     MotorGroup& right;
     std::function<double()> cpiGetter;
@@ -55,7 +56,7 @@ class BaseSettings {
     BaseSettings(MotorGroup& ileft, MotorGroup& iright, 
     std::function<double()> iCPIGetter,
     std::function<double()> iCPRGetter,
-    std::unique_ptr<ChassisControllerPID> & ibase, json& settingsLocation):
+    std::unique_ptr<Elliot2CCPID> & ibase, json& settingsLocation):
     base(ibase), left(ileft), right(iright), cpiGetter(iCPIGetter), cprGetter(iCPRGetter), data(settingsLocation) {
         loadState();
     }
