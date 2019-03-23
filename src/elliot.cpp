@@ -208,6 +208,7 @@ void Elliot::stop() {
     puncher.setVelocity(0);
     angler.moveVelocity(0);
     intake.moveVelocity(0);
+    arm.moveVelocity(0);
 }
 
 void Elliot::takeStopped() {
