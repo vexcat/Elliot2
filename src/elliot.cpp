@@ -175,8 +175,6 @@ json& getCameraState(pros::Vision& def) {
 
 Elliot::Elliot():
 controller{CONTROLLER_MASTER},
-camera{15},
-camSettings{camera, getCameraState(camera)},
 left{3, 4},
 right{-2, -1},
 puncherMtr{5},
@@ -184,8 +182,6 @@ angler{7},
 intake{10},
 arm{6},
 angleSense{'B'},
-leftSonic{'C', 'D'},
-rightSonic{'E', 'F'},
 puncher{puncherMtr, angler, angleSense, getPuncherState()},
 gps{left, right, getGPSState()},
 base{nullptr},

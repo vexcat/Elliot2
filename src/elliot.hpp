@@ -3,7 +3,6 @@
 #include "okapi/api.hpp"
 #include "gps.hpp"
 #include "display.hpp"
-#include "camera.hpp"
 #include "base.hpp"
 #include "debugging.hpp"
 #include "ccpid_mod.hpp"
@@ -50,8 +49,6 @@ class Elliot {
     public:
     long opctrlBegin;
     pros::Controller controller;
-    pros::Vision camera;
-    CameraSettings camSettings;
 	MotorGroup left;
 	MotorGroup right;
 	MotorGroup puncherMtr;
@@ -59,8 +56,6 @@ class Elliot {
 	MotorGroup intake;
     MotorGroup arm;
     okapi::Potentiometer angleSense;
-    pros::ADIUltrasonic leftSonic;
-    pros::ADIUltrasonic rightSonic;
     Puncher puncher;
     GPS gps;
     std::unique_ptr<Elliot2CCPID> base;

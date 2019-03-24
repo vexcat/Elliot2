@@ -23,60 +23,6 @@ bool getBlue() {
   return isBlue;
 }
 
-/**
- * Tracks a ball using the vision sensor.
- * It steers the robot according to the nearest ball's x position,
- * and stops once the nearest ball's y position is lower than oovThreshold.
- * 
- * @param maxVel       Velocity limit in [0, 1].
- * @param threshold    How far a ball can travel side-to-side without steering the robot.
- * @param oovThreshold How close a ball can be before stopping to intake.
- * @param attack       How far to drive forward once the ball is close to the robot.
- * @param extraTime    How long to wait for ball to finish intaking.
- */
-void trackBall(double maxVel, double threshold, double oovThreshold, double attack, int extraTime) {
-  auto &bot = getRobot();
-  auto &cha = *bot.base;
-  cha.setMaxVelocity(maxVel * (int)bot.left.getGearing());
-  //Enable intake
-  bot.intake.moveVelocity(200);
-  while(true) {
-    //Where's the ball?
-    //Wait 400ms to definitively say there's no ball.
-    pros::vision_object_s_t object;
-    for(int i = 0; i < 4; i++) {
-      pros::delay(50);
-      object = bot.camera.get_by_sig(0, 1);
-      if(object.signature != VISION_OBJECT_ERR_SIG) {
-        break;
-      }
-    }
-    if(object.signature == VISION_OBJECT_ERR_SIG) break;
-    int centerThreshold = threshold/2;
-    int half = VISION_FOV_WIDTH/2;
-    //If the object is about to go out of view, stop.
-    if(VISION_FOV_HEIGHT - object.top_coord < oovThreshold) {
-      break;
-    }
-    //Too left
-    if(object.left_coord < half-centerThreshold) {
-      cha.driveVector(1.0, -0.3);
-    }
-    //Perfect
-    if(half-centerThreshold < object.left_coord && object.left_coord < half+centerThreshold) {
-      cha.driveVector(1.0, 0.0);
-    }
-    //Too right
-    if(object.left_coord > half+centerThreshold) {
-      cha.driveVector(1.0, 0.3);
-    }
-  }
-  //Go forward, intake off.
-  cha.moveDistance(attack);
-  pros::delay(extraTime);
-  bot.intake.moveVelocity(0);
-}
-
 //Move to a point, documented in .hpp.
 void moveToSetpoint(RoboPosition pt, double velLimit, bool reverse, int extraTime, int turnExtraTime) {
   auto &bot = getRobot();
@@ -155,16 +101,6 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     bot.base->turnAngle(dTheta * -(180 / PI) * okapi::degree);
     //Wait extra "t" seconds
     pros::delay(motionObject["t"].get<double>() * 1000);
-  }
-  //Call trackBall() defined above
-  if(type == "autoball") {
-    trackBall(
-      motionObject["v"].get<double>(),
-      motionObject["c"].get<double>(),
-      motionObject["d"].get<double>(),
-      bot.gps.inchToCounts(motionObject["a"].get<double>()),
-      motionObject["t"].get<double>() * 1000
-    );
   }
   //Move puncher to low target
   if(type == "low") {

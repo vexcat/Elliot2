@@ -507,7 +507,6 @@ class MotionList: public CRUDMenu {
     jsonInserter("Hold");
     jsonInserter("Coast");
     jsonInserter("Short");
-    jsonInserter("AutoBall", { {"v", 1.0}, {"c", 50 }, {"d", 40 }, {"a", 8}, {"t", 0.2} });
     jsonInserter("Origin", {
       {"name", "ORIGIN"},
       {"x", 0.0}, {"y", 0.0}, {"o", 0.0}
@@ -641,13 +640,6 @@ class MotionList: public CRUDMenu {
       MotionEditor(motionData, idx, {})();
     } else if(type == "rotation") {
       motionData[idx]["type"] = "rotateTo";
-    } else if(type == "autoball") {
-      MotionEditor(motionData, idx, {
-        {"v", 2, "Set vel"},
-        {"c", 0, "Set mid_thres"},
-        {"d", 0, "Set bot_thres"},
-        {"a", 2, "Set attack"}
-      })();
     } else if(type == "direct") {
       MotionEditor(motionData, idx, {
         {"l", 3, "Set leftvel"},
@@ -1041,36 +1033,6 @@ class GPSList: public ControllerMenu {
   }
 };
 
-//Can configure the V5 Vision Sensor
-class CameraList: public ControllerMenu {
-  void updateAWB() {
-    auto &cam = getRobot().camSettings;
-    if(cam.getAutoWhiteBalance()) {
-      list[0].first = "AutoWhite: ON";
-    } else {
-      list[0].first = "AutoWhite: OFF";
-    }
-  }
-  public:
-  CameraList() {
-    auto &cam = getRobot().camSettings;
-    auto &state = getState();
-    list.insert(list.end(), {
-      {"????", [&]() {
-        cam.setAutoWhiteBalance(!cam.getAutoWhiteBalance());
-        updateAWB();
-      }},
-      {"Set WhiteBal", [&]() {
-        cam.setWhiteBalance(editNumber(cam.getWhiteBalance(), 0));
-      }},
-      {"Set Exposure", [&]() {
-        cam.setExposure(editNumber(cam.getExposure(), 0));
-      }}
-    });
-    updateAWB();
-  }
-};
-
 class PunchList: public ControllerMenu {
   public:
   PunchList() {
@@ -1102,8 +1064,7 @@ class RootList: public ControllerMenu {
       {"Autonomous"    , taskOption<AutonList>},
       {"Motors"        , taskOption<MotorList>},
       {"GPS Settings"  , taskOption<  GPSList>},
-      {"Punch Settings", taskOption<PunchList>},
-      {"Camera Tuning" , taskOption<CameraList>}
+      {"Punch Settings", taskOption<PunchList>}
     });
   }
 };
