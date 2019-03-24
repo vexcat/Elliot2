@@ -41,7 +41,6 @@ class ControllerMenu: public ControllerTask {
 
 void bound(int& index, int size);
 
-using MenuPair = std::pair<int, std::vector<MenuEntry>>;
 class CRUDMenu: public ControllerTask {
   std::vector<MenuEntry> crudOptions;
   int crudIndex = 0;
