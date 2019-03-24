@@ -1,5 +1,6 @@
 #include "catOS.hpp"
 #include "elliot.hpp"
+#include "editors.hpp"
 
 void ControllerTask::operator()() {
   int result;
