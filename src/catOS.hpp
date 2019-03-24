@@ -73,8 +73,8 @@ class CRUDMenu: public ControllerTask {
   virtual void attemptMove(int idx, int newIdx, const std::string& oldName) { throw 0; }
   virtual void attemptRename(int idx, std::string newName, const std::string& oldName) { throw 0; }
   virtual std::string attemptDuplicate(int idx, int newIdx, const std::string& oldName) { throw 0; }
-  virtual void handleSelect(int idx, const std::string& name) = 0;
-  virtual void finalizeData() = 0;
+  virtual void handleSelect(int idx, const std::string& name) {};
+  virtual void finalizeData() {};
 
   public:
   int checkController() override;
