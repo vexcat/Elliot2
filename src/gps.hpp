@@ -11,12 +11,6 @@ struct RoboPosition {
 	double o;
 };
 
-struct PIDGains {
-    double kP;
-    double kI;
-    double kD;
-};
-
 class GPS {
     RoboPosition position = {0, 0, 0};
     //Counts Per Radian (the important one)
