@@ -1,6 +1,14 @@
 /**
+ * @file ccpid_mod.hpp
  * @author Ryan Benasutti, WPI
- *
+ * 
+ * This file was originally ChassisControllerPID of OkapiLib, but was
+ * copied into Elliot2 as Elliot2CCPID for simple modification.
+ * 
+ * So far, the only change that makes this class differ from
+ * the original ChassisControllerPID is that waitUntilSettled no longer
+ * stops the PID loop. 
+ * 
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -98,6 +106,9 @@ class Elliot2CCPID : public virtual ChassisController {
 
   /**
    * Delays until the currently executing movement completes.
+   * This implementation differs slightly from the original
+   * ChassisControllerPID implementation in OkapiLib, as it
+   * does not stop the PID loop once settled.
    */
   void waitUntilSettled() override;
 

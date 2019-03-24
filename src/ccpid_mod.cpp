@@ -1,5 +1,13 @@
 /**
+ * @file ccpid_mod.cpp
  * @author Ryan Benasutti, WPI
+ * 
+ * This file was originally ChassisControllerPID of OkapiLib, but was
+ * copied into Elliot2 as Elliot2CCPID for simple modification.
+ * 
+ * So far, the only change that makes this class differ from
+ * the original ChassisControllerPID is that waitUntilSettled no longer
+ * stops the PID loop.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this

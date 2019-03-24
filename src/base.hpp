@@ -1,3 +1,8 @@
+/**
+ * @file base.hpp
+ * 
+ * This file manages base configuration.
+ */
 #pragma once
 #include "main.h"
 #include "json.hpp"
@@ -10,13 +15,37 @@
 #include <functional>
 using json = nlohmann::json;
 
+/**
+ * BaseSettings is responsible for loading/saving configuration for the
+ * Elliot2CCPID that controls the base. It loads/saves PID values for
+ * turning & going forward, and for angle correction while going forward.
+ * Because Elliot2CCPID can't be reconfigured, it is reconstructed whenever
+ * loadState() is called. This is why it's stored as a unique_ptr in Elliot.
+ * 
+ * @see Elliot2CCPID
+ * @see Elliot
+ */
 class BaseSettings {
+    ///Configuration data location
     json &data;
+    ///Where to store new instances of Elliot2CCPID
     std::unique_ptr<Elliot2CCPID> &base;
+    ///Left MotorGroup to construct Elliot2CCPID with
     MotorGroup& left;
+    ///Right MotorGroup to construct Elliot2CCPID with
     MotorGroup& right;
+    ///Function to get CPI value to construct Elliot2CCPID with
     std::function<double()> cpiGetter;
+    ///Function to get CPR value to construct Elliot2CCPID with
     std::function<double()> cprGetter;
+
+    /**
+     * Load a set of PID gains from the SD card, given the name of the set.
+     * Loads from getState()["base"]["<name>"].
+     * 
+     * @param name Name of PID gain set, "dist", "angle", or "turn"
+     * @return Gains associated with name given
+     */
     okapi::IterativePosPIDController::Gains loadGains(const char* name) {
         return {
             data[name]["kP"].get<double>(),
@@ -25,7 +54,12 @@ class BaseSettings {
             0
         };
     }
+
     public:
+    /**
+     * Constructs a new Elliot2CCPID object from
+     * current SD card data.
+     */
     void loadState() {
         auto dist = loadGains("dist");
         auto angle = loadGains("angle");
@@ -47,31 +81,91 @@ class BaseSettings {
         base->startThread();
     }
 
+    /**
+     * Modifies a single set of PID gains by name.
+     * This will create a new Elliot2CCPID instance and change SD card data.
+     * @param name     Name of PID gain set, one of "dist", "angle", or "turn"
+     * @param newGains New PID values
+     */
     void modGains(const char* name, const okapi::IterativePosPIDController::Gains& newGains) {
         data[name]["kP"] = newGains.kP;
         data[name]["kI"] = newGains.kI;
         data[name]["kD"] = newGains.kD;
-        loadState();
-        saveState();
+        loadState(); // Load new values
+        saveState(); // Save to SD card
     }
+
+    /**
+     * Wrapper function for loadGains("dist").
+     * This will load PID gain data from getState()["base"]["dist"].
+     * 
+     * @return PID gains for driving straight
+     */
     okapi::IterativePosPIDController::Gains getDistGains() {
         return loadGains("dist");
     }
+
+    /**
+     * Wrapper function for loadGains("angle").
+     * This will load PID gain data from getState()["base"]["angle"].
+     * 
+     * @return PID gains for angle correction while driving straight
+     */
     okapi::IterativePosPIDController::Gains getAngleGains() {
         return loadGains("angle");
     }
+
+    /**
+     * Wrapper function for loadGains("turn").
+     * This will load PID gain data from getState()["base"]["turn"].
+     * 
+     * @return PID gains for turning in-place
+     */
     okapi::IterativePosPIDController::Gains getTurnGains() {
         return loadGains("turn");
     }
+
+    /**
+     * Wrapper function for modGains("dist", ...).
+     * This will modify PID gain data at getState()["base"]["dist"].
+     * 
+     * @param newGains New PID gains for driving straight
+     */
     void setDistGains(okapi::IterativePosPIDController::Gains newGains) {
         modGains("dist", newGains);
     }
+
+    /**
+     * Wrapper function for modGains("angle", ...).
+     * This will modify PID gain data at getState()["base"]["angle"].
+     * 
+     * @param newGains New PID gains for correcting angle while driving straight
+     */
     void setAngleGains(okapi::IterativePosPIDController::Gains newGains) {
         modGains("angle", newGains);
     }
+
+    /**
+     * Wrapper function for modGains("turn", ...).
+     * This will modify PID gain data at getState()["base"]["turn"].
+     * 
+     * @param newGains New PID gains for turning in-place
+     */
     void setTurnGains(okapi::IterativePosPIDController::Gains newGains) {
         modGains("turn", newGains);
     }
+
+    /**
+     * Constructs BaseSettings from base parameters, a location to write
+     * new Elliot2CCPID instances to, and a JSON settings location.
+     * 
+     * @param ileft      Left MotorGroup of base
+     * @param iright     Right MotorGroup of base
+     * @param iCPIGetter Function returning the current CPI ([encoder] counts per inch) value
+     * @param iCPRGetter Function returning the current CPR ([encoder] counts per radian) value
+     * @param ibase      unique_ptr& where new Elliot2CCPID instances should be written to
+     * @param data       JSON object where settings should be stored
+     */
     BaseSettings(MotorGroup& ileft, MotorGroup& iright, 
     std::function<double()> iCPIGetter,
     std::function<double()> iCPRGetter,
