@@ -1,5 +1,5 @@
 /**
- * @file autonomous.cpp
+ * @file autonomous.hpp
  * 
  * This file declares functions to interpret JSON objects as individual steps of an autonomous.
  */
