@@ -1,3 +1,9 @@
+/**
+ * @file autonomous.cpp
+ * 
+ * This file declares functions to interpret JSON objects as individual steps of an autonomous.
+ */
+
 #pragma once
 #include "main.h"
 #include "json.hpp"
