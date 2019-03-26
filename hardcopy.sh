@@ -16,7 +16,7 @@ for filename in src/*; do
   if ! file_ends_with_newline $filename; then
     echo >> $OUTFILE
   fi
-  LEN=$(cat "$filename" | wc -l)
+  LEN=$(sed -n '$=' "$filename")
   LEN=$(echo "$LEN" + 2 | bc)
   if [ "$FIRST_FILE_BLENDS_WITH_PRETEXT" == 1 ]; then
     FIRST_FILE_BLENDS_WITH_PRETEXT=0
