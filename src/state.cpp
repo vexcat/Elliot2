@@ -3,6 +3,7 @@
 #include <fstream>
 #include "state.hpp"
 #include "display.hpp"
+#include "catOS.hpp"
 using json = nlohmann::json;
 using namespace std;
 
