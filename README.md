@@ -31,5 +31,5 @@ The autonomous & auton editor lists are special in that they have an extra menu 
 
 Data will be saved when exiting any list editor. This now includes MotionEditor, which means an auton will save much more frequently.
 
-##Documentation
+## Documentation
 Documentation for this project can be found at [https://ungato.tk/botdocs/](https://ungato.tk/botdocs/).
