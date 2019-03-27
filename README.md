@@ -30,3 +30,6 @@ To get started with catOS, press the <- and -> buttons together. Use the up/down
 The autonomous & auton editor lists are special in that they have an extra menu to create/move/duplicate/delete items. To access this menu, press X. Most of the options will not prompt you for anything, but they have happened.
 
 Data will be saved when exiting any list editor. This now includes MotionEditor, which means an auton will save much more frequently.
+
+##Documentation
+Documentation for this project can be found at [https://ungato.tk/botdocs/](https://ungato.tk/botdocs/).
