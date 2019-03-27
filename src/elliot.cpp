@@ -80,6 +80,7 @@ void Puncher::setLowTarget(int target) {
     }
     lowTargetPosition = target;
     puncherData["low"] = target;
+    saveState();
 }
 void Puncher::setHighTarget(int target) {
     if(controllerPtr->getTarget() == highTargetPosition) {
@@ -87,6 +88,7 @@ void Puncher::setHighTarget(int target) {
     }
     highTargetPosition = target;
     puncherData["high"] = target;
+    saveState();
 }
 okapi::IterativePosPIDController::Gains Puncher::getGains() {   
     return {
