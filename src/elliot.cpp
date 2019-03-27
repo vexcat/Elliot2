@@ -145,8 +145,6 @@ json& getBaseState() {
 
 json& getPuncherState() {
     auto &state = getState();
-    state["puncher"]["low" ] =  800;
-    state["puncher"]["high"] = 1200;
     if(state.find("puncher") == state.end()) {
         printf("Defaults were applied for the puncher. Please change puncher PID.\n");
         state["puncher"] = {
