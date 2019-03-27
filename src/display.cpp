@@ -1046,11 +1046,11 @@ class PunchList: public ControllerMenu {
       }},
       {"Low Target", [&]() {
         auto &puncher = getRobot().puncher;
-        puncher.setLowTarget(puncher.getLowTarget()); 
+        puncher.setLowTarget(editNumber(puncher.getLowTarget(), 0)); 
       }},
       {"High Target", [&]() {
         auto &puncher = getRobot().puncher;
-        puncher.setHighTarget(puncher.getHighTarget());
+        puncher.setHighTarget(editNumber(puncher.getHighTarget(), 0));
       }}
     });
   }
