@@ -22,8 +22,6 @@ These autonomi save to the microSD card on your V5 Brain, as a json file (save.j
 
 This program also features odometry using tank kinematics. This makes it possible to move to an absolute position during autonomous, regardless of physical obstruction, like caps. 
 
-It is recommended to use a high velocity value on position commands, with a delay to match. This allows for quick motion, while a delay makes sure the brake mode hold has time to properly stop the robot.
-
 ## catOS
 The catOS menu system is <s>a confusing mess</s> a glorious and minimalistic UI for robot configuration.
 
