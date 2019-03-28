@@ -17,7 +17,6 @@ class Puncher {
     okapi::MotorGroup &puncher;
     okapi::MotorGroup &angler;
     okapi::Potentiometer &angleSense;
-    pros::Mutex reconstructionMutex;
     json& puncherData;
     std::shared_ptr<okapi::AsyncPosPIDController> controllerPtr;
     void loadState();

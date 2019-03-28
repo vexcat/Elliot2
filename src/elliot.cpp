@@ -9,7 +9,6 @@
 using namespace okapi;
 
 void Puncher::loadState() {
-    reconstructionMutex.take(TIMEOUT_MAX);
     double oldTarget = 0;
     bool oldDisabled = true;
     if(controllerPtr) {
@@ -27,7 +26,6 @@ void Puncher::loadState() {
     controllerPtr->flipDisable(oldDisabled);
     controllerPtr->setTarget(oldTarget);
     controllerPtr->startThread();
-    reconstructionMutex.give();
      lowTargetPosition = puncherData["low" ].get<double>();
     highTargetPosition = puncherData["high"].get<double>();
 }
