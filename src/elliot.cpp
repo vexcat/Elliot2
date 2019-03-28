@@ -182,7 +182,7 @@ right{-2, -1},
 puncherMtr{5},
 angler{7},
 intake{10},
-arm{6},
+scorer{6},
 angleSense{'B'},
 puncher{puncherMtr, angler, angleSense, getPuncherState()},
 gps{left, right, getGPSState()},
@@ -200,7 +200,7 @@ base, getBaseState()} {
     puncherMtr.setGearing(AbstractMotor::gearset::red);
     puncherMtr.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
     intake.setGearing(AbstractMotor::gearset::green);
-    arm.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
+    scorer.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
 }
 
 void Elliot::takeCoast() {
@@ -212,7 +212,7 @@ void Elliot::stop() {
     puncher.setVelocity(0);
     angler.moveVelocity(0);
     intake.moveVelocity(0);
-    arm.moveVelocity(0);
+    scorer.moveVelocity(0);
 }
 
 void Elliot::takeStopped() {

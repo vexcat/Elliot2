@@ -54,7 +54,7 @@ class Elliot {
 	MotorGroup puncherMtr;
 	MotorGroup angler;
 	MotorGroup intake;
-    MotorGroup arm;
+    MotorGroup scorer;
     okapi::Potentiometer angleSense;
     Puncher puncher;
     GPS gps;

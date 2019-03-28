@@ -29,9 +29,9 @@ void Elliot::drive(pros::Controller& m) {
 		right.moveVelocity(0);
 	}
 
-	//Arm drive
-	int armVel = (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
-	arm.moveVelocity(100 * armVel);
+	//Scorer drive
+	int scorerVel = (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
+	scorer.moveVelocity(100 * scorerVel);
 
 	//Puncher drive
 	if(m.get_digital_new_press(DIGITAL_R1)) {
@@ -74,7 +74,7 @@ void opcontrol() {
 	auto &bot = getRobot();
   	bot.give();
 	bot.opctrlBegin = pros::millis();
-	bot.arm.setBrakeMode(AbstractMotor::brakeMode::brake);
+	bot.scorer.setBrakeMode(AbstractMotor::brakeMode::brake);
 	while (true) {
 		//takeCoast and giveDirect allow for controller
 		//menus to safely take over the robot.

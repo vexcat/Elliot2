@@ -457,7 +457,7 @@ class MotionEditor: public ControllerMenu {
           }
           pros::delay(5);
         }
-        getRobot().arm.moveVelocity(0);
+        getRobot().scorer.moveVelocity(0);
         //Measure finish time
         long finishedIn = pros::millis() - autonStartTime;
         //Stop robot
@@ -501,7 +501,7 @@ class MotionList: public CRUDMenu {
     jsonInserter("High");
     jsonInserter("Punch");
     jsonInserter("Intake"  , { {"v", 1.0}, {"t", 0.2} });
-    jsonInserter("Arm"     , { {"p", 10 }, {"t", 0.6} });
+    jsonInserter("Scorer"  , { {"p", 10 }, {"t", 0.6} });
     jsonInserter("Delta"   , { {"x", 0.0}, {"y", 0.0}, {"o", 0.0} });
     jsonInserter("Delay"   , { {"t", 0} });
     jsonInserter("Hold");
@@ -646,7 +646,7 @@ class MotionList: public CRUDMenu {
         {"r", 3, "Set rightvel"},
         {"t", 3, "Set timing"}
       })();
-    } else if(type == "arm") {
+    } else if(type == "scorer") {
       MotionEditor(motionData, idx, {
         {"p", 1, "Set position"},
         {"t", 3, "Set timing"}

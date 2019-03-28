@@ -192,12 +192,12 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
       bot.right.moveVelocity(0);
     }
   }
-  //Arm motor control
-  if(type == "arm") {
+  //Scorer motor control
+  if(type == "scorer") {
     //"p": Position in degrees to move to, at 100rpm
     double position = motionObject["p"].get<double>();
-    bot.arm.moveAbsolute(position, 100);
-    //"t": Wait time for arm to start moving
+    bot.scorer.moveAbsolute(position, 100);
+    //"t": Wait time for scorer to start moving
     pros::delay(motionObject["t"].get<double>() * 1000);
   }
   //Straight Line
@@ -215,11 +215,11 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
 
 void runAuton(json::iterator loc, json::iterator end, bool isBlue) {
   auto &bot = getRobot();
-  bot.arm.tarePosition();
+  bot.scorer.tarePosition();
   auto oldBrake = bot.left.getBrakeMode();
   bot. left.setBrakeMode(AbstractMotor::brakeMode::coast);
   bot.right.setBrakeMode(AbstractMotor::brakeMode::coast);
-  bot.arm.setBrakeMode(AbstractMotor::brakeMode::coast);
+  bot.scorer.setBrakeMode(AbstractMotor::brakeMode::coast);
   RoboPosition tracking = {0, 0, 0};
   for(; loc != end; loc++) {
     runMotion(*loc, tracking, isBlue);
