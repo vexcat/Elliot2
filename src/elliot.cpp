@@ -1,3 +1,8 @@
+/**
+ * @file ellliot.cpp
+ * 
+ * This file defines all devices present on Elliot.
+ */
 #include "main.h"
 #include "okapi/api.hpp"
 #include "gps.hpp"
