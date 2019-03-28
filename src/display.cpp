@@ -320,6 +320,10 @@ void pidMonitor(okapi::Elliot2CCPID& cc) {
   line_set(0, "sT: " + std::to_string(settleTime) + "ms");
   line_set(1, "fE: " + std::to_string(finalError));
   line_set(2, "fV: " + std::to_string(finalVelocity));
+  while(!ctrl.get_digital_new_press(DIGITAL_B)) {
+    pros::delay(5);
+  }
+  cc.stop();
 }
 
 //Tests for PID control
