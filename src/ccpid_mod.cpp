@@ -214,7 +214,6 @@ void Elliot2CCPID::waitUntilSettled() {
   mode = none;
   doneLooping.store(true, std::memory_order_release);
   doneLoopingSeen.store(false, std::memory_order_release);
-  */
 
   // Wait for the thread to finish if it happens to be writing to motors
   auto rate = timeUtil.getRate();
@@ -225,6 +224,7 @@ void Elliot2CCPID::waitUntilSettled() {
   // Stop after the thread has run at least once
   stopAfterSettled();
   logger->info("Elliot2CCPID: Done waiting to settle");
+  */
 }
 
 /**
