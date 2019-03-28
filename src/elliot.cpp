@@ -181,7 +181,7 @@ json& getCameraState(pros::Vision& def) {
 Elliot::Elliot():
 controller{CONTROLLER_MASTER},
 left{3, 4},
-right{-2, -1},
+right{2, 1},
 puncherMtr{5},
 angler{8},
 intake{10},
