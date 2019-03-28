@@ -308,4 +308,12 @@ bool Elliot2CCPID::isSettled() const {
     return anglePid->isSettled() && distancePid->isSettled();
   }
 }
+
+double Elliot2CCPID::getError() const {
+  if(mode == angle) {
+    return turnPid->getError();
+  } else {
+    return distancePid->getError();
+  }
+}
 } // namespace okapi

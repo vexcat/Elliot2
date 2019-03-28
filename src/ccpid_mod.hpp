@@ -141,6 +141,14 @@ class Elliot2CCPID : public virtual ChassisController {
    */
   bool isSettled() const;
 
+  /**
+   * @brief Returns the error of the PID loop, ignoring angle correction.
+   * 
+   * 3rd modification to the original ChassisControllerPID, this exposes
+   * the error of the PID loop.
+   */
+  double getError() const;
+
   protected:
   Logger *logger;
   TimeUtil timeUtil;
