@@ -298,40 +298,44 @@ void uiExecutor(void*) {
 //  what JSON-based autons can do, take a look at autonomous.cpp and gps.cpp.
 //-----------------------------------------------------------------------------------
 
+/**
+ * Monitors an Elliot2CCPID as it uses its PID loop.
+ */
+void pidMonitor(okapi::Elliot2CCPID& cc) {
+  auto &ctrl = getRobot().controller;
+  auto beginTime = pros::millis();
+  line_set(0, "PID NOT SETTLED");
+  line_set(1, "B TO DISMISS");
+  line_set(2, "");
+  while(!cc.isSettled()) {
+    if(ctrl.get_digital_new_press(DIGITAL_B)) {
+      cc.stop();
+      return;
+    }
+    pros::delay(5);
+  }
+  auto settleTime = pros::millis() - beginTime;
+  auto finalError = cc.getError();
+  auto finalVelocity = (std::abs(getRobot().left.getActualVelocity()) + std::abs(getRobot().right.getActualVelocity())) / 2.0;
+  line_set(0, "sT: " + std::to_string(settleTime) + "ms");
+  line_set(1, "fE: " + std::to_string(finalError));
+  line_set(2, "fV: " + std::to_string(finalVelocity));
+}
+
 //Tests for PID control
 class PIDTestingMenu: public ControllerMenu {
   public:
   PIDTestingMenu() {
     list.insert(list.begin(), {
-      {"Small Turn", [&]() {
-        auto &gps = getRobot().gps;
-        RoboPosition track = gps.getPosition();
-        runMotion({
-          {"type", "rotateTo"},
-          {"o", PI / 18.0},
-          {"v", 1.0},
-          {"t", 0.2}
-        }, track, false);
+      {"Turn", [&]() {
+        auto &base = *getRobot().base;
+        base.turnAngleAsync(editNumber(90, 1) * okapi::degree);
+        pidMonitor(base);
       }},
-      {"90 Turn", [&]() {
-        auto &gps = getRobot().gps;
-        RoboPosition track = gps.getPosition();
-        runMotion({
-          {"type", "rotateTo"},
-          {"o", PI / 2.0},
-          {"v", 1.0},
-          {"t", 0.2}
-        }, track, false);
-      }},
-      {"24in Fwd", [&]() {
-        auto &gps = getRobot().gps;
-        RoboPosition track = gps.getPosition();
-        runMotion({
-          {"type", "sline"},
-          {"d", 24},
-          {"v", 1.0},
-          {"t", 0.2},
-        }, track, false);
+      {"Straight", [&]() {
+        auto &base = *getRobot().base;
+        base.moveDistanceAsync(editNumber(90, 1) * okapi::inch);
+        pidMonitor(base);
       }}
     });
   }
