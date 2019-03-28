@@ -300,4 +300,12 @@ ChassisScales Elliot2CCPID::getChassisScales() const {
 AbstractMotor::GearsetRatioPair Elliot2CCPID::getGearsetRatioPair() const {
   return gearsetRatioPair;
 }
+
+bool Elliot2CCPID::isSettled() const {
+  if(mode == angle) {
+    return turnPid->isSettled();
+  } else {
+    return anglePid->isSettled() && distancePid->isSettled();
+  }
+}
 } // namespace okapi

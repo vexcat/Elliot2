@@ -133,6 +133,14 @@ class Elliot2CCPID : public virtual ChassisController {
    */
   AbstractMotor::GearsetRatioPair getGearsetRatioPair() const override;
 
+  /**
+   * @brief Returns true if this controller is settled.
+   * 
+   * 2nd modification to the original ChassisControllerPID, this returns
+   * true if it is detected that the PID loop has settled.
+   */
+  bool isSettled() const;
+
   protected:
   Logger *logger;
   TimeUtil timeUtil;
