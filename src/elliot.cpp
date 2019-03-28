@@ -32,7 +32,7 @@ void Puncher::loadState() {
 
 Puncher::Puncher(MotorGroup& ipuncher, MotorGroup& iangler, okapi::Potentiometer& iangleSense, json& ipuncherData):
 puncher(ipuncher), angler(iangler), angleSense(iangleSense), puncherData(ipuncherData) {
-    lastPuncherPosition = ipuncher.getPosition();
+    puncherTarget = ipuncher.getPosition();
     loadState();
 }
 
@@ -56,8 +56,8 @@ void Puncher::stopAutoControl() {
     controllerPtr->flipDisable(true);
 }
 void Puncher::shoot() {
-    lastPuncherPosition -= 360;
-    puncher.moveAbsolute(lastPuncherPosition, 200);
+    puncherTarget -= 360;
+    puncher.moveAbsolute(puncherTarget, 200);
 }
 void Puncher::setVelocity(double vel) {
     puncher.moveVelocity(vel);
