@@ -202,7 +202,7 @@ base, getBaseState()} {
     right.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
     puncherMtr.setGearing(AbstractMotor::gearset::red);
     puncherMtr.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
-    intake.setGearing(AbstractMotor::gearset::green);
+    intake.setGearing(AbstractMotor::gearset::blue);
     scorer.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
 }
 

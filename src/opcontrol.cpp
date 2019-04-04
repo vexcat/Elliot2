@@ -44,7 +44,7 @@ void Elliot::drive(pros::Controller& m) {
 	}
 
 	//Intake drive
-	int intakeVel = -m.get_analog(ANALOG_RIGHT_Y) * (200.0 / 127.0);
+	int intakeVel = -m.get_analog(ANALOG_RIGHT_Y) * (600.0 / 127.0);
 	intake.moveVelocity(intakeVel);
 
 	//Reverse button
