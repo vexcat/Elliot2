@@ -1036,6 +1036,16 @@ class GPSList: public ControllerMenu {
       }},
       {"Set CPI", [&]() {
         gps.setCPI(editNumber(gps.inchToCounts(1), 4));
+      }},
+      {"Fwd Drive Test", [&]() {
+        auto &ctrl = getRobot().controller;
+        line_set(0, "Now driving.");
+        line_set(1, "Only fwd/back");
+        line_set(2, "B to dismiss");
+        while(!ctrl.get_digital_new_press(DIGITAL_B)) {
+          getRobot().base->driveVector(ctrl.get_analog(ANALOG_LEFT_Y), 0);
+          pros::delay(5);
+        }
       }}
     });
   }
