@@ -47,21 +47,19 @@ void Elliot::drive(pros::Controller& m) {
 	int intakeVel = -m.get_analog(ANALOG_RIGHT_Y) * (600.0 / 127.0);
 	intake.moveVelocity(intakeVel);
 
-	/*
 	//Reverse button
-	if(m.get_digital_new_press(DIGITAL_A)) {
+	if(m.get_digital_new_press(DIGITAL_B)) {
 		multiplier *= -1;
 	}
-	*/
 
-	//Brake buttons
+	//Brake button
 	if(m.get_digital_new_press(DIGITAL_X)) {
-		left .setBrakeMode(AbstractMotor::brakeMode::hold);
-		right.setBrakeMode(AbstractMotor::brakeMode::hold);
-	}
-	if(m.get_digital_new_press(DIGITAL_Y)) {
-		left .setBrakeMode(AbstractMotor::brakeMode::coast);
-		right.setBrakeMode(AbstractMotor::brakeMode::coast);
+		auto old = left.getBrakeMode();
+		if(old == AbstractMotor::brakeMode::hold) {
+			base->setBrakeMode(AbstractMotor::brakeMode::coast);
+		} else {
+			base->setBrakeMode(AbstractMotor::brakeMode::hold);
+		}
 	}
 
 	//30sec warning
