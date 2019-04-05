@@ -1043,7 +1043,7 @@ class GPSList: public ControllerMenu {
         line_set(1, "Only fwd/back");
         line_set(2, "B to dismiss");
         while(!ctrl.get_digital_new_press(DIGITAL_B)) {
-          getRobot().base->driveVector(ctrl.get_analog(ANALOG_LEFT_Y), 0);
+          getRobot().base->driveVector(ctrl.get_analog(ANALOG_LEFT_Y) / 127.0, 0);
           pros::delay(5);
         }
       }}
