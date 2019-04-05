@@ -121,12 +121,12 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
   if(type == "intake") {
     //"v": Velocity to move intake by in [-1, 1]
     double v = motionObject["v"].get<double>();
-    bot.intake.controllerSet(v);
+    bot.intake.moveVelocity(v * 600);
     //If "t" is set, wait "t" seconds and stop the intake.
     double timing = motionObject["t"].get<double>();
     if(timing != 0) {
       pros::delay((int)(timing * 1000));
-      bot.intake.controllerSet(0);
+      bot.intake.moveVelocity(0);
     }
   }
   //Delay by "t" seconds
