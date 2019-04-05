@@ -374,14 +374,14 @@ int checkTemporaryExit() {
   if(ctrl.get_digital_new_press(DIGITAL_Y)) {
     if(!ctrl.get_digital(DIGITAL_RIGHT)) {
       line_set(0, "Now driving,");
-      line_set(1, "Press B");
+      line_set(1, "Press Y");
       line_set(2, "to exit.");
       auto &bot = getRobot();
       //Let opcontrol continue.
       bot.give();
       while(true) {
-        if(ctrl.get_digital(DIGITAL_B)) {
-          while(ctrl.get_digital(DIGITAL_B)) pros::delay(25);
+        if(ctrl.get_digital(DIGITAL_Y)) {
+          while(ctrl.get_digital(DIGITAL_Y)) pros::delay(25);
           bot.takeStopped();
           break;
         }
