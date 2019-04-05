@@ -508,6 +508,7 @@ class MotionList: public CRUDMenu {
     jsonInserter("Low");
     jsonInserter("High");
     jsonInserter("Punch");
+    jsonInserter("Autoshoot");
     jsonInserter("Intake"  , { {"v", 1.0}, {"t", 0.2} });
     jsonInserter("Scorer"  , { {"p", 10 }, {"t", 0.6} });
     jsonInserter("Delta"   , { {"x", 0.0}, {"y", 0.0}, {"o", 0.0} });

@@ -12,6 +12,7 @@
 #include "elliot.hpp"
 #include "debugging.hpp"
 #include "pros/apix.h"
+#include "autoshoot.hpp"
 using namespace std;
 
 ///Whether to execute autonomous motions as on the blue side, or the red side.
@@ -210,6 +211,10 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     bot.base->moveDistance(distance);
     //"t": Extra time to wait after moving
     pros::delay(motionObject["t"].get<double>() * 1000);
+  }
+  //Automatic shot
+  if(type == "autoshoot") {
+    autoshoot();
   }
 }
 
