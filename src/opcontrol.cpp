@@ -47,10 +47,12 @@ void Elliot::drive(pros::Controller& m) {
 	int intakeVel = -m.get_analog(ANALOG_RIGHT_Y) * (600.0 / 127.0);
 	intake.moveVelocity(intakeVel);
 
+	/*
 	//Reverse button
 	if(m.get_digital_new_press(DIGITAL_A)) {
 		multiplier *= -1;
 	}
+	*/
 
 	//Brake buttons
 	if(m.get_digital_new_press(DIGITAL_X)) {

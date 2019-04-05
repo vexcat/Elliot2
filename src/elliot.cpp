@@ -10,6 +10,7 @@
 #include "elliot.hpp"
 #include "state.hpp"
 #include "json.hpp"
+#include "autoshoot.hpp"
 #include <deque>
 using namespace okapi;
 
@@ -204,6 +205,7 @@ base, getBaseState()} {
     puncherMtr.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
     intake.setGearing(AbstractMotor::gearset::blue);
     scorer.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
+    scorer.setGearing(AbstractMotor::gearset::red);
 }
 
 void Elliot::takeCoast() {
@@ -237,6 +239,7 @@ void Elliot::give() {
 void Elliot::beginTasks() {
     gps.beginTask();
     puncher.beginTask();
+    pros::Task shotTask(autoshootTask);
 }
 
 Elliot* elliot;
