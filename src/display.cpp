@@ -637,7 +637,7 @@ class MotionList: public CRUDMenu {
           motionSelected["o"] = motionSelected["o"].get<double>() - delta.o;
         }}
       })();
-    } else if(type == "scorer" || type == "catapult" || type == "intake") {
+    } else if(type == "catapult" || type == "intake") {
       MotionEditor(motionData, idx, {
         {"v", 2, "Set velocity"},
         {"t", 3, "Set timing"}
