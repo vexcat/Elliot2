@@ -13,6 +13,9 @@ void autoshoot(int toggleTime, int punchTime) {
   //Punch
   puncher.shoot();
   pros::delay(punchTime);
+  //Toggle
+  puncher.toggleTarget();
+  pros::delay(toggleTime);
 }
 void autoshootTask(void*) {
   auto &bot = getRobot();
