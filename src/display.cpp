@@ -378,11 +378,11 @@ int checkTemporaryExit() {
       line_set(2, "to exit.");
       auto &bot = getRobot();
       //Let opcontrol continue.
-      bot.give();
+      Elliot::give();
       while(true) {
         if(ctrl.get_digital(DIGITAL_Y)) {
           while(ctrl.get_digital(DIGITAL_Y)) pros::delay(25);
-          bot.takeStopped();
+          Elliot::takeStopped();
           break;
         }
         pros::delay(5);

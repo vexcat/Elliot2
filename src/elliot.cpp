@@ -179,6 +179,8 @@ json& getCameraState(pros::Vision& def) {
     return state["cam"];
 }
 
+pros::Mutex Elliot::usageGuard;
+
 Elliot::Elliot():
 controller{CONTROLLER_MASTER},
 left{12, 1},
@@ -222,7 +224,7 @@ void Elliot::stop() {
 
 void Elliot::takeStopped() {
     takeCoast();
-    stop();
+    getRobot().stop();
 }
 
 void Elliot::giveDirect() {
@@ -230,9 +232,9 @@ void Elliot::giveDirect() {
 }
 
 void Elliot::give() {
-    left .setBrakeMode(AbstractMotor::brakeMode::coast);
-    right.setBrakeMode(AbstractMotor::brakeMode::coast);
-    stop();
+    getRobot().left .setBrakeMode(AbstractMotor::brakeMode::coast);
+    getRobot().right.setBrakeMode(AbstractMotor::brakeMode::coast);
+    getRobot().stop();
     usageGuard.give();
 }
 

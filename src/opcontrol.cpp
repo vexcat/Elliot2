@@ -75,15 +75,15 @@ void Elliot::drive(pros::Controller& m) {
 void opcontrol() {
 	pros::Controller m(pros::E_CONTROLLER_MASTER);
 	auto &bot = getRobot();
-  	bot.give();
+  Elliot::give();
 	bot.opctrlBegin = pros::millis();
 	bot.scorer.setBrakeMode(AbstractMotor::brakeMode::brake);
 	while (true) {
 		//takeCoast and giveDirect allow for controller
 		//menus to safely take over the robot.
-		bot.takeCoast();
+		Elliot::takeCoast();
 		bot.drive(m);
-		bot.giveDirect();
+		Elliot::giveDirect();
 		pros::delay(5);
 	}
 }

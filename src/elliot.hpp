@@ -81,7 +81,7 @@ class Elliot {
     ///Set to 1 to drive forward, -1 to drive in reverse
 	int multiplier = 1;
     ///Guards against two tasks using an Elliot object at the same time.
-    pros::Mutex usageGuard;
+    static pros::Mutex usageGuard;
     public:
     ///Time at beginning of opcontrol, used to know when to activate
     ///30 second warning.
@@ -122,13 +122,13 @@ class Elliot {
     ///Stops all motors on the robot
     void stop();
     ///Takes the \ref usageGuard mutex without stopping the robot.
-    void takeCoast();
+    static void takeCoast();
     ///Takes the \ref usageGuard mutex and stops the robot.
-    void takeStopped();
+    static void takeStopped();
     ///Gives the \ref usageGuard mutex and stops the robot.
-    void give();
+    static void give();
     ///Gives the \ref usageGuard mutex without stopping the robot.
-    void giveDirect();
+    static void giveDirect();
     ///Does one tick of robot driving, with control from \ref controller.
     void drive(pros::Controller&);
     ///Begins the background tasks for the GPS \ref gps & the \ref base.

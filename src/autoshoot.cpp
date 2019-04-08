@@ -8,20 +8,20 @@ void autoshootReal(bool giveInDelay, int toggleTime, int punchTime) {
   auto &puncher = bot.puncher;
   //Punch
   puncher.shoot();
-  bot.giveDirect();
+  Elliot::giveDirect();
   pros::delay(punchTime);
   //Toggle
-  bot.takeCoast();
+  Elliot::takeCoast();
   puncher.toggleTarget();
-  bot.giveDirect();
+  Elliot::giveDirect();
   pros::delay(toggleTime);
   //Punch
-  bot.takeCoast();
+  Elliot::takeCoast();
   puncher.shoot();
-  bot.giveDirect();
+  Elliot::giveDirect();
   pros::delay(punchTime);
   //Toggle
-  bot.takeCoast();
+  Elliot::takeCoast();
   puncher.toggleTarget();
   pros::delay(toggleTime);
 }
@@ -34,7 +34,7 @@ void autoshootTask(void*) {
   auto &bot = getRobot();
   auto &ctrl = bot.controller;
   while(true) {
-    bot.takeCoast();
+    Elliot::takeCoast();
     if(ctrl.get_digital_new_press(DIGITAL_A)) {
       //Tell opcontrol autoshoot is active & wait for response
       autoshootActive = true;
@@ -47,7 +47,7 @@ void autoshootTask(void*) {
       //Restore user control
       autoshootActive = false;
     }
-    bot.giveDirect();
+    Elliot::giveDirect();
     pros::delay(5);
   }
 }
