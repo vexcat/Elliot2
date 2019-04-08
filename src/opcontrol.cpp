@@ -3,6 +3,7 @@
 #include "gps.hpp"
 #include "display.hpp"
 #include "elliot.hpp"
+#include "autoshoot.hpp"
 #include <deque>
 using namespace std;
 using namespace okapi;
@@ -23,7 +24,7 @@ void Elliot::drive(pros::Controller& m) {
 	double x = dz(m.get_analog(ANALOG_LEFT_X) * (1 / 127.0), 0.16);
 
 	if(y != 0 || x != 0) {
-		base->arcade(multiplier * y, x);
+		base->arcade(multiplier * y * (autoshootActive ? 0.75 : 1.0), x * (autoshootActive ? 0.6 : 1.0));
 	} else {
 		left.moveVelocity(0);
 		right.moveVelocity(0);
@@ -33,14 +34,16 @@ void Elliot::drive(pros::Controller& m) {
 	int scorerVel = (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
 	scorer.moveVelocity(100 * scorerVel);
 
-	//Puncher drive
-	if(m.get_digital_new_press(DIGITAL_R1)) {
-		puncher.shoot();
-	}
-	
-	//Angler drive
-	if(m.get_digital_new_press(DIGITAL_L1)) {
-		puncher.toggleTarget();
+	if(!autoshootActive) {
+		//Puncher drive
+		if(m.get_digital_new_press(DIGITAL_R1)) {
+			puncher.shoot();
+		}
+		
+		//Angler drive
+		if(m.get_digital_new_press(DIGITAL_L1)) {
+			puncher.toggleTarget();
+		}
 	}
 
 	//Intake drive
