@@ -230,10 +230,10 @@ void Elliot::giveDirect() {
 }
 
 void Elliot::give() {
-    usageGuard.give();
     left .setBrakeMode(AbstractMotor::brakeMode::coast);
     right.setBrakeMode(AbstractMotor::brakeMode::coast);
     stop();
+    usageGuard.give();
 }
 
 void Elliot::beginTasks() {
