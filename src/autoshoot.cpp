@@ -13,6 +13,8 @@ void autoshootReal(bool giveInDelay, int toggleTime, int punchTime) {
     Elliot::giveDirect();
     pros::delay(punchTime);
     Elliot::takeCoast();
+  } else {
+    pros::delay(punchTime);
   }
 
   //Toggle
@@ -22,6 +24,8 @@ void autoshootReal(bool giveInDelay, int toggleTime, int punchTime) {
     Elliot::giveDirect();
     pros::delay(toggleTime);
     Elliot::takeCoast();
+  } else {
+    pros::delay(toggleTime);
   }
 
   //Punch
@@ -31,6 +35,8 @@ void autoshootReal(bool giveInDelay, int toggleTime, int punchTime) {
     Elliot::giveDirect();
     pros::delay(punchTime);
     Elliot::takeCoast();
+  } else {
+    pros::delay(punchTime);
   }
 
   //Toggle
@@ -40,6 +46,8 @@ void autoshootReal(bool giveInDelay, int toggleTime, int punchTime) {
     Elliot::giveDirect();
     pros::delay(toggleTime);
     Elliot::takeCoast();
+  } else {
+    pros::delay(toggleTime);
   }
 }
 
