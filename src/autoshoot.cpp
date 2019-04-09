@@ -8,22 +8,39 @@ void autoshootReal(bool giveInDelay, int toggleTime, int punchTime) {
   auto &puncher = bot.puncher;
   //Punch
   puncher.shoot();
-  Elliot::giveDirect();
-  pros::delay(punchTime);
+
+  if(giveInDelay) {
+    Elliot::giveDirect();
+    pros::delay(punchTime);
+    Elliot::takeCoast();
+  }
+
   //Toggle
-  Elliot::takeCoast();
   puncher.toggleTarget();
-  Elliot::giveDirect();
-  pros::delay(toggleTime);
+
+  if(giveInDelay) {
+    Elliot::giveDirect();
+    pros::delay(toggleTime);
+    Elliot::takeCoast();
+  }
+
   //Punch
-  Elliot::takeCoast();
   puncher.shoot();
-  Elliot::giveDirect();
-  pros::delay(punchTime);
+
+  if(giveInDelay) {
+    Elliot::giveDirect();
+    pros::delay(punchTime);
+    Elliot::takeCoast();
+  }
+
   //Toggle
-  Elliot::takeCoast();
   puncher.toggleTarget();
-  pros::delay(toggleTime);
+
+  if(giveInDelay) {
+    Elliot::giveDirect();
+    pros::delay(toggleTime);
+    Elliot::takeCoast();
+  }
 }
 
 void autoshoot(int toggleTime, int punchTime) {
