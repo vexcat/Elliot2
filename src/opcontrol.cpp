@@ -35,7 +35,8 @@ void Elliot::drive(pros::Controller& m, DriveStyle style) {
 	}
 
 	if(y != 0 || x != 0) {
-		base->arcade(multiplier * y * (autoshootActive ? 0.75 : 1.0), x * (autoshootActive ? 0.6 : 1.0));
+		bool aimAssistOn = autoshootActive && style != UNGATO_DRIVING;
+		base->arcade(multiplier * y * (aimAssistOn ? 0.75 : 1.0), x * (aimAssistOn ? 0.6 : 1.0));
 	} else {
 		left.moveVelocity(0);
 		right.moveVelocity(0);
