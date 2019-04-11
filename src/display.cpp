@@ -510,7 +510,7 @@ class MotionList: public CRUDMenu {
     jsonInserter("Punch");
     jsonInserter("Autoshoot");
     jsonInserter("Intake"  , { {"v", 1.0}, {"t", 0.2} });
-    jsonInserter("Scorer"  , { {"p", 10 }, {"t", 0.6} });
+    jsonInserter("Scorer"  , { {"p", 10 }, {"v", 1.0}, {"t", 0.6} });
     jsonInserter("Delta"   , { {"x", 0.0}, {"y", 0.0}, {"o", 0.0} });
     jsonInserter("Delay"   , { {"t", 0} });
     jsonInserter("Hold");
@@ -658,6 +658,7 @@ class MotionList: public CRUDMenu {
     } else if(type == "scorer") {
       MotionEditor(motionData, idx, {
         {"p", 1, "Set position"},
+        {"v", 2, "Set velocity"},
         {"t", 3, "Set timing"}
       })();
     } else if(type == "sline") {

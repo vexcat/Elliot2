@@ -197,7 +197,8 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
   if(type == "scorer") {
     //"p": Position in degrees to move to, at 100rpm
     double position = motionObject["p"].get<double>();
-    bot.scorer.moveAbsolute(position, 100);
+    //"v": Velocity limit in [0, 1]
+    bot.scorer.moveAbsolute(position, 100 * motionObject["v"].get<double>());
     //"t": Wait time for scorer to start moving
     pros::delay(motionObject["t"].get<double>() * 1000);
   }
