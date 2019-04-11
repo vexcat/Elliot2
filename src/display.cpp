@@ -378,10 +378,12 @@ int checkTemporaryExit() {
       line_set(2, "to exit.");
       auto &bot = getRobot();
       //Let opcontrol continue.
+      bot.driveStyle = UNGATO_DRIVING;
       Elliot::give();
       while(true) {
         if(ctrl.get_digital(DIGITAL_Y)) {
           while(ctrl.get_digital(DIGITAL_Y)) pros::delay(25);
+          bot.driveStyle = RANDY_DRIVING;
           Elliot::takeStopped();
           break;
         }

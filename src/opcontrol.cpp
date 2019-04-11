@@ -18,10 +18,21 @@ double dz(double a, double zone) {
 	return a;
 }
 
-void Elliot::drive(pros::Controller& m) {
+double cube(double n) {
+	return n * n * n;
+}
+
+void Elliot::drive(pros::Controller& m, DriveStyle style) {
 	//Base drive
-	double y = dz(m.get_analog(ANALOG_LEFT_Y) * (1 / 127.0), 0.16);
-	double x = dz(m.get_analog(ANALOG_LEFT_X) * (1 / 127.0), 0.16);
+	double y = 0;
+	double x = 0;
+	if(style == RANDY_DRIVING) {
+		y = dz(m.get_analog(ANALOG_LEFT_Y) * (1 / 127.0), 0.16);
+		x = dz(m.get_analog(ANALOG_LEFT_X) * (1 / 127.0), 0.16);
+	} else if(style == UNGATO_DRIVING) {
+		y = cube(dz(m.get_analog(ANALOG_LEFT_Y), 32) * (1 / 127.0));
+		x = cube(dz(m.get_analog(ANALOG_LEFT_X), 32) * (1 / 127.0));
+	}
 
 	if(y != 0 || x != 0) {
 		base->arcade(multiplier * y * (autoshootActive ? 0.75 : 1.0), x * (autoshootActive ? 0.6 : 1.0));
@@ -82,7 +93,7 @@ void opcontrol() {
 		//takeCoast and giveDirect allow for controller
 		//menus to safely take over the robot.
 		Elliot::takeCoast();
-		bot.drive(m);
+		bot.drive(m, bot.driveStyle);
 		Elliot::giveDirect();
 		pros::delay(5);
 	}

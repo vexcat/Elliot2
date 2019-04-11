@@ -77,12 +77,19 @@ class Puncher {
     int getHighTarget() { return highTargetPosition; }
 };
 
+enum DriveStyle {
+    RANDY_DRIVING  = 0,
+    UNGATO_DRIVING = 1337
+};
+
 class Elliot {
     ///Set to 1 to drive forward, -1 to drive in reverse
 	int multiplier = 1;
     ///Guards against two tasks using an Elliot object at the same time.
     static pros::Mutex usageGuard;
     public:
+    ///Style of driving to use in opcontrol
+    DriveStyle driveStyle;
     ///Time at beginning of opcontrol, used to know when to activate
     ///30 second warning.
     long opctrlBegin;
@@ -130,7 +137,7 @@ class Elliot {
     ///Gives the \ref usageGuard mutex without stopping the robot.
     static void giveDirect();
     ///Does one tick of robot driving, with control from \ref controller.
-    void drive(pros::Controller&);
+    void drive(pros::Controller&, DriveStyle style);
     ///Begins the background tasks for the GPS \ref gps & the \ref base.
     void beginTasks();
 };
