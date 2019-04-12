@@ -8,7 +8,7 @@ void ControllerTask::operator()() {
   do {
     result = checkController();
     pros::delay(5);
-    if(checkTemporaryExit()) {
+    if(checkTemporaryExit() || result == ControllerTask::CheckResult::RERENDER) {
       render();
     }
   } while(result != ControllerTask::CheckResult::GO_UP);
@@ -58,13 +58,13 @@ int ControllerMenu::checkController() {
   if(ctrl.get_digital_new_press(DIGITAL_B)) return GO_UP;
   if(ctrl.get_digital_new_press(DIGITAL_A)) {
     list[index].second();
-    render();
+    return RERENDER;
   }
   int dir = getVerticalDirection(-1);
   if(dir) {
     index += dir;
     bound(index, list.size());
-    render();
+    return RERENDER;
   }
   return NO_CHANGE;
 }
@@ -161,12 +161,12 @@ int CRUDMenu::checkController() {
       return GO_UP;
     } else {
       selectedVector = ITEM_NAME_LIST;
-      render();
+      return RERENDER;
     }
   };
   if(ctrl.get_digital_new_press(DIGITAL_X)) {
     selectedVector = CRUD_OPTION_LIST;
-    render();
+    return RERENDER;
   }
   if(ctrl.get_digital_new_press(DIGITAL_A)) {
     if(selectedVector == CRUD_OPTION_LIST) {
@@ -174,7 +174,7 @@ int CRUDMenu::checkController() {
     } else {
       handleSelect(idx, items[idx]);
     }
-    render();
+    return RERENDER;
   }
   int dir = getVerticalDirection(-1);
   if(dir) {
@@ -185,7 +185,7 @@ int CRUDMenu::checkController() {
       idx += dir;
       bound(idx, items.size());
     }
-    render();
+    return RERENDER;
   }
   return NO_CHANGE;
 }

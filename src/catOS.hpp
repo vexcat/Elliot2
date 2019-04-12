@@ -22,6 +22,7 @@ class ControllerTask {
   enum CheckResult {
     NO_CHANGE, ///< Take no action
     GO_UP,     ///< Exit this menu
+    RERENDER   ///< Rerender this menu
   };
 
   /**
