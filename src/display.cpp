@@ -860,11 +860,13 @@ class GPSCalibrator: public ControllerTask {
     if(state == 0) {
       double y = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
       if(!y) y = ctrl.get_analog(ANALOG_LEFT_Y) / 127.0;
+      y = y * y * y;
       robot. left.moveVelocity(y * (int)robot. left.getGearing());
       robot.right.moveVelocity(y * (int)robot.right.getGearing());
     } else if(state == 2) {
       double x = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
       if(!x) x = ctrl.get_analog(ANALOG_LEFT_X) / 127.0;
+      x = x * x * x;
       robot. left.moveVelocity( x * (int)robot. left.getGearing());
       robot.right.moveVelocity(-x * (int)robot.right.getGearing());
     }
