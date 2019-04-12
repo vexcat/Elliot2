@@ -853,9 +853,11 @@ class GPSCalibrator: public ControllerTask {
         robot.gps.setCPR(measuredCPR);
       }
       state++;
-      if(state == 4) return GO_UP;
-      render();
-      return NO_CHANGE;
+      if(state == 4) {
+        return GO_UP;
+      } else {
+        return RERENDER;
+      }
     }
     if(state == 0) {
       double y = (!!ctrl.get_digital(DIGITAL_RIGHT) - !!ctrl.get_digital(DIGITAL_LEFT));
