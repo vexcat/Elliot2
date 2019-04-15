@@ -349,7 +349,7 @@ class PIDTestingMenu: public ControllerMenu {
 bool criticalBattIgnored = false;
 
 //Stalls the menu system if the battery is low.
-int checkBattery(pros::Controller& ctrl) {
+ControllerTask::CheckResult checkBattery(pros::Controller& ctrl) {
   if(!criticalBattIgnored && pros::battery::get_capacity() < 15) {
     line_set(0, "Battery is");
     line_set(1, "< 15. Please");
@@ -363,13 +363,13 @@ int checkBattery(pros::Controller& ctrl) {
         ctrl.rumble(".");
       }
     }
-    return 1;
+    return ControllerTask::CheckResult::RERENDER;
   }
-  return 0;
+  return ControllerTask::CheckResult::NO_CHANGE;
 }
 
 //Allows you to drive before selecting a menu option.
-int checkTemporaryExit() {
+ControllerTask::CheckResult checkTemporaryExit() {
   auto &ctrl = getRobot().controller;
   if(ctrl.get_digital_new_press(DIGITAL_Y)) {
     if(!ctrl.get_digital(DIGITAL_RIGHT)) {
@@ -389,11 +389,10 @@ int checkTemporaryExit() {
         }
         pros::delay(5);
       }
-      return true;
     } else {
       PIDTestingMenu()();
-      return true;
     }
+    return ControllerTask::CheckResult::RERENDER;
   }
   return checkBattery(ctrl);
 }

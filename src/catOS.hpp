@@ -46,9 +46,10 @@ class ControllerTask {
   /**
    * @brief Displays this ControllerTask
    * 
-   * Runs checkController() in a loop, re-rendering when
-   * checkTemporaryExit() returns true, and exiting when
-   * checkController() returns GO_UP.
+   * Runs checkController() in a loop. This loop can be broken
+   * by either checkTemporaryExit() or checkController() return
+   * GO_UP, and the menu will be re-rendered when
+   * checkTemporaryExit() or checkController() return RERENDER.
    */
   void operator()();
 
@@ -320,7 +321,7 @@ class CRUDMenu: public ControllerTask {
  * the PID test menu (-> and Y), temporary driving (just Y), and
  * will stop and warn the user if the battery is low.
  */
-int checkTemporaryExit();
+ControllerTask::CheckResult checkTemporaryExit();
 
 /**
  * @brief Gets vertical direction from the controller.

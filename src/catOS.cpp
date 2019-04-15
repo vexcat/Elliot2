@@ -3,15 +3,16 @@
 #include "editors.hpp"
 
 void ControllerTask::operator()() {
-  int result;
   render();
-  do {
-    result = checkController();
+  while(true) {
+    auto result = checkController();
+    if(result == ControllerTask::CheckResult::RERENDER) render();
+    if(result == ControllerTask::CheckResult::GO_UP   ) break;
+    result = checkTemporaryExit();
+    if(result == ControllerTask::CheckResult::RERENDER) render();
+    if(result == ControllerTask::CheckResult::GO_UP   ) break;
     pros::delay(5);
-    if(checkTemporaryExit() || result == ControllerTask::CheckResult::RERENDER) {
-      render();
-    }
-  } while(result != ControllerTask::CheckResult::GO_UP);
+  }
 }
 
 void line_set(int line, std::string str) {
