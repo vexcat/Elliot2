@@ -23,6 +23,11 @@
 #include <atomic>
 #include <memory>
 
+struct TrueSpeedPoint {
+  double x;
+  double y;
+};
+
 namespace okapi {
 class Elliot2CCPID : public virtual ChassisController {
   public:
@@ -41,8 +46,10 @@ class Elliot2CCPID : public virtual ChassisController {
                        std::unique_ptr<IterativePosPIDController> idistanceController,
                        std::unique_ptr<IterativePosPIDController> iangleController,
                        std::unique_ptr<IterativePosPIDController> iturnController,
-                       AbstractMotor::GearsetRatioPair igearset = AbstractMotor::gearset::red,
-                       const ChassisScales &iscales = ChassisScales({1, 1}));
+                       AbstractMotor::GearsetRatioPair igearset,
+                       const ChassisScales &iscales,
+                       const std::vector<TrueSpeedPoint>& trueSpeedData,
+                       bool voltagePIDOn);
 
   Elliot2CCPID(Elliot2CCPID &&other) noexcept;
 
@@ -149,11 +156,6 @@ class Elliot2CCPID : public virtual ChassisController {
    */
   double getError() const;
 
-  /**
-   * @brief Whether to use PID with voltage or velocity.
-   */
-  bool useVoltagePID = false;
-
   protected:
   Logger *logger;
   TimeUtil timeUtil;
@@ -167,6 +169,12 @@ class Elliot2CCPID : public virtual ChassisController {
   std::atomic_bool newMovement{false};
   std::atomic_bool dtorCalled{false};
   QTime threadSleepTime{10_ms};
+  std::vector<TrueSpeedPoint> tsd;
+
+  /**
+   * @brief Whether to use PID with voltage or velocity.
+   */
+  bool useVoltagePID = false;
 
   static void trampoline(void *context);
   void loop();

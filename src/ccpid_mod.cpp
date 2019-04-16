@@ -74,14 +74,18 @@ Elliot2CCPID::Elliot2CCPID(
   std::unique_ptr<IterativePosPIDController> iangleController,
   std::unique_ptr<IterativePosPIDController> iturnController,
   const AbstractMotor::GearsetRatioPair igearset,
-  const ChassisScales &iscales)
+  const ChassisScales &iscales,
+  const std::vector<TrueSpeedPoint>& trueSpeedData,
+  bool voltagePIDOn)
   : ChassisController(imodel, toUnderlyingType(igearset.internalGearset)),
     timeUtil(itimeUtil),
     distancePid(std::move(idistanceController)),
     anglePid(std::move(iangleController)),
     turnPid(std::move(iturnController)),
     scales(iscales),
-    gearsetRatioPair(igearset) {
+    gearsetRatioPair(igearset),
+    tsd(trueSpeedData),
+    useVoltagePID(voltagePIDOn) {
   if (igearset.ratio == 0) {
     logger->error("Elliot2CCPID: The gear ratio cannot be zero! Check if you are using "
                   "integer division.");

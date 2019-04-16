@@ -76,9 +76,10 @@ class BaseSettings {
             std::make_unique<IterativePosPIDController>(turn , TimeUtilFactory::create()),
             AbstractMotor::gearset::green, {
                 (360 / (PI * cpiGetter())) * okapi::inch, ((cprGetter() * 2) / cpiGetter()) * okapi::inch
-            }
+            },
+            {{0, 0}, {1, 1}},
+            data["voltage"].get<bool>()
         ));
-        base->useVoltagePID = data["voltage"].get<bool>();
         base->startThread();
     }
 
