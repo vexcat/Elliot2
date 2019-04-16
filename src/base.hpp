@@ -173,6 +173,30 @@ class BaseSettings {
         return data["voltage"].get<bool>();
     }
 
+    void setTrueSpeedData(const std::vector<TrueSpeedPoint>& points) {
+        auto& truespeed = data["truespeed"] = json::array({});
+        for(auto& pt: points) {
+            truespeed.push_back(json::array({pt.x, pt.y}));
+        }
+    }
+
+    std::vector<TrueSpeedPoint> getTrueSpeedData() {
+        std::vector<TrueSpeedPoint> ret;
+        if(data.find("truespeed") == data.end()) {
+            ret = {{0, 0}, {1, 1}};
+        } else {
+            for(auto &point: data["truespeed"]) {
+                ret.push_back({point[0], point[1]});
+            }
+        }
+        return ret;
+    }
+
+    void deleteTrueSpeedData() {
+        if(data.find("truespeed") != data.end())
+            data.erase("truespeed");
+    }
+
     /**
      * Constructs BaseSettings from base parameters, a location to write
      * new Elliot2CCPID instances to, and a JSON settings location.
