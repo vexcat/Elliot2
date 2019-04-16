@@ -168,6 +168,10 @@ class BaseSettings {
         loadState();
     }
 
+    bool getVoltagePIDUsage() {
+        return data["voltage"].get<bool>();
+    }
+
     /**
      * Constructs BaseSettings from base parameters, a location to write
      * new Elliot2CCPID instances to, and a JSON settings location.
