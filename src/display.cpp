@@ -461,7 +461,6 @@ class MotionEditor: public ControllerMenu {
         while(autonRunner.get_state() != pros::E_TASK_STATE_DELETED) {
           if(ctrl.get_digital_new_press(DIGITAL_B)) {
             autonRunner.remove();
-            getRobot().stop();
             break;
           }
           pros::delay(5);
@@ -470,7 +469,7 @@ class MotionEditor: public ControllerMenu {
         //Measure finish time
         long finishedIn = pros::millis() - autonStartTime;
         //Stop robot
-        getRobot().base->stop();
+        getRobot().stop();
         //Display finish time
         line_set(0, "Auton done in");
         line_set(1, std::to_string(finishedIn) + "ms.");
