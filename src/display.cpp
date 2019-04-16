@@ -1151,7 +1151,10 @@ class RootList: public ControllerMenu {
       {"Autonomous"    , taskOption<AutonList>},
       {"Motors"        , taskOption<MotorList>},
       {"GPS Settings"  , taskOption<  GPSList>},
-      {"Punch Settings", taskOption<PunchList>}
+      {"Punch Settings", taskOption<PunchList>},
+      {"Dump Data", [&]() {
+        puts((getState().dump() + "\n").c_str());
+      }}
     });
   }
 };
