@@ -1035,7 +1035,7 @@ void truespeedTuner() {
   auto &bot = getRobot();
   auto &ctrl = bot.controller;
   std::vector<TrueSpeedPoint> ts = {{0, 0}};
-  for(int i = 100; i <= 12000; i += 100) {
+  for(int i = 1000; i <= 12000; i += 1000) {
     line_set(0, "TrueSpeed Tuner");
     line_set(1, "A: ready for");
     line_set(2, std::to_string(i) + "mV test.");
