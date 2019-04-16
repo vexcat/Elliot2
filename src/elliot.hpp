@@ -78,7 +78,7 @@ class Puncher {
 };
 
 enum DriveStyle {
-    RANDY_DRIVING  = 0,
+    DADDY_DRIVING  = 0,
     UNGATO_DRIVING = 1337
 };
 
@@ -89,7 +89,7 @@ class Elliot {
     static pros::Mutex usageGuard;
     public:
     ///Style of driving to use in opcontrol
-    DriveStyle driveStyle;
+    DriveStyle driveStyle = DADDY_DRIVING;
     ///Time at beginning of opcontrol, used to know when to activate
     ///30 second warning.
     long opctrlBegin;

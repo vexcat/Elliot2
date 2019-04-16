@@ -26,7 +26,7 @@ void Elliot::drive(pros::Controller& m, DriveStyle style) {
 	//Base drive
 	double y = 0;
 	double x = 0;
-	if(style == RANDY_DRIVING) {
+	if(style == DADDY_DRIVING) {
 		y = dz(m.get_analog(ANALOG_LEFT_Y) * (1 / 127.0), 0.16);
 		x = dz(m.get_analog(ANALOG_LEFT_X) * (1 / 127.0), 0.16);
 	} else if(style == UNGATO_DRIVING) {

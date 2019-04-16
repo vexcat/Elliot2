@@ -383,7 +383,7 @@ ControllerTask::CheckResult checkTemporaryExit() {
       while(true) {
         if(ctrl.get_digital(DIGITAL_Y)) {
           while(ctrl.get_digital(DIGITAL_Y)) pros::delay(25);
-          bot.driveStyle = RANDY_DRIVING;
+          bot.driveStyle = DADDY_DRIVING;
           Elliot::takeStopped();
           break;
         }
