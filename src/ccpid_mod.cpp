@@ -17,6 +17,34 @@
 #include "okapi/api/util/mathUtil.hpp"
 #include <cmath>
 
+double interpolate(const std::vector<TrueSpeedPoint>& data, double x) {
+  bool negate = x < 0 ? x*=-1, true : false;
+  //Index of first point marking the best linear approximation.
+  int bestLinearApproximationIndex = 0;
+  //Edge cases: Are we outside the data's bounds?
+  if(data[0].x > x) {
+    //This case shouldn't occur.
+    bestLinearApproximationIndex = 0;
+  } else if(data[data.size()].x < x) {
+    bestLinearApproximationIndex = data.size() - 2;
+  } else {
+    //Search for pair of points containing our x
+    for(int i = 0; i < data.size() - 1; i++) {
+      auto &point1 = data[i];
+      auto &point2 = data[i + 1];
+      if(point1.x <= x && point2.x >= x) {
+        bestLinearApproximationIndex = i;
+      }
+    }
+  }
+  auto &p1 = data[bestLinearApproximationIndex];
+  auto &p2 = data[bestLinearApproximationIndex + 1];
+  //Now, calculate where x would fall on a line defined by
+  //the two closest points.
+  double y = ((p2.y - p1.y) / (p2.x - p1.x)) * (x - p1.x) + p1.y;
+  if(negate) y *= -1;
+}
+
 void driveVectorVoltage(const okapi::ChassisModel& model, double iforwardSpeed, double iyaw) {
   // This code is taken from WPIlib. All credit goes to them. Link:
   // https://github.com/wpilibsuite/allwpilib/blob/master/wpilibc/src/main/native/cpp/Drive/DifferentialDrive.cpp#L73
