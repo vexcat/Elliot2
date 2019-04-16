@@ -45,7 +45,9 @@ double interpolate(const std::vector<TrueSpeedPoint>& data, double x) {
   if(negate) y *= -1;
 }
 
-void driveVectorVoltage(const okapi::ChassisModel& model, double iforwardSpeed, double iyaw) {
+void driveVectorVoltage(const okapi::ChassisModel& model,
+const std::vector<TrueSpeedPoint>& trueSpeedData,
+double iforwardSpeed, double iyaw) {
   // This code is taken from WPIlib. All credit goes to them. Link:
   // https://github.com/wpilibsuite/allwpilib/blob/master/wpilibc/src/main/native/cpp/Drive/DifferentialDrive.cpp#L73
   const double forwardSpeed = std::clamp(iforwardSpeed, -1.0, 1.0);
@@ -58,12 +60,14 @@ void driveVectorVoltage(const okapi::ChassisModel& model, double iforwardSpeed, 
     leftOutput /= maxInputMag;
     rightOutput /= maxInputMag;
   }
-  model.tank(leftOutput, rightOutput);
+  model.tank(interpolate(trueSpeedData, leftOutput), interpolate(trueSpeedData, rightOutput));
 }
 
-void rotateVoltage(const okapi::ChassisModel& model, double ispeed) {
+void rotateVoltage(const okapi::ChassisModel& model,
+const std::vector<TrueSpeedPoint>& trueSpeedData,
+double ispeed) {
   const double speed = std::clamp(ispeed, -1.0, 1.0);
-  model.tank(speed, -1 * speed);
+  model.tank(interpolate(trueSpeedData, speed), interpolate(trueSpeedData, -1 * speed));
 }
 
 namespace okapi {
@@ -145,7 +149,7 @@ void Elliot2CCPID::loop() {
         distanceElapsed = static_cast<double>((encVals[0] + encVals[1])) / 2.0;
         angleChange = static_cast<double>(encVals[0] - encVals[1]);
         if(useVoltagePID) {
-          driveVectorVoltage(*model, distancePid->step(distanceElapsed), anglePid->step(angleChange));
+          driveVectorVoltage(*model, tsd, distancePid->step(distanceElapsed), anglePid->step(angleChange));
         } else {
           model->driveVector(distancePid->step(distanceElapsed), anglePid->step(angleChange));
         }
@@ -155,7 +159,7 @@ void Elliot2CCPID::loop() {
         encVals = model->getSensorVals() - encStartVals;
         angleChange = (encVals[0] - encVals[1]) / 2.0;
         if(useVoltagePID) {
-          rotateVoltage(*model, turnPid->step(angleChange));
+          rotateVoltage(*model, tsd, turnPid->step(angleChange));
         } else {
           model->rotate(turnPid->step(angleChange));
         }
