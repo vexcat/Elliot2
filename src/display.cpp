@@ -1027,6 +1027,63 @@ class GainTuner: public ControllerMenu {
   }
 };
 
+void truespeedTuner() {
+  auto &bot = getRobot();
+  auto &ctrl = bot.controller;
+  std::vector<TrueSpeedPoint> ts = {{0, 0}};
+  for(int i = 100; i <= 12000; i += 100) {
+    line_set(0, "TrueSpeed Tuner");
+    line_set(1, "A: ready for");
+    line_set(2, std::to_string(i) + "mV test.");
+    while(!ctrl.get_digital_new_press(DIGITAL_A)) {
+      if(ctrl.get_digital_new_press(DIGITAL_B)) return;
+      bot.base->arcade(ctrl.get_analog(ANALOG_LEFT_Y), ctrl.get_analog(ANALOG_LEFT_X));
+      pros::delay(5);
+    }
+    //Get starting position
+    double start = bot.left.getPosition();
+    //Go!
+    bot.left .moveVoltage(i);
+    bot.right.moveVoltage(i);
+    //Wait for error to be over 80in.
+    while(bot.gps.countsToInch(std::abs(start - bot.left.getPosition())) < 80) {
+      pros::delay(5);
+    }
+    //Measure final velocity
+    double vel = (bot.left.getActualVelocity() + bot.right.getActualVelocity()) / 2.0;
+    //Stop the robot
+    bot.left.moveVelocity(0);
+    bot.right.moveVelocity(0);
+    //Record the point to terminal & ts
+    printf("%dmV: %frpm\n", i, vel);
+    //Velocity first! Both should be from 0 to 1.
+    ts.push_back({vel / (double)bot.left.getActualVelocity(), i / 12000.0});
+  }
+  //Push new ts values to base settings.
+  bot.baseSettings.setTrueSpeedData(ts);
+}
+
+//Contains TrueSpeed menus
+class TSList: public ControllerMenu {
+  public:
+  TSList() {
+    list.insert(list.end(), {
+      {"Delete TS Data", [&]() {
+        getRobot().baseSettings.deleteTrueSpeedData();
+      }},
+      {"Export TS Data", [&]() {
+        auto data = getRobot().baseSettings.getTrueSpeedData();
+        for(auto &pt: data) {
+          printf("%f,%f\n", pt.x, pt.y);
+        }
+      }},
+      {"Tune TS Data", [&]() {
+        truespeedTuner();
+      }}
+    });
+  }
+};
+
 //Contains GPS menus & cpr/cpi editors.
 class GPSList: public ControllerMenu {
   public:
@@ -1048,6 +1105,7 @@ class GPSList: public ControllerMenu {
           selectOption({"Nahhhhh", "Yesssss"}, getRobot().baseSettings.getVoltagePIDUsage() ? 1 : 0)
         );
       }},
+      {"TS Settings", taskOption<TSList>},
       {"Fwd Drive Test", [&]() {
         auto &ctrl = getRobot().controller;
         line_set(0, "Now driving.");
