@@ -355,7 +355,7 @@ ControllerTask::CheckResult checkBattery(pros::Controller& ctrl) {
     line_set(1, "< 15. Please");
     line_set(2, "B to dismiss");
     int iter = 0;
-    while(!(criticalBattIgnored = ctrl.get_digital_new_press(DIGITAL_B))) {
+    while(!(criticalBattIgnored = ctrl.get_digital(DIGITAL_B))) {
       pros::delay(20);
       iter++;
       if(iter == 100) {
