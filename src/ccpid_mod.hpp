@@ -149,6 +149,11 @@ class Elliot2CCPID : public virtual ChassisController {
    */
   double getError() const;
 
+  /**
+   * @brief Whether to use PID with voltage or velocity.
+   */
+  bool useVoltagePID = false;
+
   protected:
   Logger *logger;
   TimeUtil timeUtil;

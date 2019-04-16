@@ -17,6 +17,27 @@
 #include "okapi/api/util/mathUtil.hpp"
 #include <cmath>
 
+void driveVectorVoltage(const okapi::ChassisModel& model, double iforwardSpeed, double iyaw) {
+  // This code is taken from WPIlib. All credit goes to them. Link:
+  // https://github.com/wpilibsuite/allwpilib/blob/master/wpilibc/src/main/native/cpp/Drive/DifferentialDrive.cpp#L73
+  const double forwardSpeed = std::clamp(iforwardSpeed, -1.0, 1.0);
+  const double yaw = std::clamp(iyaw, -1.0, 1.0);
+
+  double leftOutput = forwardSpeed + yaw;
+  double rightOutput = forwardSpeed - yaw;
+  if (const double maxInputMag = std::max<double>(std::abs(leftOutput), std::abs(rightOutput));
+      maxInputMag > 1) {
+    leftOutput /= maxInputMag;
+    rightOutput /= maxInputMag;
+  }
+  model.tank(leftOutput, rightOutput);
+}
+
+void rotateVoltage(const okapi::ChassisModel& model, double ispeed) {
+  const double speed = std::clamp(ispeed, -1.0, 1.0);
+  model.tank(speed, -1 * speed);
+}
+
 namespace okapi {
 Elliot2CCPID::Elliot2CCPID(
   const TimeUtil &itimeUtil,
@@ -91,13 +112,21 @@ void Elliot2CCPID::loop() {
         encVals = model->getSensorVals() - encStartVals;
         distanceElapsed = static_cast<double>((encVals[0] + encVals[1])) / 2.0;
         angleChange = static_cast<double>(encVals[0] - encVals[1]);
-        model->driveVector(distancePid->step(distanceElapsed), anglePid->step(angleChange));
+        if(useVoltagePID) {
+          driveVectorVoltage(*model, distancePid->step(distanceElapsed), anglePid->step(angleChange));
+        } else {
+          model->driveVector(distancePid->step(distanceElapsed), anglePid->step(angleChange));
+        }
         break;
 
       case angle:
         encVals = model->getSensorVals() - encStartVals;
         angleChange = (encVals[0] - encVals[1]) / 2.0;
-        model->rotate(turnPid->step(angleChange));
+        if(useVoltagePID) {
+          rotateVoltage(*model, turnPid->step(angleChange));
+        } else {
+          model->rotate(turnPid->step(angleChange));
+        }
         break;
 
       default:

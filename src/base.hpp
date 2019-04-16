@@ -78,6 +78,7 @@ class BaseSettings {
                 (360 / (PI * cpiGetter())) * okapi::inch, ((cprGetter() * 2) / cpiGetter()) * okapi::inch
             }
         ));
+        base->useVoltagePID = data["voltage"].get<bool>();
         base->startThread();
     }
 
@@ -153,6 +154,18 @@ class BaseSettings {
      */
     void setTurnGains(okapi::IterativePosPIDController::Gains newGains) {
         modGains("turn", newGains);
+    }
+
+    /**
+     * Sets whether or not the base should use voltage for PID.
+     * This will modify data at getState["base"]["voltage"].
+     * 
+     * @param useVoltage Whether to use voltage for PID. If false, velocity will be used.
+     */
+    void setVoltagePIDUsage(bool useVoltage) {
+        data["voltage"] = useVoltage;
+        saveState();
+        loadState();
     }
 
     /**

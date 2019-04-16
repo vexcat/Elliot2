@@ -142,7 +142,8 @@ json& getBaseState() {
                 {"kP", 0},
                 {"kI", 0},
                 {"kD", 0},
-            }}
+            }},
+            {"voltage", false}
         };
         saveState();
     }
@@ -215,11 +216,15 @@ void Elliot::takeCoast() {
 }
 
 void Elliot::stop() {
-    base->stop();
     puncher.setVelocity(0);
     angler.moveVelocity(0);
     intake.moveVelocity(0);
     scorer.moveVelocity(0);
+    left .setBrakeMode(AbstractMotor::brakeMode::coast);
+    right.setBrakeMode(AbstractMotor::brakeMode::coast);
+    base->stop();
+    base->setMaxVelocity((int)getRobot().left.getGearing());
+    base->setMaxVoltage(12000);
 }
 
 void Elliot::takeStopped() {
@@ -232,8 +237,6 @@ void Elliot::giveDirect() {
 }
 
 void Elliot::give() {
-    getRobot().left .setBrakeMode(AbstractMotor::brakeMode::coast);
-    getRobot().right.setBrakeMode(AbstractMotor::brakeMode::coast);
     getRobot().stop();
     usageGuard.give();
 }
