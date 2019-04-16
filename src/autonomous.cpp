@@ -31,6 +31,7 @@ void moveToSetpoint(RoboPosition pt, double velLimit, bool reverse, int extraTim
   auto &cha = *bot.base;
   //Stick to the speed limit
   cha.setMaxVelocity(velLimit * (int)bot.left.getGearing());
+  cha.setMaxVoltage(velLimit * 12000);
   //Get current position
   auto curPos = gps.getPosition();
   //Calculate distance
@@ -98,6 +99,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     //"v": Velocity limit in [0, 1]
     double velLimit = motionObject["v"].get<double>();
     bot.base->setMaxVelocity(velLimit * (int)bot.left.getGearing());
+    bot.base->setMaxVoltage(velLimit * 12000);
     //Turn by dTheta radians
     bot.base->turnAngle(dTheta * -(180 / PI) * okapi::degree);
     //Wait extra "t" seconds
@@ -183,6 +185,8 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     //"l"/"r": Left & right velocities in [-1, 1]
     double l = motionObject["l"].get<double>() * (int)bot.left.getGearing();
     double r = motionObject["r"].get<double>() * (int)bot.right.getGearing();
+    //Max out max velocity
+    bot.base->setMaxVelocity((int) bot.left.getGearing());
     //Respect isBlue by swapping l & r.
     bot.left.moveVelocity(isBlue ? r : l);
     bot.right.moveVelocity(isBlue ? l : r);
@@ -208,6 +212,7 @@ void runMotion(json motionObject, RoboPosition& offset, bool isBlue) {
     double distance = bot.gps.inchToCounts(motionObject["d"].get<double>());
     //"v": Velocity limit in [0, 1]
     bot.base->setMaxVelocity(motionObject["v"].get<double>() * (int)bot.left.getGearing());
+    bot.base->setMaxVoltage(motionObject["v"].get<double>() * 12000);
     //Move distance
     bot.base->moveDistance(distance);
     //"t": Extra time to wait after moving
