@@ -110,74 +110,63 @@ void Puncher::setGains(okapi::IterativePosPIDController::Gains gains) {
     saveState();
 }
 
-json& getGPSState() {
+void defaults(const std::string& name, const json& data) {
     auto &state = getState();
-    if(state.find("gps") == state.end()) {
-        printf("Defaults were applied for the GPS. Please run GPS calibration.\n");
-        state["gps"] = {
-            {"cpr", 442.5252999999999 * (360.0 / 900.0)},
-            {"cpi", 68.5052 * (360.0 / 900.0)}
-        };
+    auto loc = state.find(name);
+    if(loc == state.end()) {
+        state[name] = data;
+        printf("All default settings were applied for %s.\n", name.c_str());
+        saveState();
+    } else {
+        for(auto &[k, v]: data.items()) {
+            if(loc->find(k) == loc->end()) {
+                state[name][k] = v;
+                printf("Default setting was applied for %s.%s.\n", name.c_str(), k.c_str());
+            }
+        }
         saveState();
     }
-    return state["gps"];
+}
+
+json& getGPSState() {
+    defaults("gps", {
+        {"cpr", 442.5252999999999 * (360.0 / 900.0)},
+        {"cpi", 68.5052 * (360.0 / 900.0)}
+    });
+    return getState()["gps"];
 }
 
 json& getBaseState() {
-    auto &state = getState();
-    if(state.find("base") == state.end()) {
-        printf("Defaults were applied for the base. Please change base PID.\n");
-        state["base"] = {
-            {"dist", {
-                {"kP", 0},
-                {"kI", 0},
-                {"kD", 0},
-            }},
-            {"angle", {
-                {"kP", 0},
-                {"kI", 0},
-                {"kD", 0},
-            }},
-            {"turn", {
-                {"kP", 0},
-                {"kI", 0},
-                {"kD", 0},
-            }},
-            {"voltage", false}
-        };
-        saveState();
-    }
-    return state["base"];
+    defaults("base", {
+        {"dist", {
+            {"kP", 0},
+            {"kI", 0},
+            {"kD", 0},
+        }},
+        {"angle", {
+            {"kP", 0},
+            {"kI", 0},
+            {"kD", 0},
+        }},
+        {"turn", {
+            {"kP", 0},
+            {"kI", 0},
+            {"kD", 0},
+        }},
+        {"voltage", false}
+    });
+    return getState()["base"];
 }
 
 json& getPuncherState() {
-    auto &state = getState();
-    if(state.find("puncher") == state.end()) {
-        printf("Defaults were applied for the puncher. Please change puncher PID.\n");
-        state["puncher"] = {
-            {"kP", 0.001},
-            {"kI", 0.001},
-            {"kD", 0.001},
-            {"low", 800},
-            {"high", 1200}
-        };
-        saveState();
-    }
-    return state["puncher"];
-}
-
-json& getCameraState(pros::Vision& def) {
-    auto &state = getState();
-    if(state.find("cam") == state.end()) {
-        printf("Defaults were applied for the camera.\n");
-        state["cam"] = {
-            {"auto", false},
-            {"white", (int)def.get_white_balance()},
-            {"exposure", (int)def.get_exposure()}
-        };
-        saveState();
-    }
-    return state["cam"];
+    defaults("puncher", {
+        {"kP", 0.001},
+        {"kI", 0.001},
+        {"kD", 0.001},
+        {"low", 800},
+        {"high", 1200}
+    });
+    return getState()["puncher"];
 }
 
 pros::Mutex Elliot::usageGuard;
