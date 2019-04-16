@@ -1043,6 +1043,11 @@ class GPSList: public ControllerMenu {
       {"Set CPI", [&]() {
         gps.setCPI(editNumber(gps.inchToCounts(1), 4));
       }},
+      {"Voltage PID", [&]() {
+        getRobot().baseSettings.setVoltagePIDUsage(
+          selectOption({"Nahhhhh", "Yesssss"}, getRobot().baseSettings.getVoltagePIDUsage() ? 1 : 0)
+        );
+      }},
       {"Fwd Drive Test", [&]() {
         auto &ctrl = getRobot().controller;
         line_set(0, "Now driving.");
