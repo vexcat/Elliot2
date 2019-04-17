@@ -178,6 +178,8 @@ class BaseSettings {
         for(auto& pt: points) {
             truespeed.push_back(json::array({pt.x, pt.y}));
         }
+        saveState();
+        loadState();
     }
 
     std::vector<TrueSpeedPoint> getTrueSpeedData() {
@@ -195,6 +197,8 @@ class BaseSettings {
     void deleteTrueSpeedData() {
         if(data.find("truespeed") != data.end())
             data.erase("truespeed");
+        saveState();
+        loadState();
     }
 
     /**
