@@ -1061,8 +1061,11 @@ void truespeedTuner() {
     //Record the point to terminal & ts
     printf("%dmV: %frpm\n", i, vel);
     //Velocity first! Both should be from 0 to 1.
-    ts.push_back({vel / (double)bot.left.getActualVelocity(), i / 12000.0});
+    ts.push_back({vel / (double)bot.left.getGearing(), i / 12000.0});
   }
+  std::sort(ts.begin(), ts.end(), [](const TrueSpeedPoint& p1, const TrueSpeedPoint& p2) {
+    return p1.x < p2.x;
+  })
   //Push new ts values to base settings.
   bot.baseSettings.setTrueSpeedData(ts);
 }
