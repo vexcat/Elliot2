@@ -1065,7 +1065,7 @@ void truespeedTuner() {
   }
   std::sort(ts.begin(), ts.end(), [](const TrueSpeedPoint& p1, const TrueSpeedPoint& p2) {
     return p1.x < p2.x;
-  })
+  });
   //Push new ts values to base settings.
   bot.baseSettings.setTrueSpeedData(ts);
 }
