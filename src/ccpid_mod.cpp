@@ -43,6 +43,8 @@ double interpolate(const std::vector<TrueSpeedPoint>& data, double x) {
   //the two closest points.
   double y = ((p2.y - p1.y) / (p2.x - p1.x)) * (x - p1.x) + p1.y;
   if(negate) y *= -1;
+
+  return y;
 }
 
 void driveVectorVoltage(const okapi::ChassisModel& model,
