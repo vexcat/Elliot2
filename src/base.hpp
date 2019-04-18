@@ -77,7 +77,7 @@ class BaseSettings {
             AbstractMotor::gearset::green, {
                 (360 / (PI * cpiGetter())) * okapi::inch, ((cprGetter() * 2) / cpiGetter()) * okapi::inch
             },
-            {{0, 0}, {1, 1}},
+            getTrueSpeedData(),
             data["voltage"].get<bool>()
         ));
         base->startThread();
