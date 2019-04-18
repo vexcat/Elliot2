@@ -507,7 +507,7 @@ class MotionList: public CRUDMenu {
     jsonInserter("Direct"  , { {"l", 1.0}, {"r", 1.0}, {"t", 1.0} });
     jsonInserter("Low"     , { {"t", 0.0} });
     jsonInserter("High"    , { {"t", 0.0} });
-    jsonInserter("Punch");
+    jsonInserter("Punch"   , { {"t", 0.0} });
     jsonInserter("Autoshoot");
     jsonInserter("Intake"  , { {"v", 1.0}, {"t", 0.2} });
     jsonInserter("Scorer"  , { {"p", 10 }, {"v", 1.0}, {"t", 0.6} });
@@ -667,7 +667,7 @@ class MotionList: public CRUDMenu {
         {"v", 2, "Set velocity"},
         {"t", 3, "Set timing"}
       })();
-    } else if(type == "low" || type == "high") {
+    } else if(type == "low" || type == "high" || type == "shoot") {
       MotionEditor(motionData, idx, {
         {"t", 3, "Set timing"}
       })();
