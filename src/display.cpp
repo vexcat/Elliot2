@@ -1038,7 +1038,7 @@ TrueSpeedPoint runTSTunerTest(int i) {
   line_set(1, "A: ready for");
   line_set(2, std::to_string(i) + "mV test.");
   while(!ctrl.get_digital_new_press(DIGITAL_A)) {
-    bot.base->arcade(ctrl.get_analog(ANALOG_LEFT_Y), ctrl.get_analog(ANALOG_LEFT_X));
+    bot.base->arcade(ctrl.get_analog(ANALOG_LEFT_Y) / 127.0, ctrl.get_analog(ANALOG_LEFT_X) / 127.0);
     pros::delay(5);
   }
   //Get starting position
