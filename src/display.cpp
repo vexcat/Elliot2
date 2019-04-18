@@ -1038,7 +1038,6 @@ TrueSpeedPoint runTSTunerTest(int i) {
   line_set(1, "A: ready for");
   line_set(2, std::to_string(i) + "mV test.");
   while(!ctrl.get_digital_new_press(DIGITAL_A)) {
-    if(ctrl.get_digital_new_press(DIGITAL_B)) return;
     bot.base->arcade(ctrl.get_analog(ANALOG_LEFT_Y), ctrl.get_analog(ANALOG_LEFT_X));
     pros::delay(5);
   }
