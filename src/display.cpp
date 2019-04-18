@@ -1031,37 +1031,67 @@ class GainTuner: public ControllerMenu {
   }
 };
 
-void truespeedTuner() {
+TrueSpeedPoint runTSTunerTest(int i) {
   auto &bot = getRobot();
   auto &ctrl = bot.controller;
+  line_set(0, "TrueSpeed Tuner");
+  line_set(1, "A: ready for");
+  line_set(2, std::to_string(i) + "mV test.");
+  while(!ctrl.get_digital_new_press(DIGITAL_A)) {
+    if(ctrl.get_digital_new_press(DIGITAL_B)) return;
+    bot.base->arcade(ctrl.get_analog(ANALOG_LEFT_Y), ctrl.get_analog(ANALOG_LEFT_X));
+    pros::delay(5);
+  }
+  //Get starting position
+  double start = bot.left.getPosition();
+  //Go!
+  bot.left .moveVoltage(i);
+  bot.right.moveVoltage(i);
+  //Wait for error to be over 80in.
+  while(bot.gps.countsToInch(std::abs(start - bot.left.getPosition())) < 80) {
+    pros::delay(5);
+  }
+  //Measure final velocity
+  double vel = (bot.left.getActualVelocity() + bot.right.getActualVelocity()) / 2.0;
+  //Stop the robot
+  bot.left.moveVelocity(0);
+  bot.right.moveVelocity(0);
+  //Record the point to terminal & ts
+  printf("%dmV: %frpm\n", i, vel);
+  //Velocity first! Both should be from 0 to 1.
+  return {vel / (double)bot.left.getGearing(), i / 12000.0};
+}
+
+void truespeedTuner() {
+  auto &bot = getRobot();
   std::vector<TrueSpeedPoint> ts = {{0, 0}};
+  //Binary Search for Minimum Voltage
+  //Making sure the minimum voltage to achieve motion is recorded
+  //ensures that any RPM value given will always move the robot.
+  int minVoltageLowBound = 0;
+  int minVoltageHighBound = 1000;
+  TrueSpeedPoint mvpt;
+  while(minVoltageLowBound + 1 != minVoltageHighBound) {
+    auto attempt = (minVoltageHighBound + minVoltageLowBound) / 2;
+    auto pt = runTSTunerTest(attempt);
+    if(pt.x > 0) {
+      //Update the high bound to the value tried.
+      minVoltageHighBound = attempt;
+      mvpt = pt;
+    } else {
+      //Update the low bound to the value tried.
+      minVoltageLowBound = attempt;
+    }
+  }
+  ts.push_back(mvpt);
   for(int i = 1000; i <= 12000; i += 1000) {
-    line_set(0, "TrueSpeed Tuner");
-    line_set(1, "A: ready for");
-    line_set(2, std::to_string(i) + "mV test.");
-    while(!ctrl.get_digital_new_press(DIGITAL_A)) {
-      if(ctrl.get_digital_new_press(DIGITAL_B)) return;
-      bot.base->arcade(ctrl.get_analog(ANALOG_LEFT_Y), ctrl.get_analog(ANALOG_LEFT_X));
-      pros::delay(5);
+    auto p = runTSTunerTest(i);
+    //If the vel is already on the list, don't add a duplicate!
+    if(std::find_if(ts.begin(), ts.end(), [&p, &bot](const TrueSpeedPoint& p2) {
+      return p.x == p2.x;
+    }) == ts.end()) {
+      ts.push_back(p);
     }
-    //Get starting position
-    double start = bot.left.getPosition();
-    //Go!
-    bot.left .moveVoltage(i);
-    bot.right.moveVoltage(i);
-    //Wait for error to be over 80in.
-    while(bot.gps.countsToInch(std::abs(start - bot.left.getPosition())) < 80) {
-      pros::delay(5);
-    }
-    //Measure final velocity
-    double vel = (bot.left.getActualVelocity() + bot.right.getActualVelocity()) / 2.0;
-    //Stop the robot
-    bot.left.moveVelocity(0);
-    bot.right.moveVelocity(0);
-    //Record the point to terminal & ts
-    printf("%dmV: %frpm\n", i, vel);
-    //Velocity first! Both should be from 0 to 1.
-    ts.push_back({vel / (double)bot.left.getGearing(), i / 12000.0});
   }
   std::sort(ts.begin(), ts.end(), [](const TrueSpeedPoint& p1, const TrueSpeedPoint& p2) {
     return p1.x < p2.x;
