@@ -58,13 +58,15 @@ function printCommonUsage() {
   console.log('    dump <filename>');
   console.log('To reprint the list of histories, type');
   console.log('    history');
+  console.log('To rename a save, type');
+  console.log('    rename <prevname> <newname>');
 }
 
 function init() {
   const files = [];
   const filenames = fs.readdirSync(sd_path);
   for(let filename of filenames) {
-    if(/[0-9a-zA-Z]{8}/.test(filename) || filename.endsWith('.json')) {
+    if(filename !== 'latest.txt') {
       files.push({
         content: JSON.parse(fs.readFileSync(path.join(sd_path, filename))),
         name: filename
@@ -104,6 +106,27 @@ function init() {
       } else {
         console.log(JSON.stringify(JSON.parse(fs.readFileSync(path.join(sd_path, f.name), 'UTF-8')), null, 2));
       }
+    }
+    if(line.startsWith('rename')) {
+      const parts = line.substr(7).split(' ');
+      const orig = parts[0];
+      const target = parts[1];
+      let f = files.find(o => o.name.startsWith(orig));
+      let old = f.name;
+      //Move file
+      fs.renameSync(path.join(sd_path, old), path.join(sd_path, target));
+      //Change name of object
+      f.name = target;
+      //Change references in prevName
+      for(let file of files) {
+        if(file.content.prevName === '/usd/' + old) file.content.prevName = '/usd/' + target;
+      }
+      //Change reference in latest.txt
+      if(fs.readFileSync(path.join(sd_path, 'latest.txt'), 'UTF-8').substr(5) === old) {
+        fs.writeFileSync(path.join(sd_path, 'latest.txt'), '/usd/' + target);
+      }
+      //Recalculate tree
+      histories = list_to_tree(files);
     }
     if(line.startsWith('history')) {
       console.log(`Found ${histories.length} unique histories.`);
