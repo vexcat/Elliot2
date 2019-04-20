@@ -1046,8 +1046,11 @@ TrueSpeedPoint runTSTunerTest(int i) {
   //Go!
   bot.left .moveVoltage(i);
   bot.right.moveVoltage(i);
-  //Wait for error to be over 80in.
-  while(bot.gps.countsToInch(std::abs(start - bot.left.getPosition())) < 80) {
+  //Record time
+  auto testStartTime = pros::millis();
+  //Wait for error to be over 80in, or for a second to pass with no motion
+  while(bot.gps.countsToInch(std::abs(start - bot.left.getPosition())) < 80 &&
+  !(testStartTime + 1000 < pros::millis() && !bot.left.getActualVelocity())) {
     pros::delay(5);
   }
   //Measure final velocity
