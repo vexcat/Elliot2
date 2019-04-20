@@ -457,9 +457,11 @@ class MotionEditor: public ControllerMenu {
         //Measure starting time
         long autonStartTime = pros::millis();
         //Take care of task
+        bool wasStopped = false;
         auto &ctrl = getRobot().controller;
         while(autonRunner.get_state() != pros::E_TASK_STATE_DELETED) {
           if(ctrl.get_digital_new_press(DIGITAL_B)) {
+            wasStopped = true;
             autonRunner.remove();
             break;
           }
@@ -471,7 +473,7 @@ class MotionEditor: public ControllerMenu {
         //Stop robot
         getRobot().stop();
         //Display finish time
-        line_set(0, "Auton done in");
+        line_set(0, wasStopped ? "Interrupted at" : "Auton done in");
         line_set(1, std::to_string(finishedIn) + "ms.");
         line_set(2, "A to dismiss");
         //Wait for A to be pressed again
