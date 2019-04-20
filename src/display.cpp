@@ -667,7 +667,7 @@ class MotionList: public CRUDMenu {
         {"v", 2, "Set velocity"},
         {"t", 3, "Set timing"}
       })();
-    } else if(type == "low" || type == "high" || type == "shoot") {
+    } else if(type == "low" || type == "high" || type == "punch") {
       MotionEditor(motionData, idx, {
         {"t", 3, "Set timing"}
       })();
@@ -1059,7 +1059,7 @@ TrueSpeedPoint runTSTunerTest(int i) {
   bot.left.moveVelocity(0);
   bot.right.moveVelocity(0);
   //Record the point to terminal & ts
-  printf("%dmV: %frpm\n", i, vel);
+  printf("%dmV: %frpam\n", i, vel);
   //Velocity first! Both should be from 0 to 1.
   return {vel / (double)bot.left.getGearing(), i / 12000.0};
 }
