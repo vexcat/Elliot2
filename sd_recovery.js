@@ -74,6 +74,14 @@ function printCommonUsage() {
   console.log('    rename <prevname> <newname>');
 }
 
+function maybe_latest() {
+  try {
+    return fs.readFileSync(path.join(sd_path, 'latest.txt'), 'UTF-8').substr(5);
+  } catch(e) {
+    return undefined;
+  }
+}
+
 function init() {
   const files = [];
   const filenames = fs.readdirSync(sd_path);
@@ -90,7 +98,7 @@ function init() {
 
   console.log(`Found ${histories.length} unique histories.`);
   for(let history of histories) {
-    dumpHistory(history, fs.readFileSync(path.join(sd_path, 'latest.txt'), 'UTF-8').substr(5));
+    dumpHistory(history, maybe_latest());
   }
 
   printCommonUsage();
@@ -108,7 +116,7 @@ function init() {
     if(line.startsWith('dump')) {
       let nameGiven;
       if(line.length === 4) {
-        nameGiven = fs.readFileSync(path.join(sd_path, 'latest.txt'), 'UTF-8').substr(5);
+        nameGiven = maybe_latest();
       } else {
         nameGiven = line.substr(5);
       }
@@ -134,7 +142,7 @@ function init() {
         if(file.content.prevName === '/usd/' + old) file.content.prevName = '/usd/' + target;
       }
       //Change reference in latest.txt
-      if(fs.readFileSync(path.join(sd_path, 'latest.txt'), 'UTF-8').substr(5) === old) {
+      if(maybe_latest() === old) {
         fs.writeFileSync(path.join(sd_path, 'latest.txt'), '/usd/' + target);
       }
       //Recalculate tree
@@ -143,7 +151,7 @@ function init() {
     if(line.startsWith('history')) {
       console.log(`Found ${histories.length} unique histories.`);
       for(let history of histories) {
-        dumpHistory(history, fs.readFileSync(path.join(sd_path, 'latest.txt'), 'UTF-8').substr(5));
+        dumpHistory(history, maybe_latest());
       }
     }
   });
