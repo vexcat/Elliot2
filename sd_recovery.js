@@ -19,7 +19,7 @@ function dumpHistory(history, latest, dontShowName, indent, parent) {
   const len = JSON.stringify(history.content).length;
   const amLatest = history.name === latest;
   const startcolor = amLatest ? '\x1b[33m' : '';
-  const indentstr = '  '.repeat(indent);
+  const indentstr = '    '.repeat(indent);
   const start = startcolor + indentstr;
   const resetcolor = amLatest ? '\x1b[0m'  : '';
   console.log(`${start}Filename: ${history.name}\tLife: ${life} seconds\tSize: ${len}${resetcolor}`);
