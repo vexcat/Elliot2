@@ -24,6 +24,7 @@ function dumpHistory(history, dontShowName) {
   }
 }
 
+//Credit to https://stackoverflow.com/questions/18017869/build-tree-array-from-flat-array-in-javascript
 function list_to_tree(list) {
   var map = {}, node, roots = [], i;
   for (i = 0; i < list.length; i += 1) {
