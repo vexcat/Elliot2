@@ -11,15 +11,27 @@ const sd_path = process.argv[2] || '/media/ungato/ELLIOT2';
 
 console.log('SD Card Recovery Tool');
 
-function dumpHistory(history, dontShowName) {
-  if(history.children[0]) {
-    dumpHistory(history.children[0], true);
-  } else {
-    console.log(`Content of history for file ${history.name}.`);
-  }
+function dumpHistory(history, latest, dontShowName, indent, parent) {
+  if(indent === undefined) indent = 0;
+  if(!dontShowName)
+    console.log(`History since file ${history.name}.`);
   const life = history.content.lifetime ? (history.content.lifetime / 1000.0).toFixed(3) : '<Not Set>';
-  console.log(`Filename: ${history.name}\tLife: ${life} seconds\tSize: ${JSON.stringify(history.content).length}`);
-  if(!dontShowName) {
+  const len = JSON.stringify(history.content).length;
+  const amLatest = history.name === latest;
+  const startcolor = amLatest ? '\x1b[33m' : '';
+  const indentstr = '  '.repeat(indent);
+  const start = startcolor + indentstr;
+  const resetcolor = amLatest ? '\x1b[0m'  : '';
+  console.log(`${start}Filename: ${history.name}\tLife: ${life} seconds\tSize: ${len}${resetcolor}`);
+  if((parent && parent.children.length > 1) || history.children.length > 1)
+    indent++;
+  if(history.children.length === 1) {
+    dumpHistory(history.children[0], latest, true, indent, history);
+  } else if(history.children.length > 1) {
+    for(let child of history.children) {
+      dumpHistory(child, latest, true, indent, history);
+    }
+  } else {
     console.log('');
   }
 }
@@ -78,7 +90,7 @@ function init() {
 
   console.log(`Found ${histories.length} unique histories.`);
   for(let history of histories) {
-    dumpHistory(history);
+    dumpHistory(history, fs.readFileSync(path.join(sd_path, 'latest.txt'), 'UTF-8').substr(5));
   }
 
   printCommonUsage();
@@ -131,7 +143,7 @@ function init() {
     if(line.startsWith('history')) {
       console.log(`Found ${histories.length} unique histories.`);
       for(let history of histories) {
-        dumpHistory(history);
+        dumpHistory(history, fs.readFileSync(path.join(sd_path, 'latest.txt'), 'UTF-8').substr(5));
       }
     }
   });
