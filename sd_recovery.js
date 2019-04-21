@@ -33,7 +33,7 @@ function list_to_tree(list) {
   }
   for (i = 0; i < list.length; i += 1) {
       node = list[i];
-      if (node.content.prevName && map[node.content.prevName.substr(5)]) {
+      if (node.content.prevName != null && map[node.content.prevName.substr(5)] != null) {
           list[map[node.content.prevName.substr(5)]].children.push(node);
       } else {
           roots.push(node);
