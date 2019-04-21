@@ -32,8 +32,7 @@ function list_to_tree(list) {
   }
   for (i = 0; i < list.length; i += 1) {
       node = list[i];
-      if (node.content.prevName) {
-          // if you have dangling branches check that map[node.parentId] exists
+      if (node.content.prevName && map[node.content.prevName]) {
           list[map[node.content.prevName.substr(5)]].children.push(node);
       } else {
           roots.push(node);
