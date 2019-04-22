@@ -11,7 +11,7 @@ const sd_path = process.argv[2] || '/media/ungato/ELLIOT2';
 
 console.log('SD Card Recovery Tool');
 
-function dumpHistory(history, latest, dontShowName, indent, parent) {
+function dumpHistory(history, latest, dontShowName, indent) {
   if(indent === undefined) indent = 0;
   if(!dontShowName)
     console.log(`History since file ${history.name}.`);
@@ -19,20 +19,17 @@ function dumpHistory(history, latest, dontShowName, indent, parent) {
   const len = JSON.stringify(history.content).length;
   const amLatest = history.name === latest;
   const startcolor = amLatest ? '\x1b[33m' : '';
-  const indentstr = '    '.repeat(indent);
+  const indentstr = ' '.repeat(indent);
   const start = startcolor + indentstr;
   const resetcolor = amLatest ? '\x1b[0m'  : '';
   console.log(`${start}Filename: ${history.name}\tLife: ${life} seconds\tSize: ${len}${resetcolor}`);
-  if((parent && parent.children.length > 1) || history.children.length > 1)
-    indent++;
+  indent++;
   if(history.children.length === 1) {
-    dumpHistory(history.children[0], latest, true, indent, history);
+    dumpHistory(history.children[0], latest, true, indent);
   } else if(history.children.length > 1) {
     for(let child of history.children) {
-      dumpHistory(child, latest, true, indent, history);
+      dumpHistory(child, latest, true, indent);
     }
-  } else {
-    console.log('');
   }
 }
 
