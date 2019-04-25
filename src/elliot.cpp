@@ -227,6 +227,7 @@ void Elliot::giveDirect() {
 
 void Elliot::give() {
     getRobot().stop();
+	getRobot().scorer.setBrakeMode(AbstractMotor::brakeMode::brake);
     usageGuard.give();
 }
 
