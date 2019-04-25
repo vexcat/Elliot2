@@ -89,7 +89,6 @@ void opcontrol() {
 	auto &bot = getRobot();
   Elliot::give();
 	bot.opctrlBegin = pros::millis();
-	bot.scorer.setBrakeMode(AbstractMotor::brakeMode::brake);
 	while (true) {
 		//takeCoast and giveDirect allow for controller
 		//menus to safely take over the robot.
