@@ -22,7 +22,7 @@ double cube(double n) {
 	return n * n * n;
 }
 
-void Elliot::drive(pros::Controller& m, DriveStyle style) {
+void Elliot::drive(pros::Controller& m, pros::Controller& secondary, DriveStyle style) {
 	//Base drive
 	double y = 0;
 	double x = 0;
@@ -43,7 +43,10 @@ void Elliot::drive(pros::Controller& m, DriveStyle style) {
 	}
 
 	//Scorer drive
-	int scorerVel = (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
+	double scorerVel = (!!m.get_digital(DIGITAL_L2) - !!m.get_digital(DIGITAL_R2));
+	if(!scorerVel) {
+		scorerVel = secondary.get_analog(ANALOG_RIGHT_Y) / 127.0;
+	}
 	scorer.moveVelocity(100 * scorerVel);
 
 	if(!autoshootActive) {
@@ -93,7 +96,7 @@ void opcontrol() {
 		//takeCoast and giveDirect allow for controller
 		//menus to safely take over the robot.
 		Elliot::takeCoast();
-		bot.drive(m, bot.driveStyle);
+		bot.drive(m, bot.partner, bot.driveStyle);
 		Elliot::giveDirect();
 		pros::delay(5);
 	}

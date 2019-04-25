@@ -173,6 +173,7 @@ pros::Mutex Elliot::usageGuard;
 
 Elliot::Elliot():
 controller{CONTROLLER_MASTER},
+partner   {CONTROLLER_MASTER},
 left{12, 1},
 right{-3, -4},
 puncherMtr{5},

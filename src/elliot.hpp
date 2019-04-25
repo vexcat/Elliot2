@@ -95,6 +95,8 @@ class Elliot {
     long opctrlBegin;
     ///Master controller connected to robot.
     pros::Controller controller;
+    ///Secondary controller connected to robot.
+    pros::Controller partner;
     ///Motors driving left side of robot.
 	MotorGroup left;
     ///Motors driving right side of robot.
@@ -137,7 +139,7 @@ class Elliot {
     ///Gives the \ref usageGuard mutex without stopping the robot.
     static void giveDirect();
     ///Does one tick of robot driving, with control from \ref controller.
-    void drive(pros::Controller&, DriveStyle style);
+    void drive(pros::Controller&, pros::Controller&, DriveStyle style);
     ///Begins the background tasks for the GPS \ref gps & the \ref base.
     void beginTasks();
 };
